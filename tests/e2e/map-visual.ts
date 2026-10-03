@@ -18,7 +18,10 @@ declare global {
 const output = resolve(process.argv[3] ?? "test-results/map-visual");
 mkdirSync(output, { recursive: true });
 const started = performance.now();
-const app = await launch(process.argv[2], process.argv.includes("--portable"));
+const app = await launch(
+  process.argv[2] === "--dev" ? undefined : process.argv[2],
+  process.argv.includes("--portable"),
+);
 const launchMs = performance.now() - started;
 const page = await app.firstWindow();
 const errors: string[] = [],
