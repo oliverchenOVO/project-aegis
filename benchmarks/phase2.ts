@@ -78,16 +78,21 @@ const prior = existsSync(output)
 if (prior && (prior.fingerprint !== fingerprint || prior.count !== count)) {
   // One explicit orchestration migration: reconstruct the old fingerprint with
   // CURRENT authoritative bytes, so any model change still rejects old rows.
-  const oldRunner = execFileSync("git", [
-    "show",
-    "b8b10f27ea0baefff46a619bde9273bede12214f:benchmarks/phase2.ts",
-  ]);
   const oldFingerprints = [
-    contentFingerprint(oldRunner),
-    contentFingerprint(
-      Buffer.from(oldRunner.toString("utf8").replace(/\r?\n/g, "\r\n")),
-    ),
-  ];
+    "b8b10f27ea0baefff46a619bde9273bede12214f",
+    "57f05268b32f3034dc4b365e988eb2ab9fc77ba9",
+  ].flatMap((revision) => {
+    const runner = execFileSync("git", [
+      "show",
+      `${revision}:benchmarks/phase2.ts`,
+    ]);
+    return [
+      contentFingerprint(runner),
+      contentFingerprint(
+        Buffer.from(runner.toString("utf8").replace(/\r?\n/g, "\r\n")),
+      ),
+    ];
+  });
   if (prior.count !== count || !oldFingerprints.includes(prior.fingerprint))
     throw new Error(
       "Existing evidence uses different authoritative content/count; choose a fresh output file",
@@ -148,6 +153,8 @@ function persist(complete = false) {
   );
 }
 function run(s: Scenario, profile: string, seed: string) {
+  if (process.env.AEGIS_SELECT_SEED && process.env.AEGIS_SELECT_SEED !== seed)
+    return;
   if (rows.some((r) => r.profile === profile && r.seed === seed)) return;
   const started = performance.now(),
     row: Row = {
