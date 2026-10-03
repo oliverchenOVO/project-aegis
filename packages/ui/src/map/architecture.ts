@@ -363,5 +363,8 @@ export function drawArchitecture(
   for (const d of city.districts)
     mapLabel(labels, d.name, d.x, d.y + 30, t.label, 16);
   mapLabel(labels, "臨 江", 370, 310, 0x7da2b8, 12);
+  // The first measured geometry-only scene issued 23 draw calls at T0.
+  // Flatten public static geometry once per layout/LOD, not per report or camera pan.
+  root.cacheAsTexture({ resolution: 2, antialias: true });
   return { root, key: layout.key, detail };
 }
