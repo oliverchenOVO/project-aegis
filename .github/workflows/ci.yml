@@ -21,11 +21,17 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm benchmark
+      - run: pnpm exec tsx benchmarks/phase2.ts 3 test-results/phase2-ci-benchmark.json
       - run: pnpm build
       - uses: actions/upload-artifact@v4
         with:
           name: simulation-benchmark
           path: docs/qa/benchmark.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: systemic-benchmark
+          path: test-results/phase2-ci-benchmark.json
   windows:
     runs-on: windows-latest
     steps:
@@ -40,6 +46,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm package:win
       - run: pnpm smoke "release/windows-runtime/Project AEGIS.exe"
+      - run: pnpm smoke release/AEGIS-0.2.0-Windows-x64.exe --portable
+      - run: pnpm exec tsx tests/e2e/migration-restart.ts "release/windows-runtime/Project AEGIS.exe"
+      - run: pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
+      - run: pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,10 +1,10 @@
 # Project AEGIS — AI 災難指揮中心
 
-Windows emergency command simulation: incomplete information, delayed commands, real consequences and deterministic replay. Phase 1 scenario: a fictional city experiencing an urban earthquake.
+Windows emergency command simulation: incomplete information, delayed commands, conserved civilian populations, finite hospital care and deterministic replay. Phase 2 scenarios: systemic urban earthquake and urban flash flood.
 
 ## Play
 
-Launch `release/AEGIS-0.1.0-Windows-x64.exe`. Select the showcase seed `AEGIS-2026-001`, start a scenario and press the play control. Pause to inspect reports or advance by 1/5 simulated minutes. Select an incident, choose compatible units and issue the order. Wait for acknowledgment and field reports. Save/load uses `.aegis` files. Finished scenarios open AAR with causal timeline, per-report intelligence audit and verified replay/seek.
+Launch `release/AEGIS-0.2.0-Windows-x64.exe`. Choose earthquake or flood (flood showcase `AEGIS-FLOOD-2026-001`), start and press play. Pause to inspect received reports or advance by 10 seconds/1 minute/5 minutes. Select an incident, choose compatible units and issue the order; evacuation orders select a configured zone. Wait for acknowledgement and field reports. Save/load uses `.aegis`; original v0.1 saves continue under their original rules. Completed AAR shows actual systemic outcomes, seven intelligence classes and causal chains. Verify replay, seek with timeline markers or choose a decision to edit and simulate an independent alternative-command branch.
 
 No API key or Internet connection is needed to play. Unity and Blender are not required by this 2D command-center phase.
 
@@ -24,9 +24,13 @@ node node_modules/electron/install.js
 pnpm desktop
 pnpm package:win
 pnpm smoke "release/windows-runtime/Project AEGIS.exe"
-pnpm exec tsx tests/e2e/portable-launch.ts
+pnpm smoke release/AEGIS-0.2.0-Windows-x64.exe --portable
+pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
+pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
+pnpm exec tsx benchmarks/phase2.ts 100
+pnpm exec tsx benchmarks/phase2-seek.ts
 ```
 
 UI dev port is 5173. If occupied, `pnpm exec vite --host 127.0.0.1 --port 5187`. The packaged app opens local production assets and isolates the renderer from Node. Simulation runs in a separate worker and only exposes received views.
 
-See [architecture](docs/ARCHITECTURE.md), [simulation](docs/SIMULATION.md), [information fog](docs/INFORMATION_FOG.md), [replay/save format](docs/REPLAY_FORMAT.md) and [Phase 1 results](docs/PHASE1_REPORT.md).
+See [architecture](docs/ARCHITECTURE.md), [simulation](docs/SIMULATION.md), [information fog](docs/INFORMATION_FOG.md), [replay/save format](docs/REPLAY_FORMAT.md), [Phase 2 results](docs/PHASE2_REPORT.md) and preserved [Phase 1 results](docs/PHASE1_REPORT.md).

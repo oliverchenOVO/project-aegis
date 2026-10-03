@@ -1,51 +1,35 @@
-import { _electron as electron, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { Simulation } from "../../packages/simulation/src/index";
+import { execFileSync } from "node:child_process";
+import { performance } from "node:perf_hooks";
 import { flood, FLOOD_SHOWCASE_SEED } from "../../packages/scenarios/src/flood";
-import { ReplayRecorder } from "../../packages/replay/src/index";
-import { save, load } from "../../packages/persistence/src/index";
-import { hash } from "../../packages/shared/src/index";
-const output = resolve("test-results/phase2");
+
+import { load } from "../../packages/persistence/src/index";
+
+import { launch } from "./launch";
+const portable = process.argv.includes("--portable");
+const output = resolve(
+  portable ? "test-results/phase2-portable" : "test-results/phase2",
+);
 mkdirSync(output, { recursive: true });
-const original = new Simulation(flood, FLOOD_SHOWCASE_SEED),
-  recorder = new ReplayRecorder(original);
-while (!original.state.completed) {
-  if (original.state.tick === 30)
-    for (const target of [
-      "AMB-01",
-      "AMB-02",
-      "AMB-03",
-      "AMB-04",
-      "AMB-05",
-      "AMB-06",
-    ])
-      recorder.command(original, {
-        type: "DISPATCH_UNIT",
-        target,
-        incidentId: "INC-1",
-      });
-  original.step();
-  recorder.checkpoint(original);
-}
 const originalPath = resolve(output, "original.aegis"),
   branchPath = resolve(output, "branch.aegis"),
   livePath = resolve(output, "evacuation.aegis");
-writeFileSync(originalPath, save(original, recorder.record));
-const env = Object.fromEntries(
-  Object.entries(process.env).filter(
-    (e): e is [string, string] => e[1] !== undefined,
+const started = performance.now();
+const original = JSON.parse(
+  execFileSync(
+    process.execPath,
+    ["--import", "tsx", "scripts/generate-ui-showcase.ts", originalPath],
+    { encoding: "utf8" },
   ),
-);
-delete env.ELECTRON_RUN_AS_NODE;
-const executable = process.argv[2];
-const app = await electron.launch({
-  ...(executable
-    ? { executablePath: resolve(executable), args: [] }
-    : { args: [resolve("apps/desktop/dist/main.cjs")] }),
-  env,
-  timeout: 30000,
-});
+) as { worldHash: string; recordHash: string };
+const mark = (stage: string) =>
+  console.log(
+    JSON.stringify({ stage, elapsedMs: performance.now() - started }),
+  );
+mark("showcase generated in isolated process");
+const app = await launch(process.argv[2], portable);
 const page = await app.firstWindow(),
   errors: string[] = [],
   warnings: string[] = [],
@@ -138,12 +122,14 @@ try {
   expect(
     live.simulation.state.commands.some((c) => c.type === "EVACUATE_ZONE"),
   ).toBe(true);
+  mark("live save validated");
   await dialogPaths(originalPath, branchPath);
   await page.getByRole("button", { name: "載入", exact: true }).click();
   await expect(page.getByRole("heading", { name: "行動檢討報告" })).toBeVisible(
     { timeout: 45000 },
   );
   await expect(page.getByRole("heading", { name: "關鍵因果鏈" })).toBeVisible();
+  mark("completed save loaded and AAR rendered");
   await page.screenshot({ path: resolve(output, "aar2.png") });
   await page
     .getByRole("button", { name: "從 CMD-1 分岔", exact: true })
@@ -188,6 +174,7 @@ try {
   await expect(page.getByTestId("counterfactual-panel")).toContainText(
     "PATIENT_RECOVERED",
   );
+  mark("alternative simulated and compared");
   await page.screenshot({ path: resolve(output, "counterfactual.png") });
   await page.getByRole("button", { name: "儲存分支存檔", exact: true }).click();
   await expect
@@ -203,13 +190,13 @@ try {
     )
     .toBeGreaterThan(0);
   const branch = load(readFileSync(branchPath));
-  expect(branch.replay.lineage!.parentHash).toBe(original.hash());
+  expect(branch.replay.lineage!.parentHash).toBe(original.worldHash);
   checks.branch = {
-    originalHash: original.hash(),
+    originalHash: original.worldHash,
     alternativeHash: branch.simulation.hash(),
     lineage: branch.replay.lineage,
     fatalities: branch.simulation.aar().fatalities,
-    parentRecordHash: hash(recorder.record),
+    parentRecordHash: original.recordHash,
   };
   await page.getByRole("button", { name: "驗證並重播", exact: true }).click();
   await expect(page.locator(".operation-banner")).toContainText(
@@ -243,12 +230,21 @@ try {
   expect(errors).toEqual([]);
   checks.overlays = await page.locator("vite-error-overlay").count();
   expect(checks.overlays).toBe(0);
+} catch (error) {
+  await page
+    .screenshot({ path: resolve(output, "failure.png") })
+    .catch(() => {});
+  writeFileSync(
+    resolve(output, "failure-dom.txt"),
+    await page.locator("body").innerText(),
+  );
+  throw error;
 } finally {
   writeFileSync(
     resolve(output, "ui-qa.json"),
     JSON.stringify(
       {
-        executable: executable ?? "development Electron",
+        executable: process.argv[2] ?? "development Electron",
         browser: "Browser plugin not available; Playwright Electron used",
         checks,
         errors,

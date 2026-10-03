@@ -1,0 +1,509 @@
+{
+  "description": "Phase 2 independent frozen expectations; Phase 1 fixtures are unchanged",
+  "cases": [
+    {
+      "scenarioId": "urban-earthquake",
+      "scenarioVersion": "2.3.0",
+      "simulationVersion": "0.2.0",
+      "seed": "phase2-earthquake-0000",
+      "endTick": 1800,
+      "worldHash": "9516c625e5574787",
+      "eventsHash": "4766e46365ccd037",
+      "aarHash": "4a87ac4dc685ac59",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "b999527b1237da7b"
+        },
+        {
+          "tick": 300,
+          "hash": "d66b6c0b95261e73"
+        },
+        {
+          "tick": 600,
+          "hash": "abcbad1ad4007c16"
+        },
+        {
+          "tick": 900,
+          "hash": "5476c3855b3f96d1"
+        },
+        {
+          "tick": 1200,
+          "hash": "ab91744afac11986"
+        },
+        {
+          "tick": 1500,
+          "hash": "433c4fc9cf2b8de9"
+        },
+        {
+          "tick": 1800,
+          "hash": "9516c625e5574787"
+        }
+      ]
+    },
+    {
+      "scenarioId": "urban-earthquake",
+      "scenarioVersion": "2.3.0",
+      "simulationVersion": "0.2.0",
+      "seed": "phase2-earthquake-0001",
+      "endTick": 1800,
+      "worldHash": "debe6609984a86c7",
+      "eventsHash": "79d156bcf2788d8c",
+      "aarHash": "3fe52337fe79b06b",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "97516193094fb48d"
+        },
+        {
+          "tick": 300,
+          "hash": "d48a62f6a8976f30"
+        },
+        {
+          "tick": 600,
+          "hash": "2bae69d4744bc42c"
+        },
+        {
+          "tick": 900,
+          "hash": "4a7b38e572ea320f"
+        },
+        {
+          "tick": 1200,
+          "hash": "3a6f41d730e30a65"
+        },
+        {
+          "tick": 1500,
+          "hash": "8f97e44bc23226ad"
+        },
+        {
+          "tick": 1800,
+          "hash": "debe6609984a86c7"
+        }
+      ]
+    },
+    {
+      "scenarioId": "urban-earthquake",
+      "scenarioVersion": "2.3.0",
+      "simulationVersion": "0.2.0",
+      "seed": "phase2-earthquake-0002",
+      "endTick": 1800,
+      "worldHash": "993a8bcc8c95668a",
+      "eventsHash": "f574b36736c5ceb3",
+      "aarHash": "572fe1fba13b589d",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "de2a7d1b2be1cb37"
+        },
+        {
+          "tick": 300,
+          "hash": "7a2387ced487d44e"
+        },
+        {
+          "tick": 600,
+          "hash": "3074085a679d624e"
+        },
+        {
+          "tick": 900,
+          "hash": "d43d1479bc97d9d5"
+        },
+        {
+          "tick": 1200,
+          "hash": "c214f4c5e45f7659"
+        },
+        {
+          "tick": 1500,
+          "hash": "7951345afa425e72"
+        },
+        {
+          "tick": 1800,
+          "hash": "993a8bcc8c95668a"
+        }
+      ]
+    },
+    {
+      "scenarioId": "flood-urban-v1",
+      "scenarioVersion": "1.4.0",
+      "simulationVersion": "0.2.0",
+      "seed": "AEGIS-FLOOD-2026-001",
+      "endTick": 2400,
+      "worldHash": "400cf55da8211055",
+      "eventsHash": "b9e59c0327546379",
+      "aarHash": "9076b134270907e6",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "18f780aadf5a5bbe"
+        },
+        {
+          "tick": 300,
+          "hash": "ce2d222c9aba7f2e"
+        },
+        {
+          "tick": 600,
+          "hash": "04eca6955ee009db"
+        },
+        {
+          "tick": 900,
+          "hash": "6595fbd7a9f3e507"
+        },
+        {
+          "tick": 1200,
+          "hash": "a5b3f7b6dc306f98"
+        },
+        {
+          "tick": 1500,
+          "hash": "111f354629af74fe"
+        },
+        {
+          "tick": 1800,
+          "hash": "9765bc13dabab729"
+        },
+        {
+          "tick": 2100,
+          "hash": "bb4aeaed336c5d3f"
+        },
+        {
+          "tick": 2400,
+          "hash": "400cf55da8211055"
+        }
+      ]
+    },
+    {
+      "scenarioId": "flood-urban-v1",
+      "scenarioVersion": "1.4.0",
+      "simulationVersion": "0.2.0",
+      "seed": "phase2-flood-0000",
+      "endTick": 2400,
+      "worldHash": "b3d2fefe5fe3cdea",
+      "eventsHash": "65e4da9eafa4dc70",
+      "aarHash": "4563d20d44aaa747",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "8b9c934a90e9711c"
+        },
+        {
+          "tick": 300,
+          "hash": "4671a6c313dec741"
+        },
+        {
+          "tick": 600,
+          "hash": "4978ab48a949ead0"
+        },
+        {
+          "tick": 900,
+          "hash": "c4f633c0ad1b9968"
+        },
+        {
+          "tick": 1200,
+          "hash": "04fac661cad53c43"
+        },
+        {
+          "tick": 1500,
+          "hash": "1e7f04b1ebebfc4f"
+        },
+        {
+          "tick": 1800,
+          "hash": "d63b6001d6c783e7"
+        },
+        {
+          "tick": 2100,
+          "hash": "00e9247dec6fc729"
+        },
+        {
+          "tick": 2400,
+          "hash": "b3d2fefe5fe3cdea"
+        }
+      ]
+    },
+    {
+      "scenarioId": "flood-urban-v1",
+      "scenarioVersion": "1.4.0",
+      "simulationVersion": "0.2.0",
+      "seed": "phase2-flood-0001",
+      "endTick": 2400,
+      "worldHash": "c91a66ffa9bdb2ab",
+      "eventsHash": "8a73f7bff285a0df",
+      "aarHash": "c436d9560bbe78ae",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "ENG-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 420,
+          "input": {
+            "type": "REQUEST_STATUS",
+            "target": "H-B"
+          }
+        },
+        {
+          "tick": 900,
+          "input": {
+            "type": "RECALL_UNIT",
+            "target": "AMB-02"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "tick": 0,
+          "hash": "899ae646a82e79fa"
+        },
+        {
+          "tick": 300,
+          "hash": "e10070ea2b169fcc"
+        },
+        {
+          "tick": 600,
+          "hash": "274214109514affa"
+        },
+        {
+          "tick": 900,
+          "hash": "f055ef24ef4d1bb6"
+        },
+        {
+          "tick": 1200,
+          "hash": "8e1652f3cc8e9a99"
+        },
+        {
+          "tick": 1500,
+          "hash": "835d88fd3ba6119b"
+        },
+        {
+          "tick": 1800,
+          "hash": "fd2ff52e090e3466"
+        },
+        {
+          "tick": 2100,
+          "hash": "86fb88d9d0b7f1c7"
+        },
+        {
+          "tick": 2400,
+          "hash": "c91a66ffa9bdb2ab"
+        }
+      ]
+    }
+  ]
+}
