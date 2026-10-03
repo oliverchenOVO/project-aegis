@@ -46,6 +46,19 @@ function queued() {
   refreshHospitalCensus(w);
   return { sim, w, h, patients };
 }
+it("overload remains counted during a power emergency and peaks preserve actual pressure", () => {
+  const { w, h } = queued();
+  h.capacity = h.baselinePatients;
+  h.power = false;
+  h.generator = "FAILED";
+  const previous = h.overloadTicks ?? 0;
+  updateHospital(w);
+  expect(h.status).toBe("POWER_EMERGENCY");
+  expect(h.overloadTicks).toBe(previous + 1);
+  expect(h.peakCensus).toBe(h.currentPatients);
+  expect(h.peakQueue).toBeGreaterThan(0);
+  expect(h.peakICU).toBeGreaterThanOrEqual(h.criticalPatients);
+});
 it("triage priority consumes finite throughput and ICU capacity before admitting a queue", () => {
   const { w, h, patients } = queued();
   patients[1].triage = "IMMEDIATE";

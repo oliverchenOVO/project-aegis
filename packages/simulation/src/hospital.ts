@@ -86,8 +86,26 @@ export function updateHospital(w: WorldState): void {
         ],
       );
     }
-    if (["OVER_CAPACITY", "DIVERTING"].includes(status))
+    // Count pressure independently of the displayed power-emergency status.
+    if (load > 1 || queue > h.edCapacity * 1.5)
       h.overloadTicks = (h.overloadTicks ?? 0) + 1;
+    h.peakQueue = Math.max(h.peakQueue ?? 0, queue);
+    h.peakCensus = Math.max(
+      h.peakCensus ?? h.baselinePatients,
+      h.currentPatients,
+    );
+    h.peakICU = Math.max(
+      h.peakICU ?? h.criticalPatients,
+      h.criticalPatients +
+        patients
+          .filter((p) => p.state === "ADMITTED" && p.critical)
+          .reduce((n, p) => n + (p.count ?? 1), 0),
+    );
+    h.handoverTicks =
+      (h.handoverTicks ?? 0) +
+      w.units.filter(
+        (u) => u.state === "HANDOVER" && u.destinationHospital === h.id,
+      ).length;
     if (status === "POWER_EMERGENCY")
       h.powerEmergencyTicks = (h.powerEmergencyTicks ?? 0) + 1;
     h.throughputCredit = Math.min(

@@ -3,7 +3,7 @@ import { earthquake } from "./earthquake";
 import { communicationConfig } from "./communications";
 const systemicContent: Scenario = ScenarioSchema.parse({
   ...structuredClone(earthquake),
-  version: "2.2.0",
+  version: "2.3.0",
   hospitals: earthquake.hospitals.map((h) => ({
     ...h,
     edCapacity: 10,

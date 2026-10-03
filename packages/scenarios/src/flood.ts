@@ -38,7 +38,7 @@ const groups = [
 const floodContent: Scenario = ScenarioSchema.parse({
   ...structuredClone(earthquake),
   id: "flood-urban-v1",
-  version: "1.3.0",
+  version: "1.4.0",
   name: "臨江市・都市暴洪",
   hazardKind: "FLOOD",
   maxTicks: 2400,

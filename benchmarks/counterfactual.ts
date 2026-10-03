@@ -74,6 +74,15 @@ for (let n = 0; n < count; n++) {
     branch = timeline.fork(30, alternatives),
     branchMs = performance.now() - branchStart,
     comparison = compareBranch(sim.state, flood, branch);
+  if (
+    n === 0 &&
+    !comparison.alternativeChains.some((c) =>
+      c.nodes.some((e) => e.type === "PATIENT_RECOVERED"),
+    )
+  )
+    throw new Error(
+      "Showcase lacks actual alternative recovery causal evidence",
+    );
   assertInvariants(branch.simulation.state, flood);
   const repeat = timeline.fork(30, alternatives);
   if (
@@ -142,7 +151,7 @@ for (let n = 0; n < count; n++) {
 }
 const evidence = { seedsCompleted: rows.length, rows };
 writeFileSync(
-  "docs/qa/counterfactual-showcase.json",
+  process.argv[3] ?? "docs/qa/counterfactual-showcase.json",
   JSON.stringify(evidence, null, 2),
 );
 if (rows[0].comparison.delta.fatalities >= 0)

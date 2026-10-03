@@ -1,0 +1,1885 @@
+{
+  "seedsCompleted": 1,
+  "rows": [
+    {
+      "seed": "AEGIS-FLOOD-2026-001",
+      "originalMs": 4286.5588,
+      "verificationMs": 3058.8690000000006,
+      "branchMs": 2596.5596000000005,
+      "rescueIncident": "INC-10",
+      "rescueIncidentType": "FLOOD",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-03",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-04",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10"
+          }
+        }
+      ],
+      "comparison": {
+        "lineage": {
+          "branchId": "BR-1f3e58078923e8cb",
+          "parentReplayId": "RPL-d0fabde91bb53cc3",
+          "parentHash": "4eb523d46aa39a2a",
+          "forkTick": 30,
+          "baseHash": "bac3fa39053331e3",
+          "simulationVersion": "0.2.0",
+          "scenarioVersion": "1.4.0",
+          "requestedEndTick": 2400,
+          "alternativeCommands": [
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-01",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-02",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-03",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-04",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-05",
+                "incidentId": "INC-10"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-06",
+                "incidentId": "INC-10"
+              }
+            }
+          ],
+          "unappliedCommands": []
+        },
+        "originalHash": "4eb523d46aa39a2a",
+        "alternativeHash": "2a2b76b4e6376144",
+        "originalDuration": 2400,
+        "alternativeDuration": 2400,
+        "original": {
+          "fatalities": 901,
+          "criticalCases": 971,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 0,
+          "respondedIncidents": 0,
+          "averageEMSResponseTime": 0,
+          "respondedEMSIncidents": 0,
+          "averageCommandDelay": 22.5,
+          "acknowledgedCommands": 6,
+          "recovered": 0,
+          "sheltered": 262,
+          "unitUtilization": 0.07777777777777778
+        },
+        "alternative": {
+          "fatalities": 897,
+          "criticalCases": 971,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 249,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 47.666666666666664,
+          "acknowledgedCommands": 6,
+          "recovered": 4,
+          "sheltered": 262,
+          "unitUtilization": 0.07655092592592593
+        },
+        "delta": {
+          "fatalities": -4,
+          "criticalCases": 0,
+          "unresolvedCritical": 0,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 0,
+          "powerDowntime": 0,
+          "communicationDowntime": 0,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 249,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 25.166666666666664,
+          "acknowledgedCommands": 0,
+          "recovered": 4,
+          "sheltered": 0,
+          "unitUtilization": -0.001226851851851854
+        },
+        "changedOutcomes": [
+          {
+            "originId": "CIV-59",
+            "originalDeaths": 8,
+            "alternativeDeaths": 4,
+            "deathDelta": -4,
+            "originalEventIds": [
+              "evt-15702",
+              "evt-15703",
+              "evt-18432",
+              "evt-18433"
+            ],
+            "alternativeEventIds": [
+              "evt-6901",
+              "evt-7260",
+              "evt-15174",
+              "evt-15188",
+              "evt-15412",
+              "evt-15426",
+              "evt-25977",
+              "evt-26633"
+            ]
+          }
+        ],
+        "originalChains": [
+          {
+            "rootEventId": "evt-18433",
+            "nodes": [
+              {
+                "id": "evt-37",
+                "tick": 1,
+                "type": "RAIN_STARTED",
+                "payload": {
+                  "intensity": 1.4
+                },
+                "causedByEventIds": []
+              },
+              {
+                "id": "evt-752",
+                "tick": 120,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 0.5041758795516077,
+                  "previousDepth": 0.3614302294472007
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-763",
+                "tick": 120,
+                "type": "BUILDING_FLOODED",
+                "payload": {
+                  "nodeId": "N23",
+                  "zoneId": "F-C"
+                },
+                "causedByEventIds": [
+                  "evt-752"
+                ]
+              },
+              {
+                "id": "evt-764",
+                "tick": 120,
+                "type": "INCIDENT_CREATED",
+                "payload": {
+                  "incidentId": "INC-10",
+                  "type": "FLOOD",
+                  "nodeId": "N23"
+                },
+                "causedByEventIds": [
+                  "evt-763"
+                ]
+              },
+              {
+                "id": "evt-3978",
+                "tick": 390,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 1.718981282764927,
+                  "previousDepth": 1.604654423559577
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-4002",
+                "tick": 390,
+                "type": "CIVILIANS_EXPOSED",
+                "payload": {
+                  "cohortId": "CIV-59",
+                  "depth": 1.718981282764927,
+                  "exposure": 0.610011803175479
+                },
+                "causedByEventIds": [
+                  "evt-3978"
+                ]
+              },
+              {
+                "id": "evt-7477",
+                "tick": 509,
+                "type": "TRANSPORT_DELAYED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "reason": "AWAITING_TRANSPORT"
+                },
+                "causedByEventIds": [
+                  "evt-4002"
+                ]
+              },
+              {
+                "id": "evt-11940",
+                "tick": 697,
+                "type": "PATIENT_DETERIORATED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "previous": "IMMEDIATE",
+                  "triage": "EXPECTANT",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-7477"
+                ]
+              },
+              {
+                "id": "evt-18433",
+                "tick": 1004,
+                "type": "PATIENT_DIED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "incidentId": "INC-10",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-11940",
+                  "evt-764"
+                ]
+              }
+            ],
+            "edges": [
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-752"
+              },
+              {
+                "causeId": "evt-752",
+                "effectId": "evt-763"
+              },
+              {
+                "causeId": "evt-763",
+                "effectId": "evt-764"
+              },
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-3978"
+              },
+              {
+                "causeId": "evt-3978",
+                "effectId": "evt-4002"
+              },
+              {
+                "causeId": "evt-4002",
+                "effectId": "evt-7477"
+              },
+              {
+                "causeId": "evt-7477",
+                "effectId": "evt-11940"
+              },
+              {
+                "causeId": "evt-11940",
+                "effectId": "evt-18433"
+              },
+              {
+                "causeId": "evt-764",
+                "effectId": "evt-18433"
+              }
+            ],
+            "truncated": false,
+            "omittedEventIds": [],
+            "limits": {
+              "maxDepth": 10,
+              "maxNodes": 80
+            }
+          }
+        ],
+        "alternativeChains": [
+          {
+            "rootEventId": "evt-26633",
+            "nodes": [
+              {
+                "id": "evt-37",
+                "tick": 1,
+                "type": "RAIN_STARTED",
+                "payload": {
+                  "intensity": 1.4
+                },
+                "causedByEventIds": []
+              },
+              {
+                "id": "evt-698",
+                "tick": 120,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 0.5041758795516077,
+                  "previousDepth": 0.3614302294472007
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-709",
+                "tick": 120,
+                "type": "BUILDING_FLOODED",
+                "payload": {
+                  "nodeId": "N23",
+                  "zoneId": "F-C"
+                },
+                "causedByEventIds": [
+                  "evt-698"
+                ]
+              },
+              {
+                "id": "evt-710",
+                "tick": 120,
+                "type": "INCIDENT_CREATED",
+                "payload": {
+                  "incidentId": "INC-10",
+                  "type": "FLOOD",
+                  "nodeId": "N23"
+                },
+                "causedByEventIds": [
+                  "evt-709"
+                ]
+              },
+              {
+                "id": "evt-1480",
+                "tick": 150,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-B",
+                  "depth": 0.49401707756694924,
+                  "previousDepth": 0.3826149817779045
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-1481",
+                "tick": 150,
+                "type": "POWER_NODE_FAILED",
+                "payload": {
+                  "nodeId": "PWR"
+                },
+                "causedByEventIds": [
+                  "evt-1480"
+                ]
+              },
+              {
+                "id": "evt-1483",
+                "tick": 150,
+                "type": "COMMUNICATION_DEGRADED",
+                "payload": {
+                  "nodeId": "RAD"
+                },
+                "causedByEventIds": [
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-1712",
+                "tick": 240,
+                "type": "COMMUNICATION_DEGRADED",
+                "payload": {
+                  "status": "OFFLINE"
+                },
+                "causedByEventIds": [
+                  "evt-1481",
+                  "evt-1483"
+                ]
+              },
+              {
+                "id": "evt-2346",
+                "tick": 269,
+                "type": "NETWORK_NODE_STATUS_CHANGED",
+                "payload": {
+                  "networkNodeId": "NET-RAD",
+                  "status": "DOWN",
+                  "backupFuel": 0
+                },
+                "causedByEventIds": [
+                  "evt-1489",
+                  "evt-1481",
+                  "evt-1484"
+                ]
+              },
+              {
+                "id": "evt-2980",
+                "tick": 350,
+                "type": "MESSAGE_QUEUED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "kind": "COMMAND",
+                  "referenceId": "CMD-6",
+                  "source": "NET-DC",
+                  "destination": "NET-EMS"
+                },
+                "causedByEventIds": [
+                  "evt-2979"
+                ]
+              },
+              {
+                "id": "evt-2988",
+                "tick": 352,
+                "type": "MESSAGE_HOP_SENT",
+                "payload": {
+                  "messageId": "MSG-303",
+                  "edgeId": "LINK-7",
+                  "from": "NET-DC",
+                  "to": "NET-EMS",
+                  "arrivalTick": 368,
+                  "backupRoute": true
+                },
+                "causedByEventIds": [
+                  "evt-2978",
+                  "evt-2346"
+                ]
+              },
+              {
+                "id": "evt-3495",
+                "tick": 363,
+                "type": "MESSAGE_HOP_SENT",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "edgeId": "LINK-7",
+                  "from": "NET-DC",
+                  "to": "NET-EMS",
+                  "arrivalTick": 379,
+                  "backupRoute": true
+                },
+                "causedByEventIds": [
+                  "evt-2980",
+                  "evt-2346"
+                ]
+              },
+              {
+                "id": "evt-3563",
+                "tick": 368,
+                "type": "MESSAGE_HOP_RECEIVED",
+                "payload": {
+                  "messageId": "MSG-303",
+                  "nodeId": "NET-EMS"
+                },
+                "causedByEventIds": [
+                  "evt-2988"
+                ]
+              },
+              {
+                "id": "evt-3564",
+                "tick": 368,
+                "type": "MESSAGE_DELIVERED",
+                "payload": {
+                  "messageId": "MSG-303",
+                  "kind": "COMMAND",
+                  "referenceId": "CMD-5",
+                  "latency": 18,
+                  "queueDelay": 1
+                },
+                "causedByEventIds": [
+                  "evt-3563"
+                ]
+              },
+              {
+                "id": "evt-3575",
+                "tick": 368,
+                "type": "COMMAND_RECEIVED",
+                "payload": {
+                  "commandId": "CMD-5"
+                },
+                "causedByEventIds": [
+                  "evt-3564",
+                  "evt-1712"
+                ]
+              },
+              {
+                "id": "evt-3742",
+                "tick": 379,
+                "type": "MESSAGE_HOP_RECEIVED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "nodeId": "NET-EMS"
+                },
+                "causedByEventIds": [
+                  "evt-3495"
+                ]
+              },
+              {
+                "id": "evt-3745",
+                "tick": 379,
+                "type": "MESSAGE_DELIVERED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "kind": "COMMAND",
+                  "referenceId": "CMD-6",
+                  "latency": 29,
+                  "queueDelay": 12
+                },
+                "causedByEventIds": [
+                  "evt-3742"
+                ]
+              },
+              {
+                "id": "evt-3758",
+                "tick": 379,
+                "type": "COMMAND_RECEIVED",
+                "payload": {
+                  "commandId": "CMD-6"
+                },
+                "causedByEventIds": [
+                  "evt-3745",
+                  "evt-1712"
+                ]
+              },
+              {
+                "id": "evt-3950",
+                "tick": 390,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 1.718981282764927,
+                  "previousDepth": 1.604654423559577
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-3974",
+                "tick": 390,
+                "type": "CIVILIANS_EXPOSED",
+                "payload": {
+                  "cohortId": "CIV-59",
+                  "depth": 1.718981282764927,
+                  "exposure": 0.610011803175479
+                },
+                "causedByEventIds": [
+                  "evt-3950"
+                ]
+              },
+              {
+                "id": "evt-6905",
+                "tick": 509,
+                "type": "TRANSPORT_DELAYED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "reason": "AWAITING_TRANSPORT"
+                },
+                "causedByEventIds": [
+                  "evt-3974"
+                ]
+              },
+              {
+                "id": "evt-6906",
+                "tick": 509,
+                "type": "TRANSPORT_DELAYED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "reason": "AWAITING_TRANSPORT"
+                },
+                "causedByEventIds": [
+                  "evt-3974"
+                ]
+              },
+              {
+                "id": "evt-9693",
+                "tick": 612,
+                "type": "PATIENT_TRANSPORTED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "unitId": "AMB-05",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-6905",
+                  "evt-3575",
+                  "evt-710"
+                ]
+              },
+              {
+                "id": "evt-9915",
+                "tick": 624,
+                "type": "PATIENT_TRANSPORTED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-6906",
+                  "evt-3758",
+                  "evt-710"
+                ]
+              },
+              {
+                "id": "evt-10919",
+                "tick": 708,
+                "type": "AMBULANCE_HANDOVER_STARTED",
+                "payload": {
+                  "unitId": "AMB-05",
+                  "hospitalId": "H-A",
+                  "until": 748
+                },
+                "causedByEventIds": [
+                  "evt-3575",
+                  "evt-1481",
+                  "evt-9693"
+                ]
+              },
+              {
+                "id": "evt-10929",
+                "tick": 709,
+                "type": "HOSPITAL_STATUS_CHANGED",
+                "payload": {
+                  "hospitalId": "H-A",
+                  "status": "STRAINED",
+                  "queue": 2,
+                  "load": 34
+                },
+                "causedByEventIds": [
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-12127",
+                "tick": 748,
+                "type": "AMBULANCE_HANDOVER_COMPLETED",
+                "payload": {
+                  "unitId": "AMB-05",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-10919",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-12128",
+                "tick": 748,
+                "type": "PATIENT_QUEUED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-10919",
+                  "evt-12127"
+                ]
+              },
+              {
+                "id": "evt-12494",
+                "tick": 768,
+                "type": "AMBULANCE_HANDOVER_STARTED",
+                "payload": {
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A",
+                  "until": 820
+                },
+                "causedByEventIds": [
+                  "evt-3758",
+                  "evt-1481",
+                  "evt-9915"
+                ]
+              },
+              {
+                "id": "evt-13287",
+                "tick": 820,
+                "type": "AMBULANCE_HANDOVER_COMPLETED",
+                "payload": {
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-12494",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-13288",
+                "tick": 820,
+                "type": "PATIENT_QUEUED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-12494",
+                  "evt-13287"
+                ]
+              },
+              {
+                "id": "evt-14037",
+                "tick": 846,
+                "type": "PATIENT_DETERIORATED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "previous": "IMMEDIATE",
+                  "triage": "EXPECTANT",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-12128",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-14437",
+                "tick": 868,
+                "type": "PATIENT_DETERIORATED",
+                "payload": {
+                  "patientId": "PAT-92",
+                  "previous": "IMMEDIATE",
+                  "triage": "EXPECTANT",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-13288",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-15187",
+                "tick": 912,
+                "type": "PATIENT_TREATMENT_STARTED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-14037",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-15424",
+                "tick": 929,
+                "type": "HOSPITAL_STATUS_CHANGED",
+                "payload": {
+                  "hospitalId": "H-A",
+                  "status": "NORMAL",
+                  "queue": 2,
+                  "load": 32
+                },
+                "causedByEventIds": [
+                  "evt-1481",
+                  "evt-10929",
+                  "evt-14437"
+                ]
+              },
+              {
+                "id": "evt-15427",
+                "tick": 929,
+                "type": "PATIENT_DETERIORATED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "previous": "EXPECTANT",
+                  "triage": "IMMEDIATE",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-15187",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-18044",
+                "tick": 1049,
+                "type": "GENERATOR_FAILED",
+                "payload": {
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-18045",
+                "tick": 1049,
+                "type": "HOSPITAL_STATUS_CHANGED",
+                "payload": {
+                  "hospitalId": "H-A",
+                  "status": "POWER_EMERGENCY",
+                  "queue": 0,
+                  "load": 32
+                },
+                "causedByEventIds": [
+                  "evt-18044",
+                  "evt-15424"
+                ]
+              },
+              {
+                "id": "evt-21769",
+                "tick": 1278,
+                "type": "PATIENT_DETERIORATED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "previous": "IMMEDIATE",
+                  "triage": "EXPECTANT",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-15427",
+                  "evt-18044",
+                  "evt-18045"
+                ]
+              },
+              {
+                "id": "evt-26633",
+                "tick": 1590,
+                "type": "PATIENT_DIED",
+                "payload": {
+                  "patientId": "PAT-91",
+                  "incidentId": "INC-10",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-21769",
+                  "evt-710",
+                  "evt-18044",
+                  "evt-18045"
+                ]
+              }
+            ],
+            "edges": [
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-698"
+              },
+              {
+                "causeId": "evt-698",
+                "effectId": "evt-709"
+              },
+              {
+                "causeId": "evt-709",
+                "effectId": "evt-710"
+              },
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-1480"
+              },
+              {
+                "causeId": "evt-1480",
+                "effectId": "evt-1481"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-1483"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-1712"
+              },
+              {
+                "causeId": "evt-1483",
+                "effectId": "evt-1712"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-2346"
+              },
+              {
+                "causeId": "evt-2346",
+                "effectId": "evt-2988"
+              },
+              {
+                "causeId": "evt-2980",
+                "effectId": "evt-3495"
+              },
+              {
+                "causeId": "evt-2346",
+                "effectId": "evt-3495"
+              },
+              {
+                "causeId": "evt-2988",
+                "effectId": "evt-3563"
+              },
+              {
+                "causeId": "evt-3563",
+                "effectId": "evt-3564"
+              },
+              {
+                "causeId": "evt-3564",
+                "effectId": "evt-3575"
+              },
+              {
+                "causeId": "evt-1712",
+                "effectId": "evt-3575"
+              },
+              {
+                "causeId": "evt-3495",
+                "effectId": "evt-3742"
+              },
+              {
+                "causeId": "evt-3742",
+                "effectId": "evt-3745"
+              },
+              {
+                "causeId": "evt-3745",
+                "effectId": "evt-3758"
+              },
+              {
+                "causeId": "evt-1712",
+                "effectId": "evt-3758"
+              },
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-3950"
+              },
+              {
+                "causeId": "evt-3950",
+                "effectId": "evt-3974"
+              },
+              {
+                "causeId": "evt-3974",
+                "effectId": "evt-6905"
+              },
+              {
+                "causeId": "evt-3974",
+                "effectId": "evt-6906"
+              },
+              {
+                "causeId": "evt-6905",
+                "effectId": "evt-9693"
+              },
+              {
+                "causeId": "evt-3575",
+                "effectId": "evt-9693"
+              },
+              {
+                "causeId": "evt-710",
+                "effectId": "evt-9693"
+              },
+              {
+                "causeId": "evt-6906",
+                "effectId": "evt-9915"
+              },
+              {
+                "causeId": "evt-3758",
+                "effectId": "evt-9915"
+              },
+              {
+                "causeId": "evt-710",
+                "effectId": "evt-9915"
+              },
+              {
+                "causeId": "evt-3575",
+                "effectId": "evt-10919"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-10919"
+              },
+              {
+                "causeId": "evt-9693",
+                "effectId": "evt-10919"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-10929"
+              },
+              {
+                "causeId": "evt-10919",
+                "effectId": "evt-12127"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-12127"
+              },
+              {
+                "causeId": "evt-10919",
+                "effectId": "evt-12128"
+              },
+              {
+                "causeId": "evt-12127",
+                "effectId": "evt-12128"
+              },
+              {
+                "causeId": "evt-3758",
+                "effectId": "evt-12494"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-12494"
+              },
+              {
+                "causeId": "evt-9915",
+                "effectId": "evt-12494"
+              },
+              {
+                "causeId": "evt-12494",
+                "effectId": "evt-13287"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-13287"
+              },
+              {
+                "causeId": "evt-12494",
+                "effectId": "evt-13288"
+              },
+              {
+                "causeId": "evt-13287",
+                "effectId": "evt-13288"
+              },
+              {
+                "causeId": "evt-12128",
+                "effectId": "evt-14037"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-14037"
+              },
+              {
+                "causeId": "evt-13288",
+                "effectId": "evt-14437"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-14437"
+              },
+              {
+                "causeId": "evt-14037",
+                "effectId": "evt-15187"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-15187"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-15424"
+              },
+              {
+                "causeId": "evt-10929",
+                "effectId": "evt-15424"
+              },
+              {
+                "causeId": "evt-14437",
+                "effectId": "evt-15424"
+              },
+              {
+                "causeId": "evt-15187",
+                "effectId": "evt-15427"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-15427"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-18044"
+              },
+              {
+                "causeId": "evt-18044",
+                "effectId": "evt-18045"
+              },
+              {
+                "causeId": "evt-15424",
+                "effectId": "evt-18045"
+              },
+              {
+                "causeId": "evt-15427",
+                "effectId": "evt-21769"
+              },
+              {
+                "causeId": "evt-18044",
+                "effectId": "evt-21769"
+              },
+              {
+                "causeId": "evt-18045",
+                "effectId": "evt-21769"
+              },
+              {
+                "causeId": "evt-21769",
+                "effectId": "evt-26633"
+              },
+              {
+                "causeId": "evt-710",
+                "effectId": "evt-26633"
+              },
+              {
+                "causeId": "evt-18044",
+                "effectId": "evt-26633"
+              },
+              {
+                "causeId": "evt-18045",
+                "effectId": "evt-26633"
+              }
+            ],
+            "truncated": true,
+            "omittedEventIds": [
+              "evt-2978",
+              "evt-2979",
+              "evt-1489",
+              "evt-1484"
+            ],
+            "limits": {
+              "maxDepth": 10,
+              "maxNodes": 80
+            }
+          },
+          {
+            "rootEventId": "evt-15412",
+            "nodes": [
+              {
+                "id": "evt-37",
+                "tick": 1,
+                "type": "RAIN_STARTED",
+                "payload": {
+                  "intensity": 1.4
+                },
+                "causedByEventIds": []
+              },
+              {
+                "id": "evt-698",
+                "tick": 120,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 0.5041758795516077,
+                  "previousDepth": 0.3614302294472007
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-709",
+                "tick": 120,
+                "type": "BUILDING_FLOODED",
+                "payload": {
+                  "nodeId": "N23",
+                  "zoneId": "F-C"
+                },
+                "causedByEventIds": [
+                  "evt-698"
+                ]
+              },
+              {
+                "id": "evt-710",
+                "tick": 120,
+                "type": "INCIDENT_CREATED",
+                "payload": {
+                  "incidentId": "INC-10",
+                  "type": "FLOOD",
+                  "nodeId": "N23"
+                },
+                "causedByEventIds": [
+                  "evt-709"
+                ]
+              },
+              {
+                "id": "evt-1480",
+                "tick": 150,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-B",
+                  "depth": 0.49401707756694924,
+                  "previousDepth": 0.3826149817779045
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-1481",
+                "tick": 150,
+                "type": "POWER_NODE_FAILED",
+                "payload": {
+                  "nodeId": "PWR"
+                },
+                "causedByEventIds": [
+                  "evt-1480"
+                ]
+              },
+              {
+                "id": "evt-1483",
+                "tick": 150,
+                "type": "COMMUNICATION_DEGRADED",
+                "payload": {
+                  "nodeId": "RAD"
+                },
+                "causedByEventIds": [
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-1484",
+                "tick": 150,
+                "type": "INCIDENT_CREATED",
+                "payload": {
+                  "incidentId": "INC-15",
+                  "type": "COMMUNICATION_FAILURE",
+                  "nodeId": "N10"
+                },
+                "causedByEventIds": [
+                  "evt-1483"
+                ]
+              },
+              {
+                "id": "evt-1489",
+                "tick": 150,
+                "type": "NETWORK_NODE_STATUS_CHANGED",
+                "payload": {
+                  "networkNodeId": "NET-RAD",
+                  "status": "DEGRADED",
+                  "backupFuel": 119
+                },
+                "causedByEventIds": [
+                  "evt-1481",
+                  "evt-1484"
+                ]
+              },
+              {
+                "id": "evt-1712",
+                "tick": 240,
+                "type": "COMMUNICATION_DEGRADED",
+                "payload": {
+                  "status": "OFFLINE"
+                },
+                "causedByEventIds": [
+                  "evt-1481",
+                  "evt-1483"
+                ]
+              },
+              {
+                "id": "evt-2346",
+                "tick": 269,
+                "type": "NETWORK_NODE_STATUS_CHANGED",
+                "payload": {
+                  "networkNodeId": "NET-RAD",
+                  "status": "DOWN",
+                  "backupFuel": 0
+                },
+                "causedByEventIds": [
+                  "evt-1489",
+                  "evt-1481",
+                  "evt-1484"
+                ]
+              },
+              {
+                "id": "evt-2358",
+                "tick": 270,
+                "type": "FLOOD_ZONE_RISE",
+                "payload": {
+                  "zoneId": "F-C",
+                  "depth": 1.2306594175354075,
+                  "previousDepth": 1.0930333172900246
+                },
+                "causedByEventIds": [
+                  "evt-37"
+                ]
+              },
+              {
+                "id": "evt-2376",
+                "tick": 270,
+                "type": "CIVILIANS_EXPOSED",
+                "payload": {
+                  "cohortId": "CIV-59",
+                  "depth": 1.2306594175354075,
+                  "exposure": 0.26003058154822223
+                },
+                "causedByEventIds": [
+                  "evt-2358"
+                ]
+              },
+              {
+                "id": "evt-2979",
+                "tick": 350,
+                "type": "COMMAND_ISSUED",
+                "payload": {
+                  "commandId": "CMD-6",
+                  "target": "AMB-06",
+                  "type": "DISPATCH_UNIT",
+                  "incidentId": "INC-10"
+                },
+                "causedByEventIds": [
+                  "evt-1712"
+                ]
+              },
+              {
+                "id": "evt-2980",
+                "tick": 350,
+                "type": "MESSAGE_QUEUED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "kind": "COMMAND",
+                  "referenceId": "CMD-6",
+                  "source": "NET-DC",
+                  "destination": "NET-EMS"
+                },
+                "causedByEventIds": [
+                  "evt-2979"
+                ]
+              },
+              {
+                "id": "evt-3495",
+                "tick": 363,
+                "type": "MESSAGE_HOP_SENT",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "edgeId": "LINK-7",
+                  "from": "NET-DC",
+                  "to": "NET-EMS",
+                  "arrivalTick": 379,
+                  "backupRoute": true
+                },
+                "causedByEventIds": [
+                  "evt-2980",
+                  "evt-2346"
+                ]
+              },
+              {
+                "id": "evt-3742",
+                "tick": 379,
+                "type": "MESSAGE_HOP_RECEIVED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "nodeId": "NET-EMS"
+                },
+                "causedByEventIds": [
+                  "evt-3495"
+                ]
+              },
+              {
+                "id": "evt-3745",
+                "tick": 379,
+                "type": "MESSAGE_DELIVERED",
+                "payload": {
+                  "messageId": "MSG-304",
+                  "kind": "COMMAND",
+                  "referenceId": "CMD-6",
+                  "latency": 29,
+                  "queueDelay": 12
+                },
+                "causedByEventIds": [
+                  "evt-3742"
+                ]
+              },
+              {
+                "id": "evt-3758",
+                "tick": 379,
+                "type": "COMMAND_RECEIVED",
+                "payload": {
+                  "commandId": "CMD-6"
+                },
+                "causedByEventIds": [
+                  "evt-3745",
+                  "evt-1712"
+                ]
+              },
+              {
+                "id": "evt-3841",
+                "tick": 384,
+                "type": "PATIENT_TRANSPORTED",
+                "payload": {
+                  "patientId": "PAT-26",
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-2376",
+                  "evt-3758",
+                  "evt-710"
+                ]
+              },
+              {
+                "id": "evt-5754",
+                "tick": 480,
+                "type": "AMBULANCE_HANDOVER_STARTED",
+                "payload": {
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A",
+                  "until": 520
+                },
+                "causedByEventIds": [
+                  "evt-3758",
+                  "evt-1481",
+                  "evt-3841"
+                ]
+              },
+              {
+                "id": "evt-7244",
+                "tick": 520,
+                "type": "AMBULANCE_HANDOVER_COMPLETED",
+                "payload": {
+                  "unitId": "AMB-06",
+                  "hospitalId": "H-A"
+                },
+                "causedByEventIds": [
+                  "evt-5754",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-7245",
+                "tick": 520,
+                "type": "PATIENT_QUEUED",
+                "payload": {
+                  "patientId": "PAT-26",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-5754",
+                  "evt-7244"
+                ]
+              },
+              {
+                "id": "evt-7259",
+                "tick": 521,
+                "type": "PATIENT_TREATMENT_STARTED",
+                "payload": {
+                  "patientId": "PAT-26",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-7245",
+                  "evt-1481"
+                ]
+              },
+              {
+                "id": "evt-15412",
+                "tick": 928,
+                "type": "PATIENT_RECOVERED",
+                "payload": {
+                  "patientId": "PAT-26",
+                  "hospitalId": "H-A",
+                  "count": 2
+                },
+                "causedByEventIds": [
+                  "evt-7259",
+                  "evt-1481"
+                ]
+              }
+            ],
+            "edges": [
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-698"
+              },
+              {
+                "causeId": "evt-698",
+                "effectId": "evt-709"
+              },
+              {
+                "causeId": "evt-709",
+                "effectId": "evt-710"
+              },
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-1480"
+              },
+              {
+                "causeId": "evt-1480",
+                "effectId": "evt-1481"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-1483"
+              },
+              {
+                "causeId": "evt-1483",
+                "effectId": "evt-1484"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-1489"
+              },
+              {
+                "causeId": "evt-1484",
+                "effectId": "evt-1489"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-1712"
+              },
+              {
+                "causeId": "evt-1483",
+                "effectId": "evt-1712"
+              },
+              {
+                "causeId": "evt-1489",
+                "effectId": "evt-2346"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-2346"
+              },
+              {
+                "causeId": "evt-1484",
+                "effectId": "evt-2346"
+              },
+              {
+                "causeId": "evt-37",
+                "effectId": "evt-2358"
+              },
+              {
+                "causeId": "evt-2358",
+                "effectId": "evt-2376"
+              },
+              {
+                "causeId": "evt-1712",
+                "effectId": "evt-2979"
+              },
+              {
+                "causeId": "evt-2979",
+                "effectId": "evt-2980"
+              },
+              {
+                "causeId": "evt-2980",
+                "effectId": "evt-3495"
+              },
+              {
+                "causeId": "evt-2346",
+                "effectId": "evt-3495"
+              },
+              {
+                "causeId": "evt-3495",
+                "effectId": "evt-3742"
+              },
+              {
+                "causeId": "evt-3742",
+                "effectId": "evt-3745"
+              },
+              {
+                "causeId": "evt-3745",
+                "effectId": "evt-3758"
+              },
+              {
+                "causeId": "evt-1712",
+                "effectId": "evt-3758"
+              },
+              {
+                "causeId": "evt-2376",
+                "effectId": "evt-3841"
+              },
+              {
+                "causeId": "evt-3758",
+                "effectId": "evt-3841"
+              },
+              {
+                "causeId": "evt-710",
+                "effectId": "evt-3841"
+              },
+              {
+                "causeId": "evt-3758",
+                "effectId": "evt-5754"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-5754"
+              },
+              {
+                "causeId": "evt-3841",
+                "effectId": "evt-5754"
+              },
+              {
+                "causeId": "evt-5754",
+                "effectId": "evt-7244"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-7244"
+              },
+              {
+                "causeId": "evt-5754",
+                "effectId": "evt-7245"
+              },
+              {
+                "causeId": "evt-7244",
+                "effectId": "evt-7245"
+              },
+              {
+                "causeId": "evt-7245",
+                "effectId": "evt-7259"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-7259"
+              },
+              {
+                "causeId": "evt-7259",
+                "effectId": "evt-15412"
+              },
+              {
+                "causeId": "evt-1481",
+                "effectId": "evt-15412"
+              }
+            ],
+            "truncated": false,
+            "omittedEventIds": [],
+            "limits": {
+              "maxDepth": 10,
+              "maxNodes": 80
+            }
+          }
+        ],
+        "changedCausalOutcomes": [
+          {
+            "type": "PATIENT_DIED",
+            "subjectId": "CIV-59",
+            "originalCount": 8,
+            "alternativeCount": 4,
+            "originalFirstTick": 884,
+            "alternativeFirstTick": 1560,
+            "originalEventIds": [
+              "evt-15702",
+              "evt-15703",
+              "evt-18432",
+              "evt-18433"
+            ],
+            "alternativeEventIds": [
+              "evt-25977",
+              "evt-26633"
+            ]
+          },
+          {
+            "type": "PATIENT_RECOVERED",
+            "subjectId": "CIV-59",
+            "originalCount": 0,
+            "alternativeCount": 4,
+            "alternativeFirstTick": 911,
+            "originalEventIds": [],
+            "alternativeEventIds": [
+              "evt-15174",
+              "evt-15412"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "rescueIncident": {
+          "id": "INC-10",
+          "type": "FLOOD",
+          "nodeId": "N23",
+          "severity": 25.208793977580385,
+          "status": "ACTIVE",
+          "creationTick": 120,
+          "cause": "evt-764",
+          "required": [
+            "FIRE",
+            "EMS",
+            "POLICE",
+            "UTILITY"
+          ],
+          "affectedEntities": [
+            "PAT-25",
+            "PAT-26"
+          ],
+          "hazard": 25.208793977580385,
+          "priority": 2,
+          "work": 0
+        },
+        "patientsAtRescue": [
+          {
+            "id": "PAT-25",
+            "state": "WAITING",
+            "health": 43.407756997080305,
+            "count": 2
+          },
+          {
+            "id": "PAT-26",
+            "state": "WAITING",
+            "health": 43.407756997080305,
+            "count": 2
+          }
+        ],
+        "reservedUnits": [
+          {
+            "id": "AMB-05",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "DISABLED",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.10400000000000004,
+            "communicationStatus": "DEGRADED",
+            "route": [
+              "N22",
+              "N23"
+            ],
+            "edgeProgress": 61,
+            "eta": 131,
+            "patients": [],
+            "assignment": "INC-10",
+            "missionCause": "evt-3575",
+            "blockedSince": 810
+          },
+          {
+            "id": "AMB-06",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "AVAILABLE",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.11200000000000004,
+            "communicationStatus": "DEGRADED",
+            "route": [],
+            "edgeProgress": 0,
+            "eta": 0,
+            "patients": [],
+            "missionCause": "evt-3758"
+          }
+        ],
+        "reservedCommands": [
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10",
+            "id": "CMD-5",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 368,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3583",
+            "networkMessageId": "MSG-303",
+            "receivedTick": 368,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-492",
+            "knownExecutionTick": 369,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 386
+          },
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10",
+            "id": "CMD-6",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 379,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3766",
+            "networkMessageId": "MSG-304",
+            "receivedTick": 379,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-497",
+            "knownExecutionTick": 380,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 514
+          }
+        ],
+        "corridorAtRescue": [
+          {
+            "id": "R39",
+            "from": "N21",
+            "to": "N22",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          },
+          {
+            "id": "R41",
+            "from": "N22",
+            "to": "N23",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          }
+        ],
+        "transported": 4
+      },
+      "branchMismatch": 0,
+      "parentMutation": 0,
+      "replayMismatch": 0,
+      "saveFailure": 0
+    }
+  ]
+}

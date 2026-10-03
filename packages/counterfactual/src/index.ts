@@ -1,25 +1,14 @@
-import type { WorldState, Scenario, DomainEvent } from "../../domain/src/index";
+import type {
+  WorldState,
+  Scenario,
+  DomainEvent,
+  OutcomeMetrics,
+  CausalChain,
+} from "../../domain/src/index";
+import { CausalIndex } from "../../after-action/src/causal";
+export type { OutcomeMetrics } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
 import type { ReplayBranch } from "../../replay/src/index";
-export interface OutcomeMetrics {
-  fatalities: number;
-  criticalCases: number;
-  unresolvedCritical: number;
-  resolvedIncidents: number;
-  hospitalOverloadTicks: number;
-  infrastructureDowntime: number;
-  powerDowntime: number;
-  communicationDowntime: number;
-  averageResponseTime: number;
-  respondedIncidents: number;
-  averageEMSResponseTime: number;
-  respondedEMSIncidents: number;
-  averageCommandDelay: number;
-  acknowledgedCommands: number;
-  recovered: number;
-  sheltered: number;
-  unitUtilization: number;
-}
 export interface ChangedOutcome {
   originId: string;
   originalDeaths: number;
@@ -38,6 +27,18 @@ export interface BranchComparison {
   alternative: OutcomeMetrics;
   delta: OutcomeMetrics;
   changedOutcomes: ChangedOutcome[];
+  originalChains: CausalChain[];
+  alternativeChains: CausalChain[];
+  changedCausalOutcomes: {
+    type: DomainEvent["type"];
+    subjectId: string;
+    originalCount: number;
+    alternativeCount: number;
+    originalFirstTick?: number;
+    alternativeFirstTick?: number;
+    originalEventIds: string[];
+    alternativeEventIds: string[];
+  }[];
 }
 export function outcomeMetrics(w: WorldState, s: Scenario): OutcomeMetrics {
   const count = (events: DomainEvent[]) =>
@@ -193,7 +194,9 @@ function originDeaths(
   const cohorts = new Map(w.cohorts?.map((c) => [c.id, c]) ?? []),
     patients = new Map(w.patients.map((p) => [p.id, p])),
     result = new Map<string, { count: number; events: string[] }>();
-  for (const event of w.events.filter((e) => e.type === "PATIENT_DIED")) {
+  for (const event of w.events.filter((e) =>
+    ["PATIENT_DIED", "PATIENT_RECOVERED", "PATIENT_ADMITTED"].includes(e.type),
+  )) {
     const patient = patients.get(String(event.payload.patientId)),
       cohort = cohorts.get(patient?.civilianCohortId ?? "");
     const origin =
@@ -202,12 +205,63 @@ function originDeaths(
           ? `HOSPITAL-${event.payload.hospitalId}`
           : `PATIENT-${patient?.id ?? event.id}`),
       existing = result.get(origin) ?? { count: 0, events: [] };
-    existing.count +=
-      typeof event.payload.count === "number" ? event.payload.count : 1;
+    if (event.type === "PATIENT_DIED")
+      existing.count +=
+        typeof event.payload.count === "number" ? event.payload.count : 1;
     existing.events.push(event.id);
     result.set(origin, existing);
   }
   return result;
+}
+function outcomeEvents(w: WorldState) {
+  const cohorts = new Map(w.cohorts?.map((c) => [c.id, c]) ?? []),
+    patients = new Map(w.patients.map((p) => [p.id, p])),
+    results = new Map<
+      string,
+      {
+        type: DomainEvent["type"];
+        subjectId: string;
+        count: number;
+        firstTick: number;
+        eventIds: string[];
+      }
+    >();
+  for (const e of w.events) {
+    if (
+      ![
+        "PATIENT_DIED",
+        "PATIENT_RECOVERED",
+        "CIVILIANS_SHELTERED",
+        "POWER_RESTORED",
+        "INCIDENT_RESOLVED",
+      ].includes(e.type)
+    )
+      continue;
+    const patient = patients.get(String(e.payload.patientId)),
+      cohort = cohorts.get(
+        patient?.civilianCohortId ?? String(e.payload.cohortId),
+      ),
+      subjectId =
+        cohort?.originId ??
+        String(
+          e.payload.hospitalId ??
+            e.payload.incidentId ??
+            e.payload.nodeId ??
+            "PWR",
+        ),
+      key = `${e.type}:${subjectId}`,
+      value = results.get(key) ?? {
+        type: e.type,
+        subjectId,
+        count: 0,
+        firstTick: e.tick,
+        eventIds: [],
+      };
+    value.count += typeof e.payload.count === "number" ? e.payload.count : 1;
+    value.eventIds.push(e.id);
+    results.set(key, value);
+  }
+  return results;
 }
 export function compareBranch(
   original: WorldState,
@@ -249,6 +303,47 @@ export function compareBranch(
       Math.abs(b.deathDelta) - Math.abs(a.deathDelta) ||
       a.originId.localeCompare(b.originId, "en"),
   );
+  const displayed = changedOutcomes.slice(0, 12),
+    originalGraph = new CausalIndex(original.events),
+    alternativeGraph = new CausalIndex(branch.simulation.state.events);
+  const originalEvents = outcomeEvents(original),
+    alternateEvents = outcomeEvents(branch.simulation.state),
+    changedCausalOutcomes: BranchComparison["changedCausalOutcomes"] = [];
+  for (const key of new Set([
+    ...originalEvents.keys(),
+    ...alternateEvents.keys(),
+  ])) {
+    const from = originalEvents.get(key),
+      to = alternateEvents.get(key);
+    if (from?.count === to?.count && from?.firstTick === to?.firstTick)
+      continue;
+    const identity = from ?? to!;
+    changedCausalOutcomes.push({
+      type: identity.type,
+      subjectId: identity.subjectId,
+      originalCount: from?.count ?? 0,
+      alternativeCount: to?.count ?? 0,
+      originalFirstTick: from?.firstTick,
+      alternativeFirstTick: to?.firstTick,
+      originalEventIds: from?.eventIds ?? [],
+      alternativeEventIds: to?.eventIds ?? [],
+    });
+  }
+  changedCausalOutcomes.sort(
+    (a, b) =>
+      Math.abs(b.alternativeCount - b.originalCount) -
+        Math.abs(a.alternativeCount - a.originalCount) ||
+      a.type.localeCompare(b.type, "en") ||
+      a.subjectId.localeCompare(b.subjectId, "en"),
+  );
+  const causalDisplayed = changedCausalOutcomes.slice(0, 12),
+    references = [...displayed, ...causalDisplayed],
+    originalRoots = [
+      ...new Set(references.flatMap((o) => o.originalEventIds.slice(-1))),
+    ],
+    alternateRoots = [
+      ...new Set(references.flatMap((o) => o.alternativeEventIds.slice(-1))),
+    ];
   return {
     lineage: structuredClone(branch.lineage),
     originalHash: hash(original),
@@ -258,6 +353,9 @@ export function compareBranch(
     original: originalMetrics,
     alternative,
     delta,
-    changedOutcomes: changedOutcomes.slice(0, 12),
+    changedOutcomes: displayed,
+    originalChains: originalRoots.map((id) => originalGraph.trace(id)),
+    alternativeChains: alternateRoots.map((id) => alternativeGraph.trace(id)),
+    changedCausalOutcomes: causalDisplayed,
   };
 }

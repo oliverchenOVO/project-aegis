@@ -10,6 +10,7 @@ import {
   type PlayerCommand,
 } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
+import { auditIntelligence, systemicAAR } from "../../after-action/src/index";
 import { updateHazards } from "./hazards";
 import {
   initializeCivilians,
@@ -183,7 +184,9 @@ export class Simulation {
       acknowledged = w.commands.filter(
         (c) => c.acknowledgementTick !== undefined,
       );
+    const audits = w.cohorts ? auditIntelligence(w) : undefined;
     return {
+      ...(audits ? { systemic: systemicAAR(w, this.scenario, audits) } : {}),
       seed: w.seed,
       duration: w.tick,
       reason: w.completionReason!,
@@ -223,31 +226,34 @@ export class Simulation {
         lowConfidence: reports.filter((r) => r.observationConfidence < 0.65)
           .length,
       },
-      intelAudit: reports
-        .filter((r) => r.subjectKind !== "UNIT")
-        .map((r) => ({
-          id: r.id,
-          source: r.sourceId,
-          subject: r.subjectId,
-          claim: r.claim.value,
-          observedTruth: r.truthRef.value,
-          receivedTruth: r.truthRef.receivedValue,
-          observedTick: r.observedTick,
-          receivedTick: r.receivedTick,
-          classifications: [
-            r.claim.value !== r.truthRef.value ? "觀察誤差" : "",
-            r.receivedTick !== undefined &&
-            (r.receivedTick > r.expiry ||
-              r.truthRef.receivedValue !== r.truthRef.value)
-              ? "過時"
-              : "",
-            r.status === "LOST" ? "遺失" : "",
-            r.receivedTick !== undefined && r.receivedTick - r.observedTick > 90
-              ? "延遲"
-              : "",
-            r.observationConfidence < 0.65 ? "低信心" : "",
-          ].filter(Boolean),
-        })),
+      intelAudit:
+        audits ??
+        reports
+          .filter((r) => r.subjectKind !== "UNIT")
+          .map((r) => ({
+            id: r.id,
+            source: r.sourceId,
+            subject: r.subjectId,
+            claim: r.claim.value,
+            observedTruth: r.truthRef.value,
+            receivedTruth: r.truthRef.receivedValue,
+            observedTick: r.observedTick,
+            receivedTick: r.receivedTick,
+            classifications: [
+              r.claim.value !== r.truthRef.value ? "觀察誤差" : "",
+              r.receivedTick !== undefined &&
+              (r.receivedTick > r.expiry ||
+                r.truthRef.receivedValue !== r.truthRef.value)
+                ? "過時"
+                : "",
+              r.status === "LOST" ? "遺失" : "",
+              r.receivedTick !== undefined &&
+              r.receivedTick - r.observedTick > 90
+                ? "延遲"
+                : "",
+              r.observationConfidence < 0.65 ? "低信心" : "",
+            ].filter(Boolean),
+          })),
       commands,
       averageCommandDelay: acknowledged.length
         ? acknowledged.reduce(

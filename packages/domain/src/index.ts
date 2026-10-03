@@ -155,6 +155,10 @@ export const HospitalSchema = z.object({
   overloadTicks: tick.optional(),
   powerEmergencyTicks: tick.optional(),
   statusCause: id.optional(),
+  peakQueue: tick.optional(),
+  peakCensus: tick.optional(),
+  peakICU: tick.optional(),
+  handoverTicks: tick.optional(),
 });
 export const EventTypes = [
   "PATIENT_DETERIORATED",
@@ -622,6 +626,7 @@ export interface CommandCenterView {
   };
 }
 export interface AAR {
+  systemic?: SystemicAAR;
   seed: string;
   duration: number;
   reason: string;
@@ -653,4 +658,71 @@ export interface IntelAudit {
   observedTick: number;
   receivedTick?: number;
   classifications: string[];
+  corroboratingReportIds?: string[];
+  conflictingReportIds?: string[];
+  missingFields?: string[];
+  causeEventIds?: string[];
+}
+export interface OutcomeMetrics {
+  fatalities: number;
+  criticalCases: number;
+  unresolvedCritical: number;
+  resolvedIncidents: number;
+  hospitalOverloadTicks: number;
+  infrastructureDowntime: number;
+  powerDowntime: number;
+  communicationDowntime: number;
+  averageResponseTime: number;
+  respondedIncidents: number;
+  averageEMSResponseTime: number;
+  respondedEMSIncidents: number;
+  averageCommandDelay: number;
+  acknowledgedCommands: number;
+  recovered: number;
+  sheltered: number;
+  unitUtilization: number;
+}
+export const IntelClasses = [
+  "STALE",
+  "FALSE",
+  "INCOMPLETE",
+  "DELAYED",
+  "LOST",
+  "CONFLICTED",
+  "UNCORROBORATED",
+] as const;
+export type IntelClass = (typeof IntelClasses)[number];
+export interface CausalChain {
+  rootEventId: string;
+  nodes: DomainEvent[];
+  edges: { causeId: string; effectId: string }[];
+  truncated: boolean;
+  omittedEventIds: string[];
+  limits: { maxDepth: number; maxNodes: number };
+}
+export interface SystemicAAR {
+  version: 2;
+  metrics: OutcomeMetrics;
+  hospitals: {
+    id: string;
+    status: string;
+    currentPatients: number;
+    queue: number;
+    peakQueue: number;
+    peakCensus: number;
+    peakICU: number;
+    overloadTicks: number;
+    powerEmergencyTicks: number;
+    handoverTicks: number;
+  }[];
+  intelligence: Record<IntelClass, number>;
+  decisions: {
+    command: PlayerCommand;
+    issuedEventId: string;
+    acknowledgementEventIds: string[];
+    executionEventIds: string[];
+    outcomeEventIds: string[];
+    truncated: boolean;
+  }[];
+  criticalChains: CausalChain[];
 }
