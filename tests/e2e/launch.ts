@@ -47,6 +47,7 @@ export async function launch(
       ? [
           "--use-gl=angle",
           "--use-angle=swiftshader",
+          "--enable-unsafe-swiftshader",
           "--disable-renderer-backgrounding",
         ]
       : [];
