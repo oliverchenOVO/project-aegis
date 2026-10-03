@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Application, Container, Graphics, Text } from "pixi.js";
+import { Application, Container, Graphics, Text, Polygon } from "pixi.js";
 import "pixi.js/unsafe-eval";
 import { ZoomIn, ZoomOut, LocateFixed } from "lucide-react";
 import type { CommandCenterView } from "../../domain/src/index";
 import { useUI, type Layer } from "./store";
 import { color, incidentNames } from "./labels";
+import { drawArchitecture, layer, mapLabel } from "./map/architecture";
+import { cityKey, type Identity } from "./map/city";
+import { detailForScale, MAP_LAYERS, mapTheme, type Detail } from "./map/theme";
+import { positionedUnits, floodAppearance } from "./map/knowledge";
+import { cameraPosition, invalidator } from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
   UNITS: "單位",
@@ -18,13 +23,19 @@ const layerNames: Record<Layer, string> = {
 };
 interface MapProps {
   view: CommandCenterView;
+  identity: Identity;
 }
-export function SituationMap({ view }: MapProps) {
+export function SituationMap({ view, identity }: MapProps) {
   const host = useRef<HTMLDivElement>(null),
     engine = useRef<{
       app: Application;
       scene: Container;
       content: Container;
+      architecture?: ReturnType<typeof drawArchitecture>;
+      staticHost: Container;
+      publicCity: CommandCenterView["city"];
+      identity: Identity;
+      invalidation: ReturnType<typeof invalidator>;
       base: number;
       zoom: number;
       pan: { x: number; y: number };
@@ -35,15 +46,29 @@ export function SituationMap({ view }: MapProps) {
     select = useUI((s) => s.select),
     layers = useUI((s) => s.layers),
     toggle = useUI((s) => s.toggleLayer);
+  const refreshArchitecture = (
+    e: NonNullable<typeof engine.current>,
+    detail: Detail,
+  ) => {
+    const key = cityKey(e.publicCity, e.identity);
+    if (e.architecture?.key === key && e.architecture.detail === detail) return;
+    e.architecture?.root.destroy({ children: true });
+    e.architecture = drawArchitecture(e.publicCity, e.identity, detail);
+    e.staticHost.addChild(e.architecture.root);
+  };
   const transform = () => {
     const e = engine.current;
     if (!e) return;
     e.scene.scale.set(e.base * e.zoom);
-    e.scene.position.set(
-      (e.app.screen.width - 800 * e.base * e.zoom) / 2 + e.pan.x,
-      (e.app.screen.height - 590 * e.base * e.zoom) / 2 + e.pan.y,
+    const position = cameraPosition(
+      e.app.screen.width,
+      e.app.screen.height,
+      e.base * e.zoom,
+      e.pan,
     );
-    e.app.render();
+    e.scene.position.set(position.x, position.y);
+    refreshArchitecture(e, detailForScale(e.base * e.zoom));
+    e.invalidation.request();
   };
   const zoom = (factor: number) => {
     const e = engine.current;
@@ -74,12 +99,22 @@ export function SituationMap({ view }: MapProps) {
       element.appendChild(app.canvas);
       const scene = new Container(),
         content = new Container();
-      scene.addChild(content);
+      const staticHost = new Container();
+      scene.addChild(staticHost, content);
+      content.sortableChildren = true;
       app.stage.addChild(scene);
       engine.current = {
         app,
         scene,
         content,
+        staticHost,
+        publicCity: view.city,
+        identity,
+        invalidation: invalidator(
+          requestAnimationFrame,
+          cancelAnimationFrame,
+          () => app.render(),
+        ),
         base: Math.min(element.clientWidth / 800, element.clientHeight / 590),
         zoom: 1,
         pan: { x: 0, y: 0 },
@@ -136,6 +171,7 @@ export function SituationMap({ view }: MapProps) {
       window.removeEventListener("pointerup", up);
       element.removeEventListener("wheel", wheel);
       if (engine.current?.app === app) {
+        engine.current.invalidation.dispose();
         engine.current = null;
         app.destroy(true, { children: true });
       }
@@ -148,51 +184,30 @@ export function SituationMap({ view }: MapProps) {
     e.content
       .removeChildren()
       .forEach((child) => child.destroy({ children: true }));
+    e.publicCity = view.city;
+    e.identity = identity;
+    refreshArchitecture(e, detailForScale(e.base * e.zoom));
+    const floodLayer = layer(e.content, MAP_LAYERS.flood);
+    const infrastructure = layer(e.content, MAP_LAYERS.infrastructure);
+    const ground = layer(e.content, MAP_LAYERS.incidentGround);
+    const routeLayer = layer(e.content, MAP_LAYERS.routes);
+    const unitsLayer = layer(e.content, MAP_LAYERS.units);
+    const callouts = layer(e.content, MAP_LAYERS.callouts);
+    const labels = layer(e.content, MAP_LAYERS.labels);
+    const selectionLayer = layer(e.content, MAP_LAYERS.selection);
     const g = new Graphics();
-    e.content.addChild(g);
-    // Public cartography, generated only from static city topology.
-    for (let row = 0; row < 4; row++)
-      for (let col = 0; col < 6; col++) {
-        const x = 91 + col * 110,
-          y = 71 + row * 115;
-        g.rect(x, y, 88, 91).fill({
-          color: (row + col) % 3 === 0 ? 0x192b2a : 0x1d2933,
-        });
-        for (let a = 0; a < 3; a++)
-          for (let b = 0; b < 3; b++)
-            g.rect(
-              x + 6 + a * 27,
-              y + 6 + b * 29,
-              17 + ((a + row) % 6),
-              18 + ((b + col) % 7),
-            )
-              .fill(0x283641)
-              .stroke({ color: 0x33434e, width: 0.7 });
-      }
-    g.poly([
-      345, 0, 382, 0, 421, 170, 401, 320, 461, 590, 418, 590, 361, 320, 382,
-      170,
-    ]).fill(0x1c3546);
+    infrastructure.addChild(g);
     const label = (
       text: string,
       x: number,
       y: number,
-      fill = 0x93a5b4,
+      fill: number = mapTheme.label,
       size = 13,
       weight: "normal" | "bold" = "normal",
     ) => {
-      const t = new Text({
-        text,
-        style: {
-          fontFamily: "Segoe UI, Microsoft JhengHei",
-          fontSize: size,
-          fill,
-          fontWeight: weight,
-        },
-      });
-      t.position.set(x, y);
-      e.content.addChild(t);
-      return t;
+      const result = mapLabel(labels, text, x, y, fill, size);
+      result.style.fontWeight = weight;
+      return result;
     };
     const nodes = new Map(view.city.nodes.map((n) => [n.id, n]));
     for (const r of view.city.roads) {
@@ -203,16 +218,18 @@ export function SituationMap({ view }: MapProps) {
         );
       const blocked =
         layers.includes("TRAFFIC") && known?.claim.value === "BLOCKED";
-      g.moveTo(a.x, a.y)
-        .lineTo(b.x, b.y)
-        .stroke({ color: 0x293945, width: 12 });
-      g.moveTo(a.x, a.y)
-        .lineTo(b.x, b.y)
-        .stroke({
-          color: blocked ? 0xc77e50 : 0x65727b,
-          width: blocked ? 4 : 1.3,
-          alpha: blocked ? 0.85 : 0.65,
-        });
+      if (
+        blocked ||
+        (layers.includes("TRAFFIC") && known?.claim.value === "DEGRADED")
+      ) {
+        g.moveTo(a.x, a.y)
+          .lineTo(b.x, b.y)
+          .stroke({
+            color: blocked ? mapTheme.blocked : mapTheme.degraded,
+            width: 4,
+            alpha: 0.95,
+          });
+      }
       if (blocked)
         label(
           "×",
@@ -223,9 +240,6 @@ export function SituationMap({ view }: MapProps) {
           "bold",
         );
     }
-    for (const d of view.city.districts)
-      label(d.name, d.x, d.y + 30, 0x8596a4, 19, "bold");
-    label("臨 江", 370, 300, 0x7da2b8, 14);
     if (layers.includes("FLOOD"))
       for (const zone of view.city.floodZones ?? []) {
         const points = zone.nodeIds.map((id) => nodes.get(id)!).filter(Boolean),
@@ -241,11 +255,7 @@ export function SituationMap({ view }: MapProps) {
           overlay
             .roundRect(node.x - 40, node.y - 40, 80, 80, 4)
             .fill({
-              color: depth === undefined ? 0x586779 : 0x428eb8,
-              alpha:
-                depth === undefined
-                  ? 0.035
-                  : Math.min(0.26, 0.06 + depth * 0.06),
+              ...floodAppearance(depth),
             })
             .stroke({
               color: belief?.stale ? 0xc9b47b : 0x648aa4,
@@ -262,7 +272,7 @@ export function SituationMap({ view }: MapProps) {
               : `${zone.id} · 水深未知，尚無已接收觀測`,
           ),
         );
-        e.content.addChild(overlay);
+        floodLayer.addChild(overlay);
         label(
           `${zone.id} ${depth === undefined ? "未知" : `約 ${depth.toFixed(1)}m`}${belief?.stale ? " *" : ""}`,
           left + 8,
@@ -298,7 +308,7 @@ export function SituationMap({ view }: MapProps) {
             `${b.subjectId} · 估計居民 ${b.claim.estimatedPopulation ?? "未知"} · 危重 ${b.claim.estimatedCritical ?? "未知"} · ${b.age}秒前`,
           ),
         );
-        e.content.addChild(marker);
+        infrastructure.addChild(marker);
       }
     }
     if (layers.includes("COMMS"))
@@ -330,7 +340,7 @@ export function SituationMap({ view }: MapProps) {
             `${net.id} · ${net.role} · ${b ? `回報 ${b.claim.value} · ${b.age}秒前` : "狀態未知"}`,
           ),
         );
-        e.content.addChild(marker);
+        infrastructure.addChild(marker);
       }
     for (const h of view.city.hospitals)
       if (layers.includes("MEDICAL")) {
@@ -357,7 +367,7 @@ export function SituationMap({ view }: MapProps) {
             `${h.id} · ${hospitalBelief?.claim.value ?? "狀態未知"}${hospitalBelief ? ` · ${hospitalBelief.age}秒前` : ""}`,
           ),
         );
-        e.content.addChild(marker);
+        infrastructure.addChild(marker);
         label(
           h.id +
             (hospitalBelief?.claim.hospitalStatus &&
@@ -399,7 +409,7 @@ export function SituationMap({ view }: MapProps) {
         hit.eventMode = "static";
         hit.cursor = "pointer";
         hit.on("pointertap", () => select(f.id));
-        e.content.addChild(hit);
+        infrastructure.addChild(hit);
       }
     }
     if (layers.includes("INCIDENTS"))
@@ -408,7 +418,37 @@ export function SituationMap({ view }: MapProps) {
         if (!n) continue;
         const c = b.claim.value === "已解除" ? 0x7fa18b : 0xe58b54;
         const marker = new Container();
-        marker.position.set(n.x, n.y - 23);
+        marker.position.set(n.x, n.y - 42);
+        const anchor = new Graphics()
+          .circle(n.x, n.y, 10)
+          .stroke({ color: c, width: 2, alpha: 0.9 })
+          .moveTo(n.x, n.y - 10)
+          .lineTo(n.x, n.y - 27)
+          .stroke({ color: c, width: 1.3 });
+        ground.addChild(anchor);
+        if (b.claim.value !== "已解除" && b.claim.incidentType === "FIRE") {
+          anchor
+            .circle(n.x + 5, n.y - 5, 6)
+            .fill({ color: c, alpha: 0.25 })
+            .ellipse(n.x + 8, n.y - 15, 5, 9)
+            .fill({ color: mapTheme.smoke, alpha: 0.32 });
+        }
+        if (
+          b.claim.value !== "已解除" &&
+          b.claim.incidentType === "BUILDING_COLLAPSE"
+        ) {
+          for (let k = 0; k < 4; k++)
+            anchor
+              .poly([
+                n.x - 8 + k * 5,
+                n.y + 4,
+                n.x - 6 + k * 5,
+                n.y - 2 - (k % 2) * 3,
+                n.x - 3 + k * 5,
+                n.y + 5,
+              ])
+              .fill({ color: mapTheme.roof, alpha: 0.85 });
+        }
         marker.addChild(
           new Graphics()
             .roundRect(-13, -13, 93, 30, 3)
@@ -439,25 +479,31 @@ export function SituationMap({ view }: MapProps) {
             `${b.subjectId} · ${b.claim.value} · 觀察距今 ${b.age}秒 · 信心 ${Math.round(b.confidence * 100)}%`,
           ),
         );
-        e.content.addChild(marker);
+        callouts.addChild(marker);
         if (layers.includes("INTELLIGENCE") && b.stale)
           label("過時", n.x + 43, n.y - 40, 0xdac17b, 10);
       }
     if (layers.includes("UNITS")) {
-      const groups = new Map<string, typeof view.units>();
-      for (const u of view.units) {
-        const nodeId = u.belief?.claim.nodeId;
-        if (nodeId) groups.set(nodeId, [...(groups.get(nodeId) ?? []), u]);
-      }
+      const groups = positionedUnits(view);
       for (const [nodeId, units] of groups) {
         const n = nodes.get(nodeId)!;
         for (const [index, u] of units.entries()) {
           const x = n.x - 16 + (index % 4) * 11,
             y = n.y + 31 + Math.floor(index / 4) * 11;
           const marker = new Graphics()
-            .circle(x, y, selected === u.id ? 7 : 4)
+            .roundRect(x - 5, y - 4, 11, 8, 2)
+            .fill(mapTheme.shadow)
+            .roundRect(x - 5, y - 7, 10, 7, 2)
             .fill(color[u.agency])
-            .stroke({ color: 0x182028, width: 1 });
+            .stroke({ color: mapTheme.edge, width: 0.7 })
+            .rect(x + 1, y - 6, 2, 4)
+            .fill(mapTheme.front);
+          if (selected === u.id)
+            selectionLayer.addChild(
+              new Graphics()
+                .circle(x, y - 3, 9)
+                .stroke({ color: mapTheme.route, width: 1.5 }),
+            );
           marker.eventMode = "static";
           marker.cursor = "pointer";
           marker.on("pointertap", () => select(u.id));
@@ -466,23 +512,62 @@ export function SituationMap({ view }: MapProps) {
               `${u.id} · 回報位置 ${n.name} · 情報距今 ${u.belief!.age}秒`,
             ),
           );
-          e.content.addChild(marker);
+          unitsLayer.addChild(marker);
           if (selected === u.id) {
             label(u.id, x + 9, y - 7, 0xc2def3, 12, "bold");
             let last = n;
             for (const id of u.belief!.claim.route ?? []) {
               const next = nodes.get(id)!;
-              g.moveTo(last.x, last.y)
+              if (!next) continue;
+              const route = new Graphics()
+                .moveTo(last.x, last.y)
                 .lineTo(next.x, next.y)
-                .stroke({ color: 0x85bce6, width: 3, alpha: 0.7 });
+                .stroke({ color: mapTheme.shadow, width: 6 })
+                .moveTo(last.x, last.y)
+                .lineTo(next.x, next.y)
+                .stroke({ color: mapTheme.route, width: 3, alpha: 0.95 });
+              const dx = next.x - last.x,
+                dy = next.y - last.y,
+                len = Math.hypot(dx, dy);
+              if (len) {
+                const mx = (last.x + next.x) / 2,
+                  my = (last.y + next.y) / 2,
+                  ux = dx / len,
+                  uy = dy / len;
+                route
+                  .poly([
+                    mx + ux * 6,
+                    my + uy * 6,
+                    mx - ux * 4 - uy * 4,
+                    my - uy * 4 + ux * 4,
+                    mx - ux * 4 + uy * 4,
+                    my - uy * 4 - ux * 4,
+                  ])
+                  .fill(mapTheme.route);
+                route.hitArea = new Polygon([
+                  last.x - uy * 7,
+                  last.y + ux * 7,
+                  next.x - uy * 7,
+                  next.y + ux * 7,
+                  next.x + uy * 7,
+                  next.y - ux * 7,
+                  last.x + uy * 7,
+                  last.y - ux * 7,
+                ]);
+                route.eventMode = "static";
+                const routeLabel = `${u.id} · 已回報路線 ${last.name} → ${next.name}`;
+                route.on("pointerover", () => setHover(routeLabel));
+              }
+              routeLayer.addChild(route);
               last = next;
             }
+            if(u.belief!.claim.route?.length) routeLayer.addChild(new Graphics().circle(last.x,last.y,7).stroke({color:mapTheme.route,width:2}));
           }
         }
       }
     }
-    e.app.render();
-  }, [view, selected, layers, select, ready]);
+    e.invalidation.request();
+  }, [view, identity.id, identity.version, selected, layers, select, ready]);
   return (
     <section className="map-panel">
       <div className="panel-title">

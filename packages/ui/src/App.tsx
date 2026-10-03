@@ -464,7 +464,10 @@ export function App() {
                         seek={(tick) => void seek(tick)}
                       />
                     )}
-                    <SituationMap view={session.view} />
+                    <SituationMap
+                      view={session.view}
+                      identity={session.scenario}
+                    />
                     <CommandQueue view={session.view} />
                   </div>
                   <Intelligence
