@@ -1,9 +1,7 @@
 import { build, Platform, Arch } from "electron-builder";
 import {
   mkdtempSync,
-  cpSync,
   mkdirSync,
-  readdirSync,
   realpathSync,
   rmSync,
   existsSync,
@@ -15,6 +13,7 @@ import { join, resolve, relative } from "node:path";
 const temporaryRoot = realpathSync(tmpdir());
 const staging = mkdtempSync(join(temporaryRoot, "aegis-windows-"));
 const output = resolve("release");
+let copied = false;
 if (!existsSync(resolve("node_modules/electron/dist/electron.exe"))) {
   execFileSync(
     process.execPath,
@@ -27,6 +26,7 @@ try {
     publish: "never",
     targets: Platform.WINDOWS.createTarget(["portable"], Arch.x64),
     config: {
+      compression: "store",
       electronDist: resolve("node_modules/electron/dist"),
       directories: { output: staging },
     },
@@ -46,26 +46,28 @@ try {
         `$source = ${quote(join(staging, "win-unpacked"))}`,
         `$target = ${quote(join(output, "windows-runtime"))}`,
         "Get-ChildItem -LiteralPath $source -Force | Copy-Item -Destination $target -Recurse -Force",
+        `Get-ChildItem -LiteralPath ${quote(staging)} -Filter 'AEGIS-*.exe' -File | Copy-Item -Destination ${quote(output)} -Force`,
       ].join("\n"),
     ],
     { stdio: "inherit", windowsHide: true },
   );
   if (!existsSync(join(output, "windows-runtime/Project AEGIS.exe")))
     throw new Error("Packaged executable copy failed");
-  for (const file of readdirSync(staging).filter((file) =>
-    /^AEGIS-.*\.exe$/.test(file),
-  ))
-    cpSync(join(staging, file), join(output, file));
+  if (!existsSync(join(output, "AEGIS-0.1.0-Windows-x64.exe")))
+    throw new Error("Portable executable copy failed");
+  copied = true;
   console.log(`Windows artifacts: ${output}`);
 } finally {
   const actual = realpathSync(staging),
     inside = relative(temporaryRoot, actual);
   if (
+    copied &&
     !inside.startsWith("..") &&
     inside.startsWith("aegis-windows-") &&
     actual === resolve(staging)
   )
     rmSync(actual, { recursive: true, force: true });
+  else console.error(`Build staging retained for recovery: ${actual}`);
 }
 if (!existsSync(join(output, "windows-runtime/Project AEGIS.exe")))
   throw new Error("Packaged executable disappeared after staging cleanup");
