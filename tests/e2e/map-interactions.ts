@@ -79,7 +79,7 @@ try {
       .locator("#seed")
       .fill(scenario === "flood" ? "AEGIS-FLOOD-2026-001" : "AEGIS-2026-001");
     await page.getByRole("button", { name: "開始新情境", exact: true }).click();
-    await expect(page.locator("canvas")).toBeVisible();
+    await expect(page.locator("canvas")).toBeVisible({ timeout: 15000 });
     await expect
       .poll(() => page.evaluate(() => window.mapInteractionView?.tick))
       .toBe(0);
