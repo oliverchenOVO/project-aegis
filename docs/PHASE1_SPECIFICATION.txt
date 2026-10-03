@@ -1,0 +1,3913 @@
+可以。這個專案值得把底層一次設計對，因為它的亮點不是「地圖上很多救護車在跑」，而是 **玩家永遠看不到完整世界，只能透過延遲、錯誤、互相矛盾的情報做決策，而世界會按照真正狀態繼續演化**。
+
+我先替它定一個工作代號：
+
+# Project AEGIS
+**AI Disaster Command Center / AI 災難指揮中心**
+
+---
+
+# 0. 產品定位
+
+它不應該被做成：
+
+> 災害版 RTS + 幾個 AI 對話框
+
+而應該是：
+
+> **Deterministic Emergency Management Simulation × Information Fog × Incident Command System × Counterfactual Replay**
+
+最終玩家看到的是一套像真的「緊急應變中心」的軟體：
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  PROJECT AEGIS     INCIDENT #TW-042       14:37:22   SIM ×4   │
+├──────────────────────────────┬──────────────────────────────────┤
+│                              │ INCIDENT FEED                    │
+│           CITY MAP           │                                  │
+│                              │ 14:36 Fire Dept: Building fire   │
+│   🔥         🚑               │ 14:35 Hospital: Generator issue │
+│          ⚡                  │ 14:33 Police: Bridge blocked    │
+│      🏥                      │                                  │
+│                              ├──────────────────────────────────┤
+│                              │ COMMAND QUEUE                    │
+│                              │                                  │
+│                              │ > Dispatch ENG-04 to Sector C    │
+├──────────────────────────────┴──────────────────────────────────┤
+│ UNITS  42/57  │ CASUALTIES ? │ POWER 71% │ COMMS DEGRADED     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+但這張畫面顯示的 **不是 GameState**。
+
+它是：
+
+```text
+ObservedState ≠ WorldState
+```
+
+這一點必須從架構第一天就成立。
+
+---
+
+# 1. 核心玩法與差異化
+
+## 核心 Loop
+
+每一局基本循環：
+
+```text
+災害發生
+    ↓
+世界真實狀態演化
+    ↓
+單位 / 感測器 / 平民觀察事件
+    ↓
+情報產生
+    ↓
+延遲 / 遺失 / 誤判 / 矛盾 / 通訊中斷
+    ↓
+指揮中心收到部分情報
+    ↓
+玩家形成判斷
+    ↓
+發布命令
+    ↓
+單位接收 / 延遲 / 無法執行 / 修改執行
+    ↓
+影響真實世界
+    ↓
+產生新情報
+```
+
+玩家管理的其實有四種東西：
+
+| 資源 | 說明 |
+|---|---|
+| Physical Resources | 消防車、警力、救護車、醫院床位、發電能力 |
+| Time | 越晚處理，事件可能進入不可逆狀態 |
+| Information | 情報可能不完整、過時甚至錯誤 |
+| Attention | 玩家不可能同時處理所有事件 |
+
+---
+
+## 第一個核心差異化：Information Fog
+
+傳統模擬：
+
+```text
+Fire = severity 83
+Hospital = power 12%
+Casualties = 37
+```
+
+玩家直接看到。
+
+AEGIS 必須變成：
+
+### World Truth
+
+```text
+Sector B Hospital
+power = 3%
+generatorFuel = 11 minutes
+icuPatients = 38
+generatorFailureRisk = 0.72
+```
+
+### Command Center Belief
+
+```text
+Hospital B
+powerStatus = UNKNOWN
+lastReport = 14 minutes ago
+reportedGenerator = "operational"
+confidence = 0.61
+```
+
+玩家甚至可能收到：
+
+```text
+14:13 Hospital B:
+"Backup generator stable."
+```
+
+但現在已經是：
+
+```text
+14:27
+```
+
+而 14:19 發生燃料管線破裂。
+
+所以情報不是 boolean：
+
+```ts
+known / unknown
+```
+
+而是：
+
+```ts
+{
+  claim,
+  source,
+  observedAt,
+  reportedAt,
+  receivedAt,
+  confidence,
+  reliability,
+  expiry,
+  corroboration
+}
+```
+
+---
+
+# 2. 第二個核心差異化：因果系統
+
+AAR 不能只是：
+
+> 你死了 43 人，評分 B。
+
+每個重大結果都應該可追溯。
+
+例如：
+
+```text
+Hospital B evacuation failed
+       │
+       ├── ambulance shortage
+       │       └── 8 ambulances dispatched to Sector A
+       │
+       ├── power failure
+       │       └── generator fuel exhausted
+       │
+       └── evacuation order arrived 11 min late
+               └── radio repeater offline
+```
+
+甚至往玩家命令追：
+
+```text
+14:07
+PLAYER
+"Send all available ambulances to Sector A"
+
+↓
+
+Sector B retained only 2 ambulances
+
+↓
+
+14:21
+Hospital B evacuation requested
+
+↓
+
+insufficient transport capacity
+
+↓
+
++12 critical casualties
+```
+
+這就是整個產品最重要的資料：
+
+# Causal Graph
+
+而不是事後讓 LLM 猜「可能是因為……」。
+
+---
+
+# 3. 第三個核心差異化：Counterfactual Replay
+
+AAR 裡可以選：
+
+> 如果我 14:07 沒有派出所有救護車呢？
+
+Simulation 從指定 tick fork：
+
+```text
+Original timeline
+───────────────●──────────────────────>
+               14:07
+
+Alternative
+               └──────────────────────>
+                 Keep 4 ambulances
+```
+
+接著 deterministic simulation 重新跑。
+
+例如：
+
+```text
+ORIGINAL
+Fatalities: 41
+
+COUNTERFACTUAL
+Fatalities: 29
+
+Difference:
+-12 fatalities
+
+Primary causal difference:
+Hospital B evacuation completed 8m 41s earlier.
+```
+
+這會是非常強的展示功能。
+
+---
+
+# 4. 世界架構
+
+我建議採：
+
+# Fixed-step deterministic discrete simulation
+
+不要讓模擬世界直接依靠：
+
+```ts
+setInterval()
+Date.now()
+Math.random()
+```
+
+而是：
+
+```text
+Tick 000001
+Tick 000002
+Tick 000003
+...
+```
+
+例如：
+
+```text
+1 simulation tick = 1 simulated second
+```
+
+UI：
+
+```text
+Paused
+×1
+×2
+×4
+×8
+```
+
+只是控制一秒執行多少 simulation ticks。
+
+不是改變 simulation 規則。
+
+---
+
+# 5. 整體系統架構
+
+```text
+┌──────────────────────────────────────┐
+│              Renderer                │
+│                                      │
+│ React                                │
+│ ├─ Command UI                        │
+│ ├─ Intel Feed                        │
+│ ├─ Units                             │
+│ ├─ Incident Panels                   │
+│ └─ Map                               │
+└─────────────────┬────────────────────┘
+                  │
+             Read Models
+                  │
+┌─────────────────▼────────────────────┐
+│         Application Layer            │
+│                                      │
+│ Command Bus                          │
+│ Query Service                        │
+│ Replay Controller                    │
+│ Save Service                         │
+└─────────────────┬────────────────────┘
+                  │ Commands
+┌─────────────────▼────────────────────┐
+│        SIMULATION ENGINE             │
+│          PURE / HEADLESS             │
+│                                      │
+│ WorldState                           │
+│ EventQueue                           │
+│ Systems                              │
+│ RNG                                  │
+│ CausalGraph                          │
+│ ObservationSystem                    │
+│ CommunicationSystem                  │
+│ UnitAISystem                         │
+│ DisasterSystem                       │
+│ MedicalSystem                        │
+│ InfrastructureSystem                 │
+└─────────────────┬────────────────────┘
+                  │
+            Domain Events
+                  │
+┌─────────────────▼────────────────────┐
+│         Persistence Layer            │
+│                                      │
+│ Event log                            │
+│ Save snapshots                       │
+│ Replay metadata                      │
+│ Scenario definitions                 │
+└──────────────────────────────────────┘
+```
+
+最重要的規則：
+
+```text
+Simulation Engine
+≠
+React
+≠
+Electron
+≠
+LLM
+```
+
+Simulation 必須可以完全 headless：
+
+```bash
+pnpm sim:run scenario-earthquake --seed 12345
+```
+
+甚至 CI 裡完全不啟動 UI，也能跑 1000 局。
+
+---
+
+# 6. Simulation architecture
+
+建議不要一開始上完整 ECS framework。
+
+這個遊戲主要是：
+
+- 事件
+- 資源
+- 狀態
+- 時間
+- 網路
+- 因果
+
+所以採：
+
+# Entity + Component-like state + Systems + Event Queue
+
+例如：
+
+```ts
+interface WorldState {
+  tick: number;
+  entities: EntityStore;
+  incidents: IncidentStore;
+  infrastructure: InfrastructureState;
+  communications: CommunicationState;
+  intel: IntelState;
+  causalGraph: CausalGraph;
+}
+```
+
+每 tick：
+
+```text
+advanceSimulation()
+
+1. resolve scheduled events
+2. update disasters
+3. update infrastructure
+4. update population
+5. update medical system
+6. update responder units
+7. update communications
+8. generate observations
+9. transmit intelligence
+10. resolve commands
+11. emit domain events
+12. update causal graph
+```
+
+順序必須固定。
+
+不能某一次：
+
+```text
+fire → ambulance
+```
+
+另一次：
+
+```text
+ambulance → fire
+```
+
+否則 Replay 會飄掉。
+
+---
+
+# 7. RNG 系統
+
+只能存在一個 deterministic random abstraction：
+
+```ts
+interface RandomSource {
+  next(): number;
+  integer(min: number, max: number): number;
+  chance(probability: number): boolean;
+}
+```
+
+禁止 simulation code 使用：
+
+```ts
+Math.random()
+```
+
+建議：
+
+```text
+seed
+↓
+scenario RNG
+↓
+named streams
+```
+
+例如：
+
+```text
+seed: AEGIS-2026-001
+
+fireSpread
+population
+communications
+medical
+unitDecisions
+```
+
+進一步可以：
+
+```ts
+rng.stream("fire:incident-17")
+```
+
+這樣新增 UI 或非關聯事件，不容易造成整個 RNG sequence 改變。
+
+---
+
+# 8. Event architecture
+
+世界應該產生明確 Domain Event：
+
+```ts
+{
+  id: "evt_4812",
+  tick: 842,
+  type: "POWER_NODE_FAILED",
+  payload: {
+    nodeId: "power-17"
+  },
+  causedBy: ["evt_4690"]
+}
+```
+
+其他例子：
+
+```text
+EARTHQUAKE_OCCURRED
+ROAD_BLOCKED
+BUILDING_COLLAPSED
+FIRE_STARTED
+FIRE_SPREAD
+UNIT_DISPATCHED
+UNIT_ARRIVED
+PATIENT_TRANSPORTED
+HOSPITAL_OVER_CAPACITY
+POWER_NODE_FAILED
+RADIO_NETWORK_DEGRADED
+REPORT_CREATED
+REPORT_RECEIVED
+COMMAND_ISSUED
+COMMAND_ACKNOWLEDGED
+COMMAND_FAILED
+```
+
+Replay 不記錄「畫面發生了什麼」。
+
+Replay 記錄：
+
+```text
+seed
+scenario
+player inputs
+simulation version
+```
+
+Domain events主要供：
+
+- Audit
+- debugging
+- AAR
+- timeline
+- causal analysis
+
+---
+
+# 9. 情報資料模型
+
+這是本專案最值得精雕的模型。
+
+```ts
+interface IntelReport {
+  id: ReportId;
+
+  sourceId: EntityId;
+
+  subject: IntelSubject;
+
+  claim: Claim;
+
+  observedTick: Tick;
+  transmittedTick: Tick;
+  receivedTick?: Tick;
+
+  sourceReliability: number;
+
+  observationConfidence: number;
+
+  status:
+    | "CREATED"
+    | "IN_TRANSIT"
+    | "RECEIVED"
+    | "LOST"
+    | "EXPIRED";
+
+  truthRef?: WorldFactRef;
+}
+```
+
+例如：
+
+```json
+{
+  "sourceId": "FD-07",
+  "claim": {
+    "type": "FIRE_SEVERITY",
+    "target": "INC-12",
+    "value": "SEVERE"
+  },
+  "observedTick": 840,
+  "receivedTick": 923,
+  "observationConfidence": 0.74
+}
+```
+
+世界真實值可能已經變成：
+
+```text
+CATASTROPHIC
+```
+
+---
+
+# 10. Knowledge / Belief Model
+
+Command Center 不應直接 query WorldState。
+
+必須：
+
+```text
+WorldState
+   │
+Observation
+   ▼
+IntelReport
+   │
+Transmission
+   ▼
+CommandCenterKnowledge
+   │
+   ▼
+UI
+```
+
+也就是 React UI 不能寫：
+
+```ts
+world.incidents[id].severity
+```
+
+而應讀：
+
+```ts
+commandView.incidents[id].estimatedSeverity
+```
+
+這個 separation 必須建立 automated architectural test。
+
+---
+
+# 11. 單位資料模型
+
+```ts
+ResponderUnit {
+  id
+
+  agency:
+    FIRE
+    POLICE
+    EMS
+    UTILITY
+    GOVERNMENT
+
+  type
+
+  location
+
+  state:
+    AVAILABLE
+    DISPATCHED
+    EN_ROUTE
+    OPERATING
+    RETURNING
+    DISABLED
+
+  personnel
+
+  equipment
+
+  capability
+
+  fatigue
+
+  communicationStatus
+
+  activeAssignment
+}
+```
+
+第一版不用做幾百種車。
+
+例如：
+
+```text
+Fire Engine
+Ambulance
+Police Patrol
+Utility Crew
+```
+
+就足夠建立完整機制。
+
+---
+
+# 12. Infrastructure graph
+
+道路、醫院、電網、通訊最好不是獨立假的數值。
+
+使用 Graph：
+
+```text
+Power Plant
+ │
+ ├─ Substation A
+ │   ├─ Hospital
+ │   └─ Radio Tower
+ │
+ └─ Substation B
+```
+
+道路：
+
+```text
+Node
+↓
+Edge
+↓
+Node
+```
+
+所以：
+
+```text
+bridge collapse
+```
+
+真的會造成：
+
+```text
+route unavailable
+↓
+ambulance reroute
+↓
++5 min arrival
+↓
+patient deteriorates
+```
+
+這才能產生 emergent gameplay。
+
+---
+
+# 13. Disaster System
+
+不要寫一個：
+
+```ts
+class EarthquakeGame
+```
+
+而應該：
+
+```text
+Hazard
+↓
+Effects
+↓
+World Systems
+```
+
+例如 earthquake：
+
+```text
+Ground shaking
+├── structural damage
+├── road damage
+├── power damage
+├── communications damage
+└── injuries
+```
+
+Fire：
+
+```text
+Fire
+├── intensity
+├── fuel
+├── spread probability
+├── suppression
+└── structural damage
+```
+
+Flood：
+
+```text
+FloodZone
+├── depth
+├── flow
+├── road passability
+├── building damage
+└── electrical risk
+```
+
+這樣未來可以同時：
+
+```text
+Earthquake
+↓
+Power failure
+↓
+Hospital generator
+↓
+Fire
+↓
+Communications overload
+```
+
+而不是獨立 minigame。
+
+---
+
+# 14. 哪些必須 deterministic
+
+這條界線我建議非常嚴格。
+
+| 系統 | Deterministic |
+|---|---|
+| 災害物理演化 | ✅ |
+| 火勢蔓延 | ✅ |
+| 人員傷亡 | ✅ |
+| 路線計算 | ✅ |
+| 車輛移動 | ✅ |
+| 醫院容量 | ✅ |
+| 電網 | ✅ |
+| 通訊網 | ✅ |
+| 情報是否傳達 | ✅ seed RNG |
+| 情報延遲 | ✅ |
+| Agent 基礎決策 | ✅ |
+| 指令執行 | ✅ |
+| 世界真相 | ✅ |
+| Score | ✅ |
+| causal graph | ✅ |
+| Replay | ✅ |
+
+---
+
+# 15. 哪些可以使用 LLM
+
+LLM 是 enhancement。
+
+不是 simulation authority。
+
+### 適合 LLM
+
+```text
+消防隊無線電自然語言
+醫院求援文字
+市政府 briefing
+平民 911 報案
+新聞報導
+角色 personality
+AAR 自然語言摘要
+高階 AI advisor
+NPC 對玩家命令的自然語言回覆
+```
+
+例如 simulation 決定：
+
+```json
+{
+  "type": "REQUEST_ASSISTANCE",
+  "incident": "INC-4",
+  "severity": "critical",
+  "requestedResources": {
+    "ambulance": 4
+  }
+}
+```
+
+LLM 可以轉成：
+
+> 指揮中心，這裡是第三消防分隊。現場傷患數持續增加，我們至少還需要四輛救護車，情況非常緊急。
+
+但 LLM **不可以決定**：
+
+> 現在需要 4 台救護車。
+
+4 是 simulation 算的。
+
+---
+
+# 16. LLM fallback
+
+任何 LLM 系統都必須：
+
+```text
+LLM enabled
+    ↓
+structured input
+    ↓
+LLM
+    ↓
+schema validation
+    ↓
+display
+```
+
+如果：
+
+```text
+timeout
+invalid JSON
+API unavailable
+model unavailable
+```
+
+立即 fallback：
+
+```text
+deterministic template renderer
+```
+
+因此：
+
+> 沒有 API key，也可以完整玩。
+
+---
+
+# 17. Command architecture
+
+命令不直接 mutate world。
+
+玩家：
+
+```text
+DISPATCH ambulance-04 incident-17
+```
+
+產生：
+
+```ts
+PlayerCommand
+```
+
+↓
+
+```text
+Command validation
+```
+
+↓
+
+```text
+communication transmission
+```
+
+↓
+
+```text
+Unit receives command
+```
+
+↓
+
+```text
+Unit evaluates feasibility
+```
+
+↓
+
+```text
+Unit action
+```
+
+例如：
+
+```text
+PLAYER: Dispatch FD-07 → Sector B
+
+Command issued 14:31:03
+↓
+Radio network congested
+↓
+Command received 14:32:41
+↓
+FD-07 currently suppressing fire
+↓
+cannot immediately comply
+↓
+Unit leaves 14:36
+```
+
+這就是這款遊戲會「像專業系統」的關鍵。
+
+---
+
+# 18. UI / UX
+
+視覺方向我會選：
+
+> **Modern Emergency Operations Center**
+
+不是軍事綠，也不是 Cyberpunk。
+
+風格：
+
+```text
+深石墨背景
+低飽和地圖
+紅 / 橙作 emergency indication
+藍作 command / police
+白灰資訊 hierarchy
+```
+
+---
+
+## 主畫面布局
+
+### 中央：Situation Map
+
+包含：
+
+- District
+- Roads
+- Infrastructure
+- Incidents
+- Units
+- Hospitals
+- Power nodes
+- Communication nodes
+
+可切 Layer：
+
+```text
+INCIDENTS
+UNITS
+MEDICAL
+POWER
+COMMS
+TRAFFIC
+INTELLIGENCE
+```
+
+重點：
+
+### Map 顯示的是「已知資訊」
+
+不是 World Truth。
+
+Debug Mode 才能切：
+
+```text
+Truth View
+```
+
+---
+
+## 右側：Incident Feed
+
+例如：
+
+```text
+14:42  FIRE
+Sector 4 reports structural fire.
+
+14:41  EMS
+Ambulance 12 delayed by road obstruction.
+
+14:39  POWER
+Utility reports instability near North District.
+
+14:37  UNKNOWN
+Multiple civilian reports of smoke.
+```
+
+還可以顯示：
+
+```text
+SOURCE
+AGE
+CONFIDENCE
+```
+
+---
+
+## 左側：Command / Resource panel
+
+```text
+FIRE       8 / 12 AVAILABLE
+EMS        5 / 14 AVAILABLE
+POLICE    14 / 21 AVAILABLE
+UTILITY    3 / 6 AVAILABLE
+```
+
+點單位：
+
+```text
+AMB-07
+
+STATUS
+En route
+
+LOCATION
+West Avenue
+
+ASSIGNMENT
+Incident #17
+
+ETA
+6m 21s
+
+COMMS
+Degraded
+```
+
+---
+
+# 19. 情報 UX
+
+這部分必須做漂亮。
+
+例如事件：
+
+```text
+Possible hospital power failure
+```
+
+顯示：
+
+```text
+CONFIDENCE
+
+██████░░░░ 61%
+
+SOURCE
+Hospital B
+
+REPORT AGE
+11m 42s
+
+CORROBORATION
+None
+
+STATUS
+UNVERIFIED
+```
+
+後來收到 utility report：
+
+```text
+Power substation 3 offline
+```
+
+可以變：
+
+```text
+CONFIDENCE
+89%
+
+2 CORROBORATING SOURCES
+```
+
+玩家因此真的會開始思考：
+
+> 這條消息我到底要不要相信？
+
+---
+
+# 20. 命令 UX
+
+避免 RTS：
+
+```text
+右鍵 → Move
+```
+
+改成：
+
+```text
+Select incident
+↓
+REQUEST / ASSIGN
+↓
+Resources
+↓
+priority
+↓
+issue command
+```
+
+例如：
+
+```text
+DISPATCH ORDER
+
+Incident
+Warehouse Fire / S-14
+
+Resources
+☑ Engine 04
+☑ Engine 07
+☑ Ambulance 03
+
+Priority
+URGENT
+
+[ ISSUE ORDER ]
+```
+
+發布後不是立即 teleport：
+
+```text
+ORDER SENT
+awaiting acknowledgement...
+```
+
+---
+
+# 21. AAR
+
+遊戲結束後：
+
+```text
+AFTER ACTION REPORT
+Incident AEGIS-174
+```
+
+第一頁：
+
+```text
+Incident Duration   03:47:12
+Deaths              27
+Serious Injuries    61
+Buildings Lost       4
+Hospital Failures    1
+Critical Orders     17
+Intel Failures       6
+```
+
+但不只分數。
+
+---
+
+## Decision Timeline
+
+```text
+14:03 Earthquake
+14:07 You dispatched EMS reserve → Sector A
+14:12 Hospital B requested assistance
+14:16 Bridge C collapsed
+14:21 Hospital B lost backup power
+14:27 Mass evacuation ordered
+```
+
+點：
+
+```text
+14:07
+```
+
+可以看到：
+
+```text
+Information available to player
+Information not yet known
+Actual world truth
+Decision
+Consequences
+```
+
+這會非常強。
+
+---
+
+# 22. Intelligence Failure Analysis
+
+例如：
+
+```text
+REPORT #122
+
+Claim:
+Sector A fire was spreading rapidly.
+
+Reality:
+Fire was already contained.
+
+Why inaccurate:
+Report transmission delay = 11m 34s
+
+Impact:
+2 engines unnecessarily diverted.
+```
+
+甚至：
+
+```text
+FALSE
+STALE
+MISINTERPRETED
+LOST
+UNCORROBORATED
+```
+
+分開。
+
+---
+
+# 23. 技術棧
+
+我會選：
+
+### Desktop
+
+**Electron + TypeScript**
+
+截至 2026-10-03，Electron 44 是目前正式 stable major；Electron 45 預計 2026-10-20 才進 stable。[Electron Releases](https://releases.electronjs.org/schedule?utm_source=chatgpt.com)
+
+Tauri 2.12 其實現在也相當成熟，而且在 2026-09-26 剛發布，Windows updater 等功能已有正式支援。[Tauri](https://tauri.app/blog/tauri-2.12/?utm_source=chatgpt.com)
+
+但 **AEGIS 我仍優先選 Electron**。
+
+原因不是 Tauri 不好，而是這個專案：
+
+- UI 很重
+- TypeScript simulation 很重
+- 要大量 Browser QA
+- 要 Windows portable
+- 你現有開發流程也已經有 Electron 成功經驗
+- 少一個 Rust boundary 對高速迭代非常有利
+
+---
+
+## Frontend
+
+```text
+React
+TypeScript
+Vite
+```
+
+State：
+
+```text
+Zustand
+```
+
+但注意：
+
+```text
+Zustand ≠ simulation state
+```
+
+只存 UI / view state。
+
+---
+
+## Map renderer
+
+我推薦：
+
+# PixiJS
+
+而不是直接 DOM。
+
+因為未來可能同時：
+
+```text
+1000 civilian indicators
+100 units
+hundreds incidents
+roads
+particles
+heatmaps
+fog overlays
+```
+
+React：
+
+```text
+panels
+buttons
+lists
+modals
+```
+
+PixiJS：
+
+```text
+city visualization
+```
+
+---
+
+# 24. Simulation package
+
+Monorepo：
+
+```text
+apps/
+  desktop/
+
+packages/
+  simulation/
+  domain/
+  scenarios/
+  replay/
+  persistence/
+  ui/
+  llm/
+  shared/
+```
+
+核心：
+
+```text
+packages/simulation
+```
+
+必須：
+
+```text
+0 Electron imports
+0 React imports
+0 DOM dependency
+0 Node filesystem dependency
+```
+
+這樣可以：
+
+```text
+browser
+node
+tests
+benchmark
+```
+
+共用。
+
+---
+
+# 25. Persistence
+
+我不建議 Phase 1 就把 simulation 綁 SQLite。
+
+先採：
+
+```text
+SavePackage
+├── manifest.json
+├── scenario.json
+├── snapshot.json
+├── commands.ndjson
+└── events.ndjson
+```
+
+正式儲存檔例如：
+
+```text
+AEGIS_SAVE_20261003_1421.aegis
+```
+
+內部 zip container。
+
+之後如果典藏幾百局需要搜尋，再建立：
+
+```text
+local SQLite index
+```
+
+但是 replay source of truth 仍然是 portable package。
+
+---
+
+# 26. Replay
+
+Replay 格式：
+
+```ts
+interface ReplayManifest {
+  formatVersion: number;
+
+  simulationVersion: string;
+
+  scenarioId: string;
+
+  scenarioVersion: string;
+
+  seed: string;
+
+  commands: PlayerCommand[];
+
+  checkpoints: CheckpointIndex[];
+}
+```
+
+完整 Replay：
+
+```text
+load scenario
+↓
+set seed
+↓
+run ticks
+↓
+at tick 311 apply player command
+↓
+continue
+```
+
+每：
+
+```text
+300 ticks
+```
+
+可以建立 snapshot。
+
+因此 seek：
+
+```text
+00:00 → 02:41
+```
+
+不用從 tick 0 重跑。
+
+---
+
+# 27. Replay integrity
+
+每 N ticks 計算：
+
+```text
+stateHash
+```
+
+例如：
+
+```text
+tick 0
+hash F911...
+
+tick 600
+hash A928...
+
+tick 1200
+hash C211...
+```
+
+Replay 再跑時：
+
+```text
+expected == actual
+```
+
+不同直接報：
+
+```text
+DETERMINISM REGRESSION
+```
+
+這會極大提升長期維護品質。
+
+---
+
+# 28. Phase 規劃
+
+## MVP — Simulation Vertical Slice
+
+目標：
+
+> 證明「真相 ≠ 玩家情報 ≠ 決策 ≠ 執行結果」。
+
+只需要：
+
+```text
+1 city
+1 disaster
+2–3 incidents
+Fire
+EMS
+Hospital
+roads
+communication
+information fog
+commands
+replay
+```
+
+甚至 UI 可以還沒漂亮。
+
+但核心 simulation 必須成立。
+
+---
+
+# Phase 1 — Playable Command Center
+
+這是第一個真正可玩的版本。
+
+場景：
+
+# Urban Earthquake
+
+包含：
+
+### World
+
+```text
+1 fictional city
+4 districts
+road graph
+2 hospitals
+2 fire stations
+1 EMS depot
+1 power substation
+1 radio infrastructure
+```
+
+### Units
+
+```text
+6 fire engines
+6 ambulances
+4 police units
+2 utility crews
+```
+
+### Incidents
+
+地震之後 deterministic 生成：
+
+```text
+building collapse
+fire
+road blockage
+casualties
+power disruption
+communications degradation
+```
+
+### Information Fog
+
+完成：
+
+```text
+observation
+report
+delay
+loss
+staleness
+confidence
+corroboration
+```
+
+### Player commands
+
+最少：
+
+```text
+dispatch
+reassign
+recall
+request status
+set incident priority
+```
+
+### UI
+
+完成：
+
+```text
+map
+timeline/feed
+resources
+incident inspector
+unit inspector
+command workflow
+time controls
+pause
+```
+
+### Save
+
+```text
+manual save
+load
+```
+
+### Replay
+
+```text
+full replay
+timeline scrub
+```
+
+### AAR Lite
+
+```text
+casualties
+response timeline
+critical commands
+intel failures
+```
+
+### Windows
+
+```text
+installer / portable executable
+```
+
+---
+
+# Phase 2 — Full Crisis Simulation
+
+新增：
+
+```text
+fire propagation
+hospital capacity
+triage
+power network
+communications network
+traffic congestion
+civilian agents
+evacuation
+shelters
+resource depletion
+unit fatigue
+multiple simultaneous hazards
+```
+
+災害：
+
+```text
+Earthquake
+Urban Fire
+Flood
+Typhoon
+```
+
+增加：
+
+```text
+agency autonomy
+command hierarchy
+resource requests
+mutual aid
+AI advisor
+optional LLM radio traffic
+```
+
+AAR：
+
+```text
+full causal graph
+intel analysis
+decision chains
+```
+
+---
+
+# Phase 3 — Showcase Product
+
+加入：
+
+```text
+scenario editor
+custom disasters
+scenario sharing
+campaign/challenges
+advanced counterfactual replay
+LLM-generated briefings
+LLM-generated AAR narrative
+AI agency leaders
+interactive doctrine
+heatmaps
+statistics dashboard
+mod support
+```
+
+以及：
+
+```text
+performance optimization
+1000+ civilians
+large maps
+multi-hour scenarios
+```
+
+最終：
+
+```text
+Windows Installer
+Windows Portable
+GitHub Releases
+```
+
+---
+
+# 29. Benchmark
+
+每次 release 都跑固定 benchmark。
+
+例如：
+
+```text
+100 seeds
+```
+
+檢查：
+
+```text
+crash
+NaN
+invalid entity
+unreachable state
+deadlock
+event explosion
+infinite incident
+invalid path
+negative resource
+corrupt save
+replay mismatch
+```
+
+更高階：
+
+```text
+1000 seeds nightly / release
+```
+
+---
+
+# 30. Performance benchmark
+
+設定 target，例如：
+
+```text
+1000 agents
+100 responders
+100 simultaneous incidents
+10,000 events
+```
+
+要求：
+
+```text
+headless simulation
+≥ 100 ticks/sec
+```
+
+實際數字後面再透過 profiling 決定。
+
+不要現在過早承諾。
+
+---
+
+# 31. Determinism tests
+
+最關鍵測試：
+
+```ts
+run(seed=123)
+run(seed=123)
+```
+
+必須：
+
+```text
+stateHashA == stateHashB
+eventLogA == eventLogB
+```
+
+不同 seed：
+
+```text
+seed 123 != seed 456
+```
+
+應合理產生不同 outcome。
+
+---
+
+# 32. Invariant tests
+
+例如永遠：
+
+```text
+hospital.currentPatients >= 0
+
+ambulance.patientCount <= capacity
+
+entity exists before event references it
+
+unit cannot be simultaneously AVAILABLE and DISPATCHED
+
+casualty cannot be both ALIVE and DEAD
+
+incident severity >= 0
+
+resource count >= 0
+```
+
+---
+
+# 33. Property / fuzz tests
+
+大量隨機：
+
+```text
+commands
+ticks
+scenario parameters
+```
+
+執行：
+
+```text
+1000 seeds
+```
+
+尋找：
+
+```text
+crash
+lock
+impossible state
+determinism issue
+```
+
+---
+
+# 34. Save compatibility
+
+Save：
+
+```text
+saveFormatVersion
+simulationVersion
+scenarioVersion
+```
+
+必須支援 migration。
+
+不能：
+
+> 改 interface 後以前存檔全部壞掉。
+
+---
+
+# 35. Browser QA
+
+桌面 GUI：
+
+```text
+1920×1080
+1600×900
+1366×768
+```
+
+檢查：
+
+```text
+overflow
+click targets
+modal
+map
+zoom
+timeline
+long text
+high incident count
+```
+
+Playwright 官方目前仍提供 Electron automation API，雖然 Electron 支援被標示為 experimental，所以它適合做我們自己的 desktop smoke/E2E 層，但不能把全部 QA 壓在它身上。[Playwright](https://playwright.dev/docs/api/class-electron?utm_source=chatgpt.com)
+
+時間相關 unit test 則可以用 Vitest fake timers；不過 simulation 自身仍不該依賴 real timers。[Vitest](https://main.vitest.dev/guide/mocking/timers?utm_source=chatgpt.com)
+
+---
+
+# 36. UI 測試
+
+建立 screenshot QA。
+
+固定：
+
+```text
+seed
+tick
+viewport
+```
+
+例如：
+
+```text
+scenario earthquake
+seed showcase-001
+tick 1800
+```
+
+所以每次都能產生幾乎完全一樣的 UI。
+
+---
+
+# 37. Git 架構
+
+Private repo：
+
+```text
+project-aegis
+```
+
+Branches：
+
+```text
+main
+feature/*
+fix/*
+release/*
+```
+
+但是我建議 Codex 工作時主要採：
+
+```text
+small commits directly on current development branch
+```
+
+不要一次做完 Phase 再 commit。
+
+---
+
+# 38. Commit 規則
+
+例如：
+
+```text
+chore: bootstrap workspace
+
+feat(sim): add deterministic simulation clock
+
+feat(sim): implement seeded rng streams
+
+feat(domain): add responder unit model
+
+feat(intel): implement observation pipeline
+
+feat(ui): add command center shell
+
+feat(map): render city road graph
+
+feat(replay): record player commands
+
+test(sim): add deterministic replay suite
+```
+
+一個 commit 對應一個可以理解的改變。
+
+---
+
+# 39. Release
+
+版本：
+
+```text
+v0.1.0 Phase 1
+v0.2.0 Phase 2
+v0.3.0 Phase 3
+```
+
+等成熟：
+
+```text
+v1.0.0
+```
+
+每個 release：
+
+```text
+tests
+benchmark
+production build
+Windows smoke test
+portable artifact
+release notes
+```
+
+全部完成才 tag。
+
+---
+
+# 40. CI
+
+GitHub Actions：
+
+```text
+install
+↓
+lint
+↓
+typecheck
+↓
+unit tests
+↓
+determinism tests
+↓
+headless benchmark
+↓
+build
+```
+
+Release：
+
+```text
+Windows build
+↓
+artifact
+↓
+GitHub Release
+```
+
+Private GitHub repository 保持：
+
+```text
+source
+issues
+tags
+releases
+```
+
+同步。
+
+---
+
+# 41. Repository Structure
+
+我會要求 Codex 建：
+
+```text
+project-aegis/
+│
+├─ apps/
+│  └─ desktop/
+│
+├─ packages/
+│  ├─ domain/
+│  ├─ simulation/
+│  ├─ scenarios/
+│  ├─ replay/
+│  ├─ persistence/
+│  ├─ ui/
+│  ├─ llm/
+│  └─ shared/
+│
+├─ tests/
+│  ├─ simulation/
+│  ├─ integration/
+│  ├─ replay/
+│  └─ e2e/
+│
+├─ benchmarks/
+│
+├─ docs/
+│  ├─ ARCHITECTURE.md
+│  ├─ SIMULATION.md
+│  ├─ INFORMATION_FOG.md
+│  ├─ REPLAY_FORMAT.md
+│  └─ PHASE1_REPORT.md
+│
+├─ scripts/
+│
+└─ .github/
+   └─ workflows/
+```
+
+---
+
+# 42. 一個非常重要的架構規則
+
+我建議直接寫進：
+
+```text
+ARCHITECTURE.md
+```
+
+成為專案 constitution：
+
+> **The UI must never have privileged access to world truth during normal gameplay.**
+
+以及：
+
+> **No LLM output may directly mutate authoritative simulation state.**
+
+以及：
+
+> **All simulation randomness must derive from the seeded RNG system.**
+
+以及：
+
+> **A replay with the same simulation version, scenario, seed, and command stream must produce identical state hashes.**
+
+這四句應該變成整個專案永遠不能破壞的 invariant。
+
+---
+
+# 43. Phase 1 明確驗收
+
+Phase 1 不以「寫完很多 code」當完成。
+
+而是必須真的做到：
+
+```text
+Launch EXE
+↓
+New Scenario
+↓
+Choose seed
+↓
+Earthquake starts
+↓
+Incomplete reports begin arriving
+↓
+Player evaluates conflicting intel
+↓
+Dispatches units
+↓
+Units travel
+↓
+Road failure changes ETA
+↓
+Hospital deteriorates
+↓
+Player reacts
+↓
+Scenario ends
+↓
+AAR
+↓
+Replay
+↓
+Save/load works
+```
+
+然後：
+
+```text
+same seed + same commands
+```
+
+重新跑：
+
+```text
+identical outcome
+```
+
+才叫 Phase 1。
+
+---
+
+# 44. 我建議 Phase 1 **不要做**的東西
+
+刻意不碰：
+
+```text
+真實 Google Maps
+多人連線
+Steam
+帳號系統
+雲端同步
+Workshop
+1000 civilians
+完整城市生成
+語音辨識
+多人指揮
+真實 FEMA / 消防資料匯入
+複雜 LLM agents
+```
+
+不是因為它們不酷。
+
+而是 Phase 1 最重要的是證明：
+
+# Information Fog + Command + Consequence + Replay
+
+真的好玩。
+
+---
+
+# 45. Phase 1 成功時應該出現的「展示時刻」
+
+最理想的一局會有這種情境：
+
+```text
+14:11
+
+消防：
+Sector A 多處火災，請求增援。
+
+玩家：
+將兩台消防車派往 Sector A。
+
+14:16
+
+Hospital B：
+Generator operational.
+
+玩家：
+暫時忽略 Hospital B。
+
+14:21
+
+Utility Crew：
+Substation B failure confirmed.
+
+14:23
+
+Hospital B:
+URGENT — backup generator failure.
+
+玩家：
+等等。
+
+14:16 那份報告不是說 generator 正常嗎？
+```
+
+AAR：
+
+```text
+Hospital B report
+Observed: 14:09
+Received: 14:16
+
+Generator failure
+Occurred: 14:14
+```
+
+所以：
+
+> **兩份資訊都不是「假的」。**
+
+而是玩家拿著過時的真實資訊做出了錯誤判斷。
+
+這比「AI 隨機騙你」高明很多。
+
+---
+
+# 46. 可直接交給 Codex 的 Phase 1 Prompt
+
+下面這份我會建議你**整份直接貼進新的 Codex 工作階段**。這不是簡略需求，而是 Phase 1 的 implementation contract。
+
+# Project AEGIS — Phase 1 Development Specification
+
+你現在要正式開始開發一個新的 Windows 桌面軟體／模擬遊戲：
+
+**Project AEGIS — AI Disaster Command Center**
+
+這不是 prototype、概念 Demo 或一次性展示。
+
+目標是建立一個具有長期可維護架構、可測試、可 deterministic replay、可持續加入新災害與系統的正式產品。
+
+本次任務只完成 **Phase 1 — Playable Command Center**。
+
+請自主完成實作、測試、QA、build、文件與 Git 提交；遇到非阻塞性細節請自行作合理工程決策，不要因小問題停止整體開發。
+
+---
+
+# 1. Product Concept
+
+玩家扮演城市緊急應變指揮中心的指揮官。
+
+城市發生災害後，真正的世界狀態持續演化，但玩家不能直接看到 World Truth。
+
+玩家只能透過消防、EMS、警察、醫院、公用事業與通訊系統傳回的情報建立 Situation Awareness。
+
+必須成立：
+
+World Truth != Command Center Knowledge
+
+情報可能：
+
+- 延遲
+- 遺失
+- 過時
+- 不完整
+- 低可信度
+- 與其他來源互相矛盾
+
+玩家根據當時實際可取得的資訊下令。
+
+命令也不能直接修改世界，而必須經過：
+
+Command issued
+→ transmission
+→ received
+→ acknowledged
+→ executed
+→ consequence
+
+整個產品最重要的玩法是：
+
+Information Fog + Resource Allocation + Time Pressure + Consequence + Replay
+
+---
+
+# 2. Non-Negotiable Architecture Rules
+
+以下為硬性要求。
+
+## Rule A — Deterministic Simulation
+
+Simulation core 不得依賴：
+
+- Math.random()
+- Date.now()
+- performance.now()
+- browser timers
+- network calls
+- LLM
+
+所有 simulation randomness 必須經由 seeded deterministic RNG abstraction。
+
+同一：
+
+- simulation version
+- scenario version
+- seed
+- player command stream
+
+必須產生相同：
+
+- authoritative world state
+- event sequence
+- final result
+- deterministic state hashes
+
+---
+
+## Rule B — UI Cannot Access World Truth
+
+Normal gameplay UI 不得直接讀取 authoritative WorldState。
+
+UI 只能讀：
+
+CommandCenterView / KnowledgeState / ReadModel
+
+World Truth 僅允許：
+
+- simulation internals
+- automated tests
+- explicit developer/debug truth mode
+
+使用。
+
+請以 module boundaries 和 tests 防止意外破壞這項規則。
+
+---
+
+## Rule C — LLM Cannot Control Truth
+
+Phase 1 不需要 LLM 才能完整遊玩。
+
+Simulation 不可依賴 LLM。
+
+未來 LLM 可負責：
+
+- radio dialogue
+- natural-language briefings
+- narrative
+- advisor responses
+- AAR prose
+
+但 LLM output 永遠不得直接 mutate authoritative simulation state。
+
+請預留乾淨 interface，但 Phase 1 不需整合商業 API。
+
+---
+
+## Rule D — Headless Simulation
+
+simulation package 必須能在完全沒有：
+
+- Electron
+- React
+- DOM
+
+的環境下執行。
+
+應可從 Node CLI / tests 執行 scenario。
+
+---
+
+# 3. Preferred Technology Stack
+
+優先使用：
+
+- pnpm workspace
+- TypeScript
+- Electron
+- React
+- Vite
+- PixiJS for map visualization
+- Zustand for UI-only state
+- Vitest
+- Playwright where appropriate for desktop/browser smoke testing
+- Zod or equivalent runtime schema validation
+
+使用目前穩定且互相相容的正式版本。
+
+除非有明確工程理由，不要加入大型 unnecessary dependency。
+
+Simulation 不可依賴 React、Electron、PixiJS 或 Zustand。
+
+---
+
+# 4. Repository Structure
+
+建立清楚 monorepo，例如：
+
+project-aegis/
+  apps/
+    desktop/
+
+  packages/
+    domain/
+    simulation/
+    scenarios/
+    replay/
+    persistence/
+    ui/
+    llm/
+    shared/
+
+  tests/
+    simulation/
+    integration/
+    replay/
+    e2e/
+
+  benchmarks/
+
+  docs/
+    ARCHITECTURE.md
+    SIMULATION.md
+    INFORMATION_FOG.md
+    REPLAY_FORMAT.md
+    PHASE1_REPORT.md
+
+  scripts/
+
+  .github/
+    workflows/
+
+可依實際 dependency graph 微調，但保持 simulation domain 與 presentation 分離。
+
+---
+
+# 5. Simulation Clock
+
+使用 fixed-step simulation。
+
+Phase 1：
+
+1 simulation tick = 1 simulated second。
+
+WorldState 至少具有：
+
+tick
+
+UI 可支援：
+
+- Pause
+- ×1
+- ×2
+- ×4
+- ×8
+
+Simulation speed 僅決定 real-time 中執行多少 tick，不改變 simulation outcome。
+
+所有 systems 執行順序固定且明確記錄在文件。
+
+禁止依賴 JavaScript object iteration 的不穩定 side effect 決定 gameplay。
+
+---
+
+# 6. Seeded RNG
+
+建立正式 RNG abstraction。
+
+至少：
+
+RandomSource
+- next()
+- integer()
+- chance()
+- choose()
+
+禁止 simulation package 直接呼叫 Math.random()。
+
+最好提供 deterministic named RNG stream 或等效設計，例如：
+
+root seed
+→ disaster stream
+→ medical stream
+→ communication stream
+→ unit stream
+
+避免未來加入一個 unrelated random call 後造成整個 replay 大幅 divergence。
+
+加入 automated enforcement test / lint strategy，避免 Math.random 進入 simulation。
+
+---
+
+# 7. World Model
+
+Phase 1 建立一座 fictional city。
+
+最少：
+
+- 4 districts
+- road graph
+- 2 hospitals
+- 2 fire stations
+- 1 EMS depot
+- 1 police station/base
+- 1 utility depot
+- power infrastructure
+- radio / communications infrastructure
+
+不要使用真實城市 API。
+
+Scenario 必須由 data-driven scenario definition 建立，而不是大量硬編碼在 simulation systems。
+
+---
+
+# 8. Road Network
+
+建立 graph-based road network。
+
+道路應支援：
+
+- normal
+- degraded
+- blocked
+
+Responder routing 必須根據 graph pathfinding 計算。
+
+當道路中斷時：
+
+- route 可失效
+- unit 可 reroute
+- ETA 必須受影響
+
+不要使用 teleport。
+
+---
+
+# 9. Phase 1 Agencies and Units
+
+至少實作：
+
+FIRE
+- Fire Engine ×6
+
+EMS
+- Ambulance ×6
+
+POLICE
+- Patrol Unit ×4
+
+UTILITY
+- Utility Crew ×2
+
+每個 unit 至少包含：
+
+- id
+- agency
+- type
+- location
+- state
+- capabilities
+- communication status
+- current assignment
+- route
+- ETA / travel progress
+
+Unit state 至少：
+
+AVAILABLE
+DISPATCHED
+EN_ROUTE
+OPERATING
+RETURNING
+DISABLED
+
+避免 impossible simultaneous state。
+
+---
+
+# 10. Hospitals
+
+2 家醫院。
+
+至少模擬：
+
+- current patient load
+- capacity
+- emergency capacity
+- power status
+- backup generator status
+- critical patients
+
+Phase 1 不需要完整醫療生理模型，但必須讓：
+
+hospital overload
+power loss
+delayed ambulance transport
+
+能影響 casualty outcomes。
+
+---
+
+# 11. Phase 1 Disaster
+
+只實作一個 polished scenario：
+
+URBAN EARTHQUAKE
+
+Earthquake 初始化後應 deterministic 地造成部分：
+
+- building collapse
+- casualties
+- urban fire
+- blocked roads
+- power infrastructure damage
+- communications degradation
+
+不要只用 scripted fixed timeline。
+
+Scenario 可以定義 initial hazard configuration，但 downstream consequence 必須由 simulation systems 決定。
+
+---
+
+# 12. Incidents
+
+至少支援：
+
+BUILDING_COLLAPSE
+FIRE
+MASS_CASUALTY
+ROAD_BLOCKAGE
+POWER_FAILURE
+COMMUNICATION_FAILURE
+
+Incident 至少具有：
+
+- id
+- type
+- location
+- authoritative severity
+- lifecycle status
+- creation tick
+- associated hazards
+- affected entities
+- required capabilities
+
+事件可以因 simulation 演化而：
+
+- worsen
+- stabilize
+- resolve
+
+---
+
+# 13. Information Fog
+
+這是 Phase 1 最重要的系統。
+
+不得直接把 WorldState 顯示給玩家。
+
+建立：
+
+World Fact
+→ Observation
+→ Intel Report
+→ Transmission
+→ Command Center Knowledge
+
+IntelReport 建議至少包括：
+
+- id
+- source
+- subject
+- claim
+- observedTick
+- transmittedTick
+- receivedTick
+- sourceReliability
+- observationConfidence
+- report status
+- truth reference for audit/AAR
+
+Report status 至少：
+
+CREATED
+IN_TRANSIT
+RECEIVED
+LOST
+EXPIRED
+
+---
+
+# 14. Information Delay
+
+報告必須可能存在：
+
+observation delay
+transmission delay
+network delay
+
+例如：
+
+Hospital generator healthy at tick 400.
+
+Report observed tick 400.
+Report received tick 470.
+
+Generator fails at tick 430.
+
+玩家 tick 470 收到的訊息：
+
+“Generator operational.”
+
+這份資訊在 observedTick 時是真實的，但收到時已經 stale。
+
+系統必須能正確區分：
+
+FALSE
+STALE
+INCOMPLETE
+LOW_CONFIDENCE
+LOST
+
+不要把所有錯誤情報都做成 random lies。
+
+---
+
+# 15. Communications
+
+建立最小但真實的 communications layer。
+
+至少：
+
+NORMAL
+DEGRADED
+OFFLINE
+
+影響：
+
+- report latency
+- report loss probability
+- command latency
+- acknowledgement
+
+communications failure 必須由 WorldState 決定，且使用 deterministic RNG。
+
+---
+
+# 16. Knowledge Model
+
+建立 command center knowledge state。
+
+對每個 known incident / infrastructure status 應能表示：
+
+- estimated state
+- confidence
+- source count
+- most recent report
+- age
+- corroboration
+- conflicts
+
+例如：
+
+Incident #17
+
+Estimated severity: SEVERE
+Confidence: 0.68
+Last update: 6m 12s
+Sources: Fire Unit 03, Civilian Report
+
+UI 只看這一層。
+
+---
+
+# 17. Player Commands
+
+Phase 1 至少支援：
+
+DISPATCH_UNIT
+REASSIGN_UNIT
+RECALL_UNIT
+REQUEST_STATUS
+SET_INCIDENT_PRIORITY
+
+Command 必須有：
+
+- id
+- issueTick
+- actor
+- target
+- parameters
+- delivery status
+- acknowledgement tick
+- execution status
+
+Command 不可直接 mutate responder assignment。
+
+必須經過 communications / command handling system。
+
+---
+
+# 18. Event System
+
+Simulation 必須產生 typed Domain Events。
+
+至少涵蓋：
+
+EARTHQUAKE_OCCURRED
+INCIDENT_CREATED
+BUILDING_COLLAPSED
+FIRE_STARTED
+FIRE_SPREAD
+ROAD_BLOCKED
+POWER_NODE_FAILED
+COMMUNICATION_DEGRADED
+
+UNIT_DISPATCHED
+UNIT_RECEIVED_ORDER
+UNIT_DEPARTED
+UNIT_ARRIVED
+UNIT_REASSIGNED
+UNIT_DISABLED
+
+REPORT_CREATED
+REPORT_TRANSMITTED
+REPORT_RECEIVED
+REPORT_LOST
+
+COMMAND_ISSUED
+COMMAND_RECEIVED
+COMMAND_ACKNOWLEDGED
+COMMAND_FAILED
+
+PATIENT_TRANSPORTED
+HOSPITAL_OVER_CAPACITY
+
+INCIDENT_STABILIZED
+INCIDENT_RESOLVED
+
+所有重要事件包含：
+
+- id
+- tick
+- type
+- payload
+- causal references when known
+
+---
+
+# 19. Causal Graph
+
+Phase 1 建立 causal tracking 基礎。
+
+重要 Domain Event 可以包含：
+
+causedByEventIds
+
+例如：
+
+ROAD_BLOCKED
+→ UNIT_REROUTED
+→ UNIT_ARRIVAL_DELAYED
+→ PATIENT_TREATMENT_DELAYED
+
+不要使用 LLM 推論 causal relation。
+
+由 simulation 在產生事件時記錄已知因果。
+
+Phase 1 AAR 不需要完整 graph visualization，但資料必須存在。
+
+---
+
+# 20. UI Direction
+
+UI 必須有完成品感。
+
+視覺方向：
+
+Modern Emergency Operations Center。
+
+不要：
+
+- default Bootstrap look
+- engineering debug dashboard
+- cyberpunk neon overload
+- military HUD cliché
+- placeholder white screen
+
+建議：
+
+- dark graphite surfaces
+- subtle borders
+- low saturation map
+- strong typography hierarchy
+- emergency red/orange used selectively
+- police/command blue
+- restrained animation
+
+---
+
+# 21. Main Screen
+
+主要 layout 至少：
+
+CENTER
+Interactive city situation map
+
+LEFT
+Resource / agency panel
+
+RIGHT
+Incident / intelligence feed
+
+BOTTOM or integrated
+Simulation time and command controls
+
+Top status area：
+- scenario
+- simulation clock
+- speed
+- high-level city status
+
+---
+
+# 22. Map
+
+使用 PixiJS 或同等高效 renderer。
+
+顯示：
+
+- districts
+- roads
+- hospitals
+- fire stations
+- EMS
+- infrastructure
+- known incidents
+- responder units
+
+支援：
+
+- pan
+- zoom
+- selection
+- hover
+- incident markers
+- unit markers
+
+Normal Mode 只能呈現 command center 已知資訊。
+
+Developer Mode 可明確開啟 Truth View。
+
+Truth View 必須有醒目 DEBUG / TRUTH 標記，避免混淆正式 gameplay。
+
+---
+
+# 23. Intelligence UI
+
+玩家點 intel report 時至少看到：
+
+- source
+- received time
+- observation time
+- report age
+- confidence
+- corroborating sources
+- conflicting reports
+- verification state
+
+玩家必須能理解：
+
+“Received recently”
+不等於
+“Observed recently”。
+
+---
+
+# 24. Incident Inspector
+
+Incident panel 至少：
+
+- estimated incident type
+- estimated severity
+- confidence
+- latest intel
+- assigned units
+- requested capabilities
+- timeline
+- issue command
+
+不要展示 authoritative hidden values。
+
+---
+
+# 25. Unit Inspector
+
+至少：
+
+- callsign
+- agency
+- status
+- current assignment
+- map location
+- route
+- ETA
+- communication state
+
+---
+
+# 26. Command Workflow
+
+不要只使用 RTS right click。
+
+建立正式 command interaction：
+
+Select incident
+→ Assign resources
+→ Select units
+→ priority
+→ Issue Order
+→ Sent
+→ Await acknowledgement
+→ Acknowledged
+→ Executing
+
+讓玩家明確感受到 command latency。
+
+---
+
+# 27. Scenario Flow
+
+至少提供：
+
+Main Menu
+→ New Incident
+→ Seed field / random seed
+→ Start
+→ live simulation
+→ scenario completion
+→ After Action Report
+→ replay
+
+提供一個特別調校過的 showcase seed。
+
+但不要讓核心 simulation 為 showcase seed 加特殊 hardcode。
+
+---
+
+# 28. Scenario Completion
+
+Earthquake scenario 應有合理 completion conditions，例如：
+
+- all critical incidents resolved/stabilized
+- catastrophic failure threshold
+- scenario maximum simulation time
+
+不要只有固定倒數計時結束。
+
+---
+
+# 29. After Action Report — Phase 1
+
+至少展示：
+
+- scenario seed
+- duration
+- fatalities
+- injuries
+- incidents resolved
+- hospital overload
+- infrastructure failures
+- critical player commands
+- command delays
+- intelligence failures
+- important timeline
+
+Intel failure 應區分：
+
+- stale
+- inaccurate
+- lost
+- delayed
+- low-confidence
+
+至少可以從 AAR 點擊 timeline event 並進入 Replay 對應位置。
+
+---
+
+# 30. Replay
+
+Replay 的 authoritative inputs：
+
+- simulation version
+- scenario id/version
+- seed
+- player command stream
+
+不要以 UI snapshots 取代 deterministic replay。
+
+Replay 必須：
+
+- 從 tick 0 完整重新模擬
+- 套用相同 commands
+- 產生相同 state hashes
+
+支援：
+
+- play
+- pause
+- ×1
+- ×2
+- ×4
+- ×8
+- timeline seek
+
+為了 seek performance，可每固定 interval 儲存 deterministic checkpoint。
+
+---
+
+# 31. Replay Integrity
+
+至少每 300 ticks 建立 canonical state hash。
+
+Canonical serialization 必須避免不穩定 property ordering。
+
+Test：
+
+original run hashes
+==
+replay run hashes
+
+任何 mismatch：
+
+測試必須 fail。
+
+---
+
+# 32. Save / Load
+
+設計 versioned save format。
+
+推薦：
+
+.aegis container
+
+內含：
+
+manifest.json
+scenario.json
+snapshot.json
+commands.ndjson
+events.ndjson
+
+至少包含：
+
+saveFormatVersion
+simulationVersion
+scenarioVersion
+
+Save / Load 後必須能繼續 deterministic simulation。
+
+不得把 transient UI state 當成 authoritative simulation state。
+
+---
+
+# 33. Persistence Validation
+
+所有讀入的：
+
+- scenario
+- save
+- replay
+
+都使用 runtime schema validation。
+
+Corrupt save 不得讓 app crash。
+
+應顯示有設計過的錯誤 UI。
+
+---
+
+# 34. Testing Strategy
+
+建立：
+
+Unit tests
+Integration tests
+Simulation determinism tests
+Replay tests
+Save/load tests
+Scenario tests
+UI tests
+Desktop smoke tests
+
+---
+
+# 35. Required Determinism Test
+
+至少：
+
+runScenario(seed X, commandStream Y)
+runScenario(seed X, commandStream Y)
+
+assert：
+
+- final canonical state hash identical
+- event sequence hash identical
+- AAR metrics identical
+
+至少使用多個 seeds。
+
+---
+
+# 36. Simulation Invariants
+
+加入 automated invariant checks。
+
+至少：
+
+resource counts never negative
+
+hospital patient count never negative
+
+unit has exactly one lifecycle state
+
+unit cannot service two assignments simultaneously
+
+all referenced entities exist
+
+incident severity stays inside valid range
+
+dead casualty cannot later return alive
+
+resolved incident cannot continue producing active hazard effects unless explicitly designed
+
+event ticks never move backward
+
+simulation tick monotonically increases
+
+---
+
+# 37. Benchmark
+
+提供 headless benchmark CLI。
+
+至少執行：
+
+100 fixed seeds
+
+輸出：
+
+- seeds completed
+- crashes
+- invariant failures
+- replay mismatches
+- average ticks/sec
+- p95 simulation runtime
+- maximum event count
+
+Release QA 至少跑 100 seeds。
+
+若性能允許，再提供：
+
+1000-seed extended benchmark。
+
+---
+
+# 38. No-Hang Requirements
+
+自動偵測：
+
+- infinite event generation
+- impossible unresolved scenario
+- unit deadlock
+- routing deadlock
+- replay infinite loop
+
+Benchmark 有最大 tick guard。
+
+任何 scenario 超過 guard 都視為 failure 並列出 seed。
+
+---
+
+# 39. UI QA
+
+至少驗證：
+
+1920×1080
+1600×900
+1366×768
+
+檢查：
+
+- clipping
+- overflow
+- inaccessible controls
+- unreadable panels
+- broken map
+- overlapping UI
+- long intel text
+- empty states
+- high report volume
+
+不要把 app 設計成只能 1920×1080 才正常。
+
+---
+
+# 40. Windows Packaging
+
+Phase 1 最終必須產生 Windows 可執行版本。
+
+至少：
+
+- packaged Windows build
+- portable build 或清楚可執行 installer
+
+實際啟動 build 後的版本，而不是只驗證 dev server。
+
+Smoke test：
+
+Launch
+→ Main Menu
+→ Start scenario
+→ issue command
+→ simulation runs
+→ save
+→ load
+→ finish / force test completion
+→ AAR
+→ replay
+
+---
+
+# 41. Git
+
+從第一個有效 scaffold 開始維護 Git history。
+
+保持 small logical commits。
+
+建議 commit style：
+
+chore: bootstrap project workspace
+feat(sim): add deterministic simulation clock
+feat(sim): implement seeded rng
+feat(domain): add disaster domain entities
+feat(world): add city road graph
+feat(intel): implement observation pipeline
+feat(comms): model report transmission delay
+feat(command): implement command delivery
+feat(map): render command center map
+feat(ui): add incident inspector
+feat(replay): record and replay player commands
+feat(save): add versioned save format
+test(sim): add determinism benchmark
+
+不要把全部 Phase 1 壓成一個 commit。
+
+---
+
+# 42. GitHub
+
+建立／使用 private GitHub repository。
+
+建議 repo name：
+
+project-aegis
+
+保持 private。
+
+推送：
+
+- commits
+- tags
+- documentation
+
+不要將：
+
+- API keys
+- secrets
+- machine-specific credentials
+
+提交。
+
+提供適當 .gitignore。
+
+---
+
+# 43. CI
+
+建立 GitHub Actions。
+
+至少執行：
+
+pnpm install
+lint
+typecheck
+unit tests
+simulation tests
+determinism tests
+build
+
+若 desktop e2e 在 CI 不穩定，可拆 smoke workflow，但不得直接完全省略 QA。
+
+---
+
+# 44. Documentation
+
+完成：
+
+docs/ARCHITECTURE.md
+
+說明：
+- dependency boundaries
+- authoritative simulation
+- UI read model
+- event flow
+
+docs/SIMULATION.md
+
+說明：
+- tick architecture
+- system execution order
+- RNG
+- entities
+- incidents
+
+docs/INFORMATION_FOG.md
+
+詳細說明：
+World Truth
+→ Observation
+→ Report
+→ Transmission
+→ Knowledge
+
+docs/REPLAY_FORMAT.md
+
+詳細說明：
+- replay contract
+- commands
+- hashes
+- snapshots
+
+docs/PHASE1_REPORT.md
+
+最後填入實際完成結果。
+
+---
+
+# 45. Architecture Enforcement
+
+至少用 tests 或 build boundaries 確認：
+
+simulation 不 import：
+- electron
+- react
+- pixi
+- renderer UI
+
+simulation package 不直接使用：
+- Math.random
+- Date.now
+- setInterval
+- network APIs
+
+Normal gameplay read model 不 expose authoritative hidden values。
+
+---
+
+# 46. Code Quality
+
+要求：
+
+strict TypeScript
+
+避免：
+any
+unless extremely justified
+
+不要：
+大量 TODO
+dead code
+placeholder service
+mock system pretending to be complete
+massive God class
+
+每個重要 system 應有單一責任。
+
+優先清楚、可測試的 domain code，而不是過度 abstract framework。
+
+---
+
+# 47. No Fake Completion
+
+以下不算完成：
+
+- button exists but no actual behavior
+- replay is prerecorded animation
+- save only saves UI state
+- intel fog only visually hides known world data
+- units teleport instead of route
+- LLM-generated fake outcomes
+- benchmark script that doesn't validate state
+- tests that only test mocks
+- EXE generated but never launched
+- UI says “connected” without real system behind it
+
+Phase 1 的所有核心功能都必須真正工作。
+
+---
+
+# 48. UX Polish
+
+建立一致 design system：
+
+- spacing
+- typography
+- border radius
+- panel elevation
+- iconography
+- status semantics
+- buttons
+- warning levels
+
+加入：
+
+- loading states
+- empty states
+- confirmation for destructive actions
+- error states
+- tooltips where needed
+
+動畫 restrained。
+
+不要加入會干擾 tactical readability 的華麗效果。
+
+---
+
+# 49. Audio
+
+Phase 1 audio 是 optional。
+
+若加入，只加入少量：
+
+- alert
+- radio notification
+- command acknowledged
+
+不要因音效阻塞 Phase 1。
+
+---
+
+# 50. Accessibility
+
+至少：
+
+- keyboard usable primary controls
+- sufficient contrast
+- important state not represented only by color
+- readable font sizing
+- reduced-motion friendly where reasonable
+
+---
+
+# 51. Phase 1 Acceptance Scenario
+
+Phase 1 必須能完整展示：
+
+Launch Windows app
+
+→ Main Menu
+
+→ Start Urban Earthquake
+
+→ earthquake damages city
+
+→ incidents emerge
+
+→ player receives incomplete/delayed intel
+
+→ reports may conflict or become stale
+
+→ player selects incident
+
+→ dispatches units
+
+→ command experiences communication handling
+
+→ unit receives command
+
+→ unit routes through road network
+
+→ blocked road can force reroute
+
+→ units respond
+
+→ hospital condition evolves
+
+→ power / communications can degrade
+
+→ player issues further commands
+
+→ incidents stabilize
+
+→ scenario ends
+
+→ After Action Report appears
+
+→ important player decisions and intel failures shown
+
+→ Replay opens
+
+→ replay reproduces original result
+
+→ Save / Load works
+
+→ same seed + commands produce identical result
+
+---
+
+# 52. Showcase Situation
+
+Tune at least one scenario seed so QA commonly demonstrates this type of sequence:
+
+1. Sector A reports severe fires.
+2. Player has a reason to allocate responders there.
+3. Hospital B sends a report saying generator is operational.
+4. That observation becomes stale while in transit or shortly afterward.
+5. Power infrastructure fails.
+6. Hospital B later reports critical generator/power failure.
+7. Player can inspect report observed time vs received time.
+8. AAR explains that the earlier report was stale rather than fabricated.
+
+Do not special-case simulation logic for this seed.
+
+The situation should emerge from configured initial conditions and the same normal systems.
+
+---
+
+# 53. Required Automated Checks Before Completion
+
+Before declaring Phase 1 complete, run and report actual results for:
+
+- lint
+- TypeScript typecheck
+- unit tests
+- integration tests
+- determinism tests
+- replay tests
+- save/load tests
+- 100-seed benchmark
+- production build
+- Windows packaged build
+- actual Windows launch smoke test
+- main scenario smoke test
+
+If anything fails, fix it before completion unless there is a genuine external blocker.
+
+Do not hide failed tests.
+
+---
+
+# 54. Git Working Tree Requirement
+
+At completion：
+
+git status
+
+must be clean.
+
+All intended source and documentation changes committed.
+
+Push to private GitHub repository.
+
+---
+
+# 55. Phase 1 Release
+
+When every required gate passes：
+
+Create Phase 1 release/tag:
+
+v0.1.0
+
+Include Windows artifact if repository tooling permits.
+
+Do not tag release if required tests are failing.
+
+---
+
+# 56. Final Delivery Report
+
+At the end provide a concise but complete report containing：
+
+IMPLEMENTED
+- simulation
+- information fog
+- commands
+- map
+- replay
+- save/load
+- AAR
+
+TEST RESULTS
+- total tests
+- determinism result
+- benchmark result
+- replay mismatch count
+
+PERFORMANCE
+- average simulation speed
+- p95 if measured
+
+BUILD
+- exact Windows artifact path/name
+
+GIT
+- branch
+- latest commit
+- tag
+- GitHub push status
+
+KNOWN LIMITATIONS
+Only actual remaining limitations.
+
+NEXT PHASE
+Brief Phase 2 recommendation.
+
+Also save this report to：
+
+docs/PHASE1_REPORT.md
+
+---
+
+# 57. Priority Order
+
+若工程中需要取捨，依照這個順序：
+
+1. deterministic simulation correctness
+2. information fog correctness
+3. command / consequence model
+4. replay integrity
+5. testability
+6. save/load reliability
+7. usable polished UI
+8. visual polish
+9. optional flourish
+
+絕對不要犧牲 1–6 去換動畫或漂亮特效。
+
+---
+
+# 58. Product Constitution
+
+將以下四條加入 ARCHITECTURE.md 並視為長期不可破壞規則：
+
+1. The UI must never have privileged access to world truth during normal gameplay.
+
+2. No LLM output may directly mutate authoritative simulation state.
+
+3. All simulation randomness must derive from the seeded deterministic RNG system.
+
+4. A replay with the same simulation version, scenario version, seed, and command stream must produce identical canonical state hashes.
+
+---
+
+現在開始 Phase 1。
+
+先檢查目前工作目錄與 Git 狀態，再建立 architecture skeleton。
+
+不要先花大量時間寫假 UI。
+
+優先完成：
+
+domain
+→ deterministic simulation
+→ scenario
+→ information fog
+→ commands
+→ replay
+→ persistence
+→ UI integration
+→ polish
+→ QA
+→ Windows packaging
+→ GitHub release
+
+每完成一個穩定的 logical milestone 就測試並提交 Git。
+
+最終只有在所有 Phase 1 acceptance gates 實際通過後，才能宣告 Phase 1 完成。
+
+這份規格已經足夠直接啟動正式開發。我尤其建議**不要把 Phase 1 再縮成「先做幾個畫面看看」**：AEGIS 真正值錢的是底下那套 deterministic world / information pipeline / causal event / replay infrastructure；第一階段把這四根柱子立穩，後面加颱風、洪水、1000 個平民、LLM 無線電、反事實重播，都會變成擴充，而不是重寫。
