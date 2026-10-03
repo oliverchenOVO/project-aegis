@@ -4,7 +4,7 @@ Windows emergency command simulation: incomplete information, delayed commands, 
 
 ## Play
 
-Launch `release/AEGIS-0.2.0-Windows-x64.exe`. Choose earthquake or flood (flood showcase `AEGIS-FLOOD-2026-001`), start and press play. Pause to inspect received reports or advance by 10 seconds/1 minute/5 minutes. Select an incident, choose compatible units and issue the order; evacuation orders select a configured zone. Wait for acknowledgement and field reports. Save/load uses `.aegis`; original v0.1 saves continue under their original rules. Completed AAR shows actual systemic outcomes, seven intelligence classes and causal chains. Verify replay, seek with timeline markers or choose a decision to edit and simulate an independent alternative-command branch.
+Launch `release/AEGIS-0.2.1-Windows-x64.exe`. Choose earthquake or flood (flood showcase `AEGIS-FLOOD-2026-001`), start and press play. Pause to inspect received reports or advance by 10 seconds/1 minute/5 minutes. Select an incident, choose compatible units and issue the order; evacuation orders select a configured zone. Wait for acknowledgement and field reports. Save/load uses `.aegis`; original v0.1 saves continue under their original rules. Completed AAR shows actual systemic outcomes, seven intelligence classes and causal chains. Verify replay, seek with timeline markers or choose a decision to edit and simulate an independent alternative-command branch.
 
 No API key or Internet connection is needed to play. Unity and Blender are not required by this 2D command-center phase.
 
@@ -24,9 +24,9 @@ node node_modules/electron/install.js
 pnpm desktop
 pnpm package:win
 pnpm smoke "release/windows-runtime/Project AEGIS.exe"
-pnpm smoke release/AEGIS-0.2.0-Windows-x64.exe --portable
-pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
-pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
+pnpm smoke release/AEGIS-0.2.1-Windows-x64.exe --portable
+pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.1-Windows-x64.exe --portable
+pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.1-Windows-x64.exe --portable
 pnpm exec tsx benchmarks/phase2.ts 100 test-results/phase2-local.json
 pnpm exec tsx benchmarks/phase2-seek.ts
 ```

@@ -24,6 +24,10 @@ const app = await launch(
 );
 const launchMs = performance.now() - started;
 const page = await app.firstWindow();
+const runtime = await app.evaluate(({ app }) => ({
+  version: app.getVersion(),
+  gpuFeatures: app.getGPUFeatureStatus(),
+}));
 const errors: string[] = [],
   warnings: string[] = [];
 page.on("pageerror", (error) => errors.push(error.message));
@@ -32,6 +36,7 @@ page.on("console", (event) => {
   if (event.type() === "warning") warnings.push(event.text());
 });
 const rows: Record<string, unknown>[] = [];
+let passed = false;
 const sample = async (action: () => Promise<unknown>) => {
   const start = performance.now();
   await action();
@@ -201,6 +206,7 @@ try {
   expect(errors).toEqual([]);
   expect(warnings).toEqual([]);
   expect(await page.locator("vite-error-overlay").count()).toBe(0);
+  passed = true;
 } finally {
   writeFileSync(
     resolve(output, "qa.json"),
@@ -213,10 +219,11 @@ try {
             ? "SwiftShader"
             : "ordinary desktop flags",
         launchMs,
+        runtime,
         rows,
         errors,
         warnings,
-        passed: rows.length === 2 && !errors.length && !warnings.length,
+        passed,
       },
       null,
       2,

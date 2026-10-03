@@ -50,11 +50,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm package:win
+      - run: pnpm exec tsx tests/e2e/map-visual.ts "release/windows-runtime/Project AEGIS.exe" test-results/map-ci-packaged
+      - run: pnpm exec tsx tests/e2e/map-interactions.ts "release/windows-runtime/Project AEGIS.exe" test-results/map-ci-interactions
+      - run: pnpm exec tsx tests/e2e/map-interactions.ts release/AEGIS-0.2.1-Windows-x64.exe test-results/map-ci-portable --portable
       - run: pnpm smoke "release/windows-runtime/Project AEGIS.exe"
-      - run: pnpm smoke release/AEGIS-0.2.0-Windows-x64.exe --portable
+      - run: pnpm smoke release/AEGIS-0.2.1-Windows-x64.exe --portable
       - run: pnpm exec tsx tests/e2e/migration-restart.ts "release/windows-runtime/Project AEGIS.exe"
-      - run: pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
-      - run: pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
+      - run: pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.1-Windows-x64.exe --portable
+      - run: pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.1-Windows-x64.exe --portable
       - uses: actions/upload-artifact@v4
         if: always()
         with:
