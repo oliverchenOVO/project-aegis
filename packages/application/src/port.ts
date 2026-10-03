@@ -1,6 +1,8 @@
 import type { CommandInput } from "../../domain/src/index";
 import type { SessionUpdate } from "./session";
 export type { SessionUpdate } from "./session";
+export type { AlternativeCommands } from "../../replay/src/index";
+export type { BranchComparison } from "../../counterfactual/src/index";
 export class CommandPort {
   private worker = new Worker(new URL("./worker.ts", import.meta.url), {
     type: "module",
@@ -36,8 +38,8 @@ export class CommandPort {
       this.worker.postMessage({ id, action, ...values });
     });
   }
-  start(seed: string) {
-    return this.request<SessionUpdate>("start", { seed });
+  start(seed: string, scenarioId = "earthquake") {
+    return this.request<SessionUpdate>("start", { seed, scenarioId });
   }
   step(count: number) {
     return this.request<SessionUpdate>("step", { count });
@@ -56,5 +58,11 @@ export class CommandPort {
   }
   aar() {
     return this.request<SessionUpdate>("aar");
+  }
+  fork(tick: number, alternatives: unknown) {
+    return this.request<SessionUpdate>("fork", { tick, alternatives });
+  }
+  saveBranch(branchId: string) {
+    return this.request<Uint8Array>("saveBranch", { branchId });
   }
 }

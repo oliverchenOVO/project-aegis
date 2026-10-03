@@ -611,6 +611,31 @@ export function projectView(w: WorldState, s: Scenario): CommandCenterView {
         : c.failure,
     })),
     city: {
+      ...(s.civilians
+        ? {
+            evacuationZones:
+              s.flood?.zones.map((z) => ({
+                id: z.id,
+                nodeIds: [...z.nodeIds],
+              })) ??
+              s.districts.map((d) => ({
+                id: d.id,
+                nodeIds: s.nodes
+                  .filter((n) => n.district === d.id)
+                  .map((n) => n.id),
+              })),
+            shelters: structuredClone(s.civilians.shelters),
+          }
+        : {}),
+      ...(s.communications
+        ? {
+            communicationNodes: s.communications.nodes.map((n) => ({
+              id: n.id,
+              nodeId: n.nodeId,
+              role: n.role,
+            })),
+          }
+        : {}),
       ...(s.flood
         ? {
             floodZones: s.flood.zones.map((z) => ({
@@ -628,6 +653,9 @@ export function projectView(w: WorldState, s: Scenario): CommandCenterView {
         nodeId: h.nodeId,
         capacity: h.capacity,
         emergencyCapacity: h.emergencyCapacity,
+        ...(h.edCapacity !== undefined
+          ? { edCapacity: h.edCapacity, icuCapacity: h.icuCapacity }
+          : {}),
       })),
     },
   };

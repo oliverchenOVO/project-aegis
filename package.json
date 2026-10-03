@@ -1,6 +1,6 @@
 {
   "name": "project-aegis",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -14,7 +14,8 @@
     "benchmark": "tsx benchmarks/run.ts",
     "desktop": "electron apps/desktop/dist/main.cjs",
     "package:win": "pnpm build && node scripts/package-windows.mjs",
-    "smoke": "tsx tests/e2e/desktop-smoke.ts",
+    "smoke": "tsx tests/e2e/phase2-smoke.ts",
+    "smoke:legacy": "tsx tests/e2e/desktop-smoke.ts",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -60,7 +61,8 @@
     "asar": true,
     "win": {
       "target": "portable",
-      "signAndEditExecutable": false
+      "icon": "assets/aegis.ico",
+      "signAndEditExecutable": true
     },
     "artifactName": "AEGIS-${version}-Windows-${arch}.${ext}"
   },

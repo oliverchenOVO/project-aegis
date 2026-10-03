@@ -6,6 +6,8 @@ export type Layer =
   | "POWER"
   | "COMMS"
   | "TRAFFIC"
+  | "FLOOD"
+  | "CIVILIANS"
   | "INTELLIGENCE";
 interface UIState {
   selected?: string;
@@ -28,6 +30,8 @@ export const useUI = create<UIState>((set) => ({
     "POWER",
     "COMMS",
     "TRAFFIC",
+    "FLOOD",
+    "CIVILIANS",
     "INTELLIGENCE",
   ],
   select: (selected) => set({ selected }),

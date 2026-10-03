@@ -12,6 +12,8 @@ const layerNames: Record<Layer, string> = {
   POWER: "電力",
   COMMS: "通訊",
   TRAFFIC: "道路",
+  FLOOD: "淹水",
+  CIVILIANS: "居民",
   INTELLIGENCE: "情報",
 };
 interface MapProps {
@@ -220,9 +222,118 @@ export function SituationMap({ view }: MapProps) {
     for (const d of view.city.districts)
       label(d.name, d.x, d.y + 30, 0x8596a4, 19, "bold");
     label("臨 江", 370, 300, 0x7da2b8, 14);
+    if (layers.includes("FLOOD"))
+      for (const zone of view.city.floodZones ?? []) {
+        const points = zone.nodeIds.map((id) => nodes.get(id)!).filter(Boolean),
+          belief = view.beliefs.find(
+            (b) => b.kind === "FLOOD" && b.subjectId === zone.id,
+          );
+        if (!points.length) continue;
+        const left = Math.min(...points.map((n) => n.x)) - 18,
+          top = Math.min(...points.map((n) => n.y)) - 18,
+          depth = belief?.claim.estimatedDepth;
+        const overlay = new Graphics();
+        for (const node of points)
+          overlay
+            .roundRect(node.x - 40, node.y - 40, 80, 80, 4)
+            .fill({
+              color: depth === undefined ? 0x586779 : 0x428eb8,
+              alpha:
+                depth === undefined
+                  ? 0.035
+                  : Math.min(0.26, 0.06 + depth * 0.06),
+            })
+            .stroke({
+              color: belief?.stale ? 0xc9b47b : 0x648aa4,
+              width: 1,
+              alpha: 0.5,
+            });
+        overlay.eventMode = "static";
+        overlay.cursor = "pointer";
+        overlay.on("pointertap", () => select(zone.id));
+        overlay.on("pointerover", () =>
+          setHover(
+            belief
+              ? `${zone.id} · 估計 ${depth?.toFixed(2) ?? "未知"}m · ${belief.age}秒前 · 信心 ${Math.round(belief.confidence * 100)}%${belief.stale ? " · 過時" : ""}`
+              : `${zone.id} · 水深未知，尚無已接收觀測`,
+          ),
+        );
+        e.content.addChild(overlay);
+        label(
+          `${zone.id} ${depth === undefined ? "未知" : `約 ${depth.toFixed(1)}m`}${belief?.stale ? " *" : ""}`,
+          left + 8,
+          top + 4,
+          0x9ec7de,
+          11,
+        );
+      }
+    if (layers.includes("CIVILIANS")) {
+      for (const shelter of view.city.shelters ?? []) {
+        const n = nodes.get(shelter.nodeId)!;
+        g.poly([n.x - 6, n.y + 22, n.x, n.y + 12, n.x + 6, n.y + 22]).fill(
+          0x89ad92,
+        );
+        label(shelter.id, n.x + 8, n.y + 12, 0x89ad92, 9);
+      }
+      for (const b of view.beliefs.filter((b) => b.kind === "CIVILIANS")) {
+        const n = nodes.get(b.claim.nodeId ?? "");
+        if (!n) continue;
+        const risk = (b.claim.estimatedCritical ?? 0) > 0;
+        g.circle(n.x + 22, n.y + 22, 11).fill({
+          color: risk ? 0xce9867 : 0x90ad8d,
+          alpha: b.stale ? 0.3 : 0.6,
+        });
+        const marker = new Graphics()
+          .circle(n.x + 22, n.y + 22, 14)
+          .fill({ color: 0xffffff, alpha: 0.001 });
+        marker.eventMode = "static";
+        marker.cursor = "pointer";
+        marker.on("pointertap", () => select(b.subjectId));
+        marker.on("pointerover", () =>
+          setHover(
+            `${b.subjectId} · 估計居民 ${b.claim.estimatedPopulation ?? "未知"} · 危重 ${b.claim.estimatedCritical ?? "未知"} · ${b.age}秒前`,
+          ),
+        );
+        e.content.addChild(marker);
+      }
+    }
+    if (layers.includes("COMMS"))
+      for (const [index, net] of (
+        view.city.communicationNodes ?? []
+      ).entries()) {
+        const n = nodes.get(net.nodeId)!,
+          b = view.beliefs.find(
+            (b) =>
+              b.kind === "COMMS" &&
+              (b.subjectId === net.id ||
+                (net.role === "REPEATER" && b.subjectId === "RAD")),
+          ),
+          x = n.x + 30 + (index % 2) * 15,
+          y = n.y - 10;
+        const marker = new Graphics().circle(x, y, 5).stroke({
+          color: b
+            ? b.claim.value === "DOWN"
+              ? 0xe89377
+              : 0x96bac9
+            : 0x647582,
+          width: 1.4,
+        });
+        marker.eventMode = "static";
+        marker.cursor = "pointer";
+        marker.on("pointertap", () => select(b?.subjectId ?? net.id));
+        marker.on("pointerover", () =>
+          setHover(
+            `${net.id} · ${net.role} · ${b ? `回報 ${b.claim.value} · ${b.age}秒前` : "狀態未知"}`,
+          ),
+        );
+        e.content.addChild(marker);
+      }
     for (const h of view.city.hospitals)
       if (layers.includes("MEDICAL")) {
         const n = nodes.get(h.nodeId)!;
+        const hospitalBelief = view.beliefs.find(
+          (b) => b.kind === "HOSPITAL" && b.subjectId === h.id,
+        );
         const marker = new Container();
         marker.position.set(n.x, n.y);
         const icon = new Graphics()
@@ -237,9 +348,19 @@ export function SituationMap({ view }: MapProps) {
         marker.eventMode = "static";
         marker.cursor = "pointer";
         marker.on("pointertap", () => select(h.id));
+        marker.on("pointerover", () =>
+          setHover(
+            `${h.id} · ${hospitalBelief?.claim.value ?? "狀態未知"}${hospitalBelief ? ` · ${hospitalBelief.age}秒前` : ""}`,
+          ),
+        );
         e.content.addChild(marker);
         label(
-          h.id + (selected === h.id ? " ◂" : ""),
+          h.id +
+            (hospitalBelief?.claim.hospitalStatus &&
+            hospitalBelief.claim.hospitalStatus !== "NORMAL"
+              ? " !"
+              : "") +
+            (selected === h.id ? " ◂" : ""),
           n.x + 19,
           n.y - 10,
           0xe5b4b4,

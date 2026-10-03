@@ -227,3 +227,24 @@ it("session branch generation and branch export leave the original save/replay u
   const live = new Session("unfinished-branch", scenario);
   expect(() => live.fork(0, [])).toThrow("先完成");
 });
+it("session retains only the four latest exportable branches without changing its parent", () => {
+  const scenario = {
+      ...earthquake,
+      version: "1.0.0-branch-retention",
+      maxTicks: 300,
+    },
+    session = new Session("branch-retention", scenario);
+  session.step(300);
+  const before = session.exportSave(),
+    ids: string[] = [];
+  for (let index = 0; index < 5; index++)
+    ids.push(
+      session.fork(0, [
+        { tick: index * 10, input: { type: "REQUEST_STATUS", target: "H-B" } },
+      ]).counterfactual!.lineage.branchId,
+    );
+  expect(() => session.exportBranch(ids[0])).toThrow("分支不存在");
+  for (const id of ids.slice(1))
+    expect(session.exportBranch(id).length).toBeGreaterThan(0);
+  expect(session.exportSave()).toEqual(before);
+});

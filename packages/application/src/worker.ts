@@ -1,5 +1,7 @@
 import { Session } from "./session";
 import type { CommandInput } from "../../domain/src/index";
+import { earthquakeSystemic } from "../../scenarios/src/earthquake-systemic";
+import { flood } from "../../scenarios/src/flood";
 interface Request {
   id: number;
   action: string;
@@ -8,12 +10,22 @@ interface Request {
   input?: CommandInput;
   bytes?: Uint8Array;
   tick?: number;
+  scenarioId?: string;
+  alternatives?: unknown;
+  branchId?: string;
 }
 let session: Session | undefined;
 self.onmessage = (event: MessageEvent<Request>) => {
   const r = event.data;
   try {
-    if (r.action === "start") session = new Session(r.seed!);
+    if (r.action === "start") {
+      if (r.scenarioId !== "earthquake" && r.scenarioId !== "flood")
+        throw new Error("未知場景");
+      session = new Session(
+        r.seed!,
+        r.scenarioId === "flood" ? flood : earthquakeSystemic,
+      );
+    }
     if (!session) throw new Error("尚未開始情境");
     const result =
       r.action === "step"
@@ -28,7 +40,11 @@ self.onmessage = (event: MessageEvent<Request>) => {
                 ? session.seek(r.tick!)
                 : r.action === "aar"
                   ? session.returnToAAR()
-                  : session.update();
+                  : r.action === "fork"
+                    ? session.fork(r.tick!, r.alternatives)
+                    : r.action === "saveBranch"
+                      ? session.exportBranch(r.branchId!)
+                      : session.update();
     self.postMessage({ id: r.id, result });
   } catch (error) {
     self.postMessage({

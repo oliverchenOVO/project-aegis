@@ -19,6 +19,8 @@ import { Intelligence } from "./Intelligence";
 import { CommandQueue } from "./CommandQueue";
 import { AfterAction } from "./AAR";
 import { statusNames } from "./labels";
+import { ReplayTimeline } from "./ReplayTimeline";
+import type { AlternativeCommands } from "../../application/src/port";
 declare global {
   interface Window {
     aegisFiles?: {
@@ -34,6 +36,7 @@ export function App() {
   const [session, setSession] = useState<SessionUpdate>(),
     [screen, setScreen] = useState<"MENU" | "COMMAND" | "AAR">("MENU"),
     [seed, setSeed] = useState(SHOWCASE),
+    [scenarioId, setScenarioId] = useState("earthquake"),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
@@ -58,12 +61,12 @@ export function App() {
     setBusy(true);
     setError("");
     try {
-      const result = await getPort().start(seed.trim());
+      const result = await getPort().start(seed.trim(), scenarioId);
       accept(result);
       setScreen("COMMAND");
       setPaused(true);
       select(undefined);
-      setNotice("情境已就緒。開始模擬後，地震與情報會依序發生。");
+      setNotice("情境已就緒。災害與情報持續演化，請留意回報時間與來源。");
     } catch (e) {
       handleError(e);
     } finally {
@@ -171,7 +174,44 @@ export function App() {
       accept(result);
       setScreen(result.view.completed ? "AAR" : "COMMAND");
       select(undefined);
-      setNotice("存檔已驗證並載入。");
+      setNotice(
+        `存檔已驗證並載入 · 引擎 ${result.scenario.simulationVersion}${result.migrations.length ? ` · 存檔格式已遷移 ${result.migrations.map((m) => `${m.fromVersion}→${m.toVersion}`).join(", ")}，保留原始模擬規則` : ""}。`,
+      );
+    } catch (e) {
+      handleError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const fork = async (tick: number, plan: AlternativeCommands) => {
+    setBusy(true);
+    setPaused(true);
+    setError("");
+    try {
+      accept(await getPort().fork(tick, plan));
+      setNotice("替代分支已重跑並保留原始時間線。");
+    } catch (e) {
+      handleError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const saveBranch = async (id: string) => {
+    setBusy(true);
+    try {
+      const bytes = await getPort().saveBranch(id);
+      if (window.aegisFiles) {
+        const path = await window.aegisFiles.save(bytes);
+        if (path) setNotice(`分支已儲存：${path}`);
+      } else {
+        const url = URL.createObjectURL(new Blob([Uint8Array.from(bytes)]));
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `${id}.aegis`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        setNotice("分支存檔已下載。");
+      }
     } catch (e) {
       handleError(e);
     } finally {
@@ -215,22 +255,26 @@ export function App() {
           </div>
           <div className="menu-content">
             <div className="menu-intro">
-              <span className="scenario-label">PHASE 1 / URBAN EARTHQUAKE</span>
+              <span className="scenario-label">PHASE 2 / SYSTEMIC CRISIS</span>
               <h1>
                 在不完整的情報中，
                 <br />
                 做出關鍵決策。
               </h1>
               <p>
-                你是臨江市緊急應變指揮官。地震、火災與停電持續演化；每份情報都有來源、延遲與不確定性。
+                你是臨江市緊急應變指揮官。災害、居民風險與醫療壓力持續演化；每份情報都有來源、傳輸路徑與不確定性。
               </p>
               <div className="briefing">
-                <h2>臨江市・都市地震</h2>
+                <h2>
+                  {scenarioId === "flood"
+                    ? "臨江市・都市暴洪"
+                    : "臨江市・都市地震"}
+                </h2>
                 <p>四個行政區 · 兩家醫院 · 18 個應變單位</p>
                 <ul>
                   <li>區分觀察時間與接收時間，查證互相矛盾的消息。</li>
                   <li>派遣消防、救護、警察與搶修隊，等待命令確認。</li>
-                  <li>任務結束後，檢視因果紀錄並驗證重播。</li>
+                  <li>任務結束後，檢視因果、定位重播並模擬替代指令。</li>
                 </ul>
               </div>
             </div>
@@ -243,6 +287,22 @@ export function App() {
             >
               <Radio className="menu-radio" size={38} />
               <h2>啟動應變中心</h2>
+              <label htmlFor="scenario">災害場景</label>
+              <select
+                id="scenario"
+                value={scenarioId}
+                onChange={(e) => {
+                  setScenarioId(e.target.value);
+                  setSeed(
+                    e.target.value === "flood"
+                      ? "AEGIS-FLOOD-2026-001"
+                      : SHOWCASE,
+                  );
+                }}
+              >
+                <option value="earthquake">都市地震 · 複合災害</option>
+                <option value="flood">都市暴洪 · 居民疏散</option>
+              </select>
               <label htmlFor="seed">情境 Seed</label>
               <input
                 id="seed"
@@ -253,7 +313,16 @@ export function App() {
                 required
               />
               <div className="seed-actions">
-                <button type="button" onClick={() => setSeed(SHOWCASE)}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSeed(
+                      scenarioId === "flood"
+                        ? "AEGIS-FLOOD-2026-001"
+                        : SHOWCASE,
+                    )
+                  }
+                >
                   展示種子
                 </button>
                 <button
@@ -287,7 +356,7 @@ export function App() {
           </div>
           <div className="menu-footer">
             Information Fog · Command · Consequence · Replay
-            <span>LOCAL SIMULATION / v0.1.0</span>
+            <span>LOCAL SIMULATION / v0.2.0</span>
           </div>
         </main>
       ) : (
@@ -298,7 +367,7 @@ export function App() {
               <b>PROJECT AEGIS</b>
               <span>AI 災難指揮中心</span>
             </div>
-            <div className="scenario-title">臨江市・都市地震</div>
+            <div className="scenario-title">{session!.scenario.name}</div>
             <time data-testid="sim-clock">{clock(session!.view.tick)}</time>
             <button
               className={`pause-control ${paused ? "warning" : ""}`}
@@ -348,6 +417,11 @@ export function App() {
               data={session.aar}
               seek={(tick) => void seek(tick)}
               back={() => setScreen("COMMAND")}
+              commands={session.replaySummary?.commands ?? []}
+              comparison={session.counterfactual}
+              busy={busy}
+              fork={(tick, plan) => void fork(tick, plan)}
+              saveBranch={(id) => void saveBranch(id)}
             />
           ) : (
             session && (
@@ -383,6 +457,13 @@ export function App() {
                     }
                   />
                   <div className="center-column">
+                    {session.mode === "REPLAY" && (
+                      <ReplayTimeline
+                        session={session}
+                        busy={busy}
+                        seek={(tick) => void seek(tick)}
+                      />
+                    )}
                     <SituationMap view={session.view} />
                     <CommandQueue view={session.view} />
                   </div>
@@ -401,16 +482,6 @@ export function App() {
                   <div>
                     {session.mode === "REPLAY" && (
                       <>
-                        <label htmlFor="replay-seek">重播定位</label>
-                        <input
-                          id="replay-seek"
-                          type="range"
-                          min="0"
-                          max={session.replayEnd}
-                          value={session.view.tick}
-                          disabled={busy}
-                          onChange={(e) => void seek(Number(e.target.value))}
-                        />
                         <span>
                           {session.view.tick} / {session.replayEnd}s
                         </span>
@@ -433,6 +504,12 @@ export function App() {
                     )}
                     {!session.view.completed && (
                       <>
+                        <button
+                          disabled={busy || !paused}
+                          onClick={() => void step(10)}
+                        >
+                          推進 10秒
+                        </button>
                         <button
                           disabled={busy || !paused}
                           onClick={() => void step(60)}

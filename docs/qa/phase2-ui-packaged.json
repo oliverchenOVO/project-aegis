@@ -1,0 +1,84 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron used",
+  "checks": {
+    "identity": {
+      "url": "file:///F:/CodeX%E9%96%8B%E7%99%BC%E5%B0%8F%E6%9D%B1%E6%9D%B1/AI%20%E7%81%BD%E9%9B%A3%E6%8C%87%E6%8F%AE%E4%B8%AD%E5%BF%83/release/windows-runtime/resources/app.asar/dist/index.html",
+      "title": "Project AEGIS — AI 災難指揮中心"
+    },
+    "initialFog": "unknown units/power; no initial truth",
+    "hospitalInspector": "received census/queue/ICU/handover/power with age/source",
+    "branch": {
+      "originalHash": "4eb523d46aa39a2a",
+      "alternativeHash": "2a2b76b4e6376144",
+      "lineage": {
+        "branchId": "BR-1f3e58078923e8cb",
+        "parentReplayId": "RPL-d0fabde91bb53cc3",
+        "parentHash": "4eb523d46aa39a2a",
+        "forkTick": 30,
+        "baseHash": "bac3fa39053331e3",
+        "simulationVersion": "0.2.0",
+        "scenarioVersion": "1.4.0",
+        "requestedEndTick": 2400,
+        "alternativeCommands": [
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-01",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-02",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-03",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-04",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 350,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-05",
+              "incidentId": "INC-10"
+            }
+          },
+          {
+            "tick": 350,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-06",
+              "incidentId": "INC-10"
+            }
+          }
+        ],
+        "unappliedCommands": []
+      },
+      "fatalities": 897,
+      "parentRecordHash": "80cd871aec957320"
+    },
+    "replay": "verified checkpoint seek to350; commands disabled",
+    "earthquake": "systemic scenario selection/start/tick/render",
+    "overlays": 0
+  },
+  "errors": [],
+  "warnings": []
+}

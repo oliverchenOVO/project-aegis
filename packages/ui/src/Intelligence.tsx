@@ -23,6 +23,7 @@ export function Intelligence({
     [reportId, setReportId] = useState<string>(),
     [selectedUnits, setSelectedUnits] = useState<string[]>([]),
     [priority, setPriority] = useState(2);
+  const [evacuationZone, setEvacuationZone] = useState("");
   const belief = view.beliefs.find((b) => b.subjectId === selected),
     report = view.reports.find((r) => r.id === reportId);
   const feed = view.reports
@@ -40,11 +41,13 @@ export function Intelligence({
       ? ["FIRE", "EMS"]
       : type === "BUILDING_COLLAPSE"
         ? ["FIRE", "EMS", "POLICE"]
-        : type === "MASS_CASUALTY"
-          ? ["EMS"]
-          : type === "ROAD_BLOCKAGE"
-            ? ["POLICE"]
-            : ["UTILITY"];
+        : type === "FLOOD" || type === "STRANDED_CIVILIANS"
+          ? ["FIRE", "EMS", "POLICE", "UTILITY"]
+          : type === "MASS_CASUALTY"
+            ? ["EMS"]
+            : type === "ROAD_BLOCKAGE"
+              ? ["POLICE"]
+              : ["UTILITY"];
   const eligible = view.units.filter((u) => needed.includes(u.agency));
   return (
     <aside className="intel-panel">
@@ -62,6 +65,8 @@ export function Intelligence({
           <option value="POWER">電力</option>
           <option value="COMMS">通訊</option>
           <option value="ROAD">道路</option>
+          <option value="FLOOD">淹水觀測</option>
+          <option value="CIVILIANS">居民風險</option>
         </select>
       </div>
       <div className="feed-heading">
@@ -190,10 +195,64 @@ export function Intelligence({
                     </dd>
                   </>
                 )}
+                {belief.kind === "HOSPITAL" && (
+                  <>
+                    <dt>回報在院 / 名目容量</dt>
+                    <dd>
+                      {belief.claim.currentPatients ?? "未知"} /{" "}
+                      {view.city.hospitals.find((h) => h.id === selected)
+                        ?.capacity ?? "未知"}
+                    </dd>
+                    <dt>回報急診佇列</dt>
+                    <dd>{belief.claim.emergencyQueue ?? "未知"}</dd>
+                    <dt>回報 ICU 占用</dt>
+                    <dd>
+                      {belief.claim.icuOccupied ?? "未知"} /{" "}
+                      {view.city.hospitals.find((h) => h.id === selected)
+                        ?.icuCapacity ?? "未知"}
+                    </dd>
+                    <dt>回報救護車交接</dt>
+                    <dd>{belief.claim.ambulanceHandover ?? "未知"}</dd>
+                    <dt>回報電力</dt>
+                    <dd>
+                      {belief.claim.powered === undefined
+                        ? "未知"
+                        : belief.claim.powered
+                          ? "供電中"
+                          : "失去供電"}
+                    </dd>
+                  </>
+                )}
+                {belief.kind === "FLOOD" && (
+                  <>
+                    <dt>估計水深</dt>
+                    <dd>
+                      {belief.claim.estimatedDepth === undefined
+                        ? "未知"
+                        : `${belief.claim.estimatedDepth.toFixed(2)}m`}
+                    </dd>
+                  </>
+                )}
+                {belief.kind === "CIVILIANS" && (
+                  <>
+                    <dt>估計居民</dt>
+                    <dd>{belief.claim.estimatedPopulation ?? "未知"}</dd>
+                    <dt>估計受傷 / 危重</dt>
+                    <dd>
+                      {belief.claim.estimatedInjured ?? "未知"} /{" "}
+                      {belief.claim.estimatedCritical ?? "未知"}
+                    </dd>
+                  </>
+                )}
               </dl>
               <button
                 className="full"
-                disabled={disabled}
+                disabled={
+                  disabled ||
+                  !["INCIDENT", "HOSPITAL", "UNIT", "POWER", "COMMS"].includes(
+                    belief.kind,
+                  )
+                }
                 onClick={() =>
                   command({ type: "REQUEST_STATUS", target: belief.subjectId })
                 }
@@ -258,9 +317,44 @@ export function Intelligence({
             </div>
           </>
         ) : (
-          <div className="empty">選擇地圖事件或報告，評估情報後下令。</div>
+          <div className="empty">
+            {selected
+              ? `${selected}：狀態未知，尚無已接收情報。`
+              : "選擇地圖事件或報告，評估情報後下令。"}
+          </div>
         )}
       </div>
+      {view.city.evacuationZones && (
+        <div className="evacuation-control">
+          <label htmlFor="evacuation-zone">區域疏散命令</label>
+          <div className="row-actions">
+            <select
+              id="evacuation-zone"
+              aria-label="疏散區域"
+              value={evacuationZone}
+              onChange={(e) => setEvacuationZone(e.target.value)}
+            >
+              <option value="">選擇區域</option>
+              {view.city.evacuationZones.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.id}
+                </option>
+              ))}
+            </select>
+            <button
+              disabled={disabled || !evacuationZone}
+              onClick={() =>
+                command({ type: "EVACUATE_ZONE", target: evacuationZone })
+              }
+            >
+              發布疏散
+            </button>
+          </div>
+          <small className="muted">
+            送達後居民依路線與遵從率行動；不保證安全抵達。
+          </small>
+        </div>
+      )}
       {incident && belief && (
         <div className="dispatch-submit">
           {" "}

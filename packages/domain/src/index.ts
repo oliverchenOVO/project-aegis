@@ -617,11 +617,16 @@ export interface CommandCenterView {
   city: Pick<Scenario, "nodes" | "districts" | "facilities"> & {
     roads: { id: string; from: string; to: string }[];
     floodZones?: { id: string; nodeIds: string[] }[];
+    evacuationZones?: { id: string; nodeIds: string[] }[];
+    shelters?: { id: string; nodeId: string; capacity: number }[];
+    communicationNodes?: { id: string; nodeId: string; role: string }[];
     hospitals: {
       id: string;
       nodeId: string;
       capacity: number;
       emergencyCapacity: number;
+      edCapacity?: number;
+      icuCapacity?: number;
     }[];
   };
 }

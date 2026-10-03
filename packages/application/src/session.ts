@@ -10,6 +10,7 @@ import {
   ReplayRecorder,
   VerifiedTimeline,
   type ReplayBranch,
+  type AlternativeCommands,
 } from "../../replay/src/index";
 import { save, load } from "../../persistence/src/index";
 import type { MigrationMetadata } from "../../persistence/src/index";
@@ -18,6 +19,19 @@ import {
   type BranchComparison,
 } from "../../counterfactual/src/index";
 export interface SessionUpdate {
+  migrations: MigrationMetadata[];
+  scenario: {
+    id: string;
+    name: string;
+    version: string;
+    simulationVersion: string;
+    hazardKind: string;
+  };
+  replaySummary?: {
+    checkpoints: number[];
+    commands: AlternativeCommands;
+    events: { id: string; tick: number; type: string }[];
+  };
   view: CommandCenterView;
   mode: "LIVE" | "REPLAY";
   replayEnd: number;
@@ -44,7 +58,30 @@ export class Session {
     this.#recorder = new ReplayRecorder(this.#sim);
   }
   update(): SessionUpdate {
+    const original = this.#original ?? this.#sim;
     return {
+      migrations: structuredClone(this.#migrations),
+      scenario: {
+        id: this.#sim.scenario.id,
+        name: this.#sim.scenario.name,
+        version: this.#sim.scenario.version,
+        simulationVersion: this.#sim.state.version,
+        hazardKind: this.#sim.scenario.hazardKind ?? "EARTHQUAKE",
+      },
+      replaySummary: original.state.completed
+        ? {
+            checkpoints:
+              this.#recorder.record.checkpoints?.map((c) => c.tick) ?? [],
+            commands: structuredClone(this.#recorder.record.commands),
+            events: original.state.events
+              .filter(
+                (e) =>
+                  !e.type.startsWith("REPORT_") &&
+                  !e.type.startsWith("MESSAGE_"),
+              )
+              .map((e) => ({ id: e.id, type: e.type, tick: e.tick })),
+          }
+        : undefined,
       view: this.#sim.view(),
       mode: this.#mode,
       replayEnd: this.#recorder.record.endTick,
@@ -155,6 +192,8 @@ export class Session {
     const branch = this.#timeline.fork(forkTick, alternatives),
       comparison = compareBranch(original.state, original.scenario, branch);
     this.#branches.set(branch.lineage.branchId, { branch, comparison });
+    while (this.#branches.size > 4)
+      this.#branches.delete(this.#branches.keys().next().value!);
     this.#comparison = comparison;
     this.#verified = true;
     return this.update();

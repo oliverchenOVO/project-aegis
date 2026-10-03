@@ -12,9 +12,17 @@ export const incidentNames: Record<string, string> = {
   ROAD_BLOCKAGE: "道路阻斷",
   POWER_FAILURE: "供電中斷",
   COMMUNICATION_FAILURE: "通訊故障",
+  FLOOD: "區域淹水",
+  STRANDED_CIVILIANS: "居民受困",
 };
 export const statusNames: Record<string, string> = {
   AVAILABLE: "待命",
+  HANDOVER: "院方交接中",
+  DOWN: "離線",
+  STRAINED: "醫療緊繃",
+  OVER_CAPACITY: "超過容量",
+  DIVERTING: "分流中",
+  POWER_EMERGENCY: "供電緊急",
   DISPATCHED: "受令",
   EN_ROUTE: "前往中",
   OPERATING: "作業中",
@@ -36,6 +44,7 @@ export const statusNames: Record<string, string> = {
   RECALL_UNIT: "召回",
   REQUEST_STATUS: "查詢狀態",
   SET_INCIDENT_PRIORITY: "設定優先序",
+  EVACUATE_ZONE: "疏散區域",
 };
 export const color: Record<string, number> = {
   FIRE: 0xe87944,
