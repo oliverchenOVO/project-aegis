@@ -302,6 +302,8 @@ export function App() {
             <time data-testid="sim-clock">{clock(session!.view.tick)}</time>
             <button
               className={`pause-control ${paused ? "warning" : ""}`}
+              aria-label={paused ? "開始模擬" : "暫停模擬"}
+              title={paused ? "開始模擬" : "暫停模擬"}
               disabled={busy || session!.view.completed || screen !== "COMMAND"}
               onClick={() => setPaused(!paused)}
             >

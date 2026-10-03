@@ -55,7 +55,7 @@ export function Intelligence({
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="ALL">全部来源</option>
+          <option value="ALL">全部來源</option>
           <option value="INCIDENT">事件</option>
           <option value="HOSPITAL">醫院</option>
           <option value="UNIT">單位</option>
@@ -240,39 +240,6 @@ export function Intelligence({
                       </label>
                     ))}
                   </div>
-                  <button
-                    className="primary full"
-                    disabled={
-                      disabled ||
-                      !selectedUnits.some((id) =>
-                        eligible.some((u) => u.id === id),
-                      )
-                    }
-                    onClick={() => {
-                      command({
-                        type: "SET_INCIDENT_PRIORITY",
-                        target: belief.subjectId,
-                        priority,
-                      });
-                      for (const id of selectedUnits.filter((id) =>
-                        eligible.some((u) => u.id === id),
-                      )) {
-                        const u = view.units.find((u) => u.id === id)!;
-                        command({
-                          type:
-                            u.belief?.claim.unitState === "AVAILABLE"
-                              ? "DISPATCH_UNIT"
-                              : "REASSIGN_UNIT",
-                          target: id,
-                          incidentId: belief.subjectId,
-                        });
-                      }
-                      setSelectedUnits([]);
-                    }}
-                  >
-                    <Send size={15} />
-                    發布命令
-                  </button>
                 </div>
               )}
               <div className="local-timeline">
@@ -294,6 +261,42 @@ export function Intelligence({
           <div className="empty">選擇地圖事件或報告，評估情報後下令。</div>
         )}
       </div>
+      {incident && belief && (
+        <div className="dispatch-submit">
+          {" "}
+          <button
+            className="primary full"
+            disabled={
+              disabled ||
+              !selectedUnits.some((id) => eligible.some((u) => u.id === id))
+            }
+            onClick={() => {
+              command({
+                type: "SET_INCIDENT_PRIORITY",
+                target: belief.subjectId,
+                priority,
+              });
+              for (const id of selectedUnits.filter((id) =>
+                eligible.some((u) => u.id === id),
+              )) {
+                const u = view.units.find((u) => u.id === id)!;
+                command({
+                  type:
+                    u.belief?.claim.unitState === "AVAILABLE"
+                      ? "DISPATCH_UNIT"
+                      : "REASSIGN_UNIT",
+                  target: id,
+                  incidentId: belief.subjectId,
+                });
+              }
+              setSelectedUnits([]);
+            }}
+          >
+            <Send size={15} />
+            發布命令
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

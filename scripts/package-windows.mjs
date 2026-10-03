@@ -33,10 +33,23 @@ try {
   });
   mkdirSync(output, { recursive: true });
   mkdirSync(join(output, "windows-runtime"), { recursive: true });
-  cpSync(join(staging, "win-unpacked"), join(output, "windows-runtime"), {
-    recursive: true,
-    dereference: true,
-  });
+  const quote = (value) => "'" + value.replace(/'/g, "''") + "'";
+  // Native PowerShell copying also works on redirected drives whose Node directory-copy semantics differ.
+  execFileSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      [
+        "$ErrorActionPreference = 'Stop'",
+        `$source = ${quote(join(staging, "win-unpacked"))}`,
+        `$target = ${quote(join(output, "windows-runtime"))}`,
+        "Get-ChildItem -LiteralPath $source -Force | Copy-Item -Destination $target -Recurse -Force",
+      ].join("\n"),
+    ],
+    { stdio: "inherit", windowsHide: true },
+  );
   if (!existsSync(join(output, "windows-runtime/Project AEGIS.exe")))
     throw new Error("Packaged executable copy failed");
   for (const file of readdirSync(staging).filter((file) =>

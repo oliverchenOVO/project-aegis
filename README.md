@@ -20,9 +20,11 @@ pnpm lint
 pnpm test
 pnpm benchmark
 pnpm build
+node node_modules/electron/install.js
 pnpm desktop
 pnpm package:win
 pnpm smoke "release/windows-runtime/Project AEGIS.exe"
+pnpm exec tsx tests/e2e/portable-launch.ts
 ```
 
 UI dev port is 5173. If occupied, `pnpm exec vite --host 127.0.0.1 --port 5187`. The packaged app opens local production assets and isolates the renderer from Node. Simulation runs in a separate worker and only exposes received views.

@@ -140,6 +140,11 @@ try {
   await page.getByLabel("重播定位").fill("900");
   await expect(page.getByTestId("sim-clock")).toHaveText("14:15:00");
   await page.screenshot({ path: resolve(output, "replay.png") });
+  await page.getByRole("button", { name: "開始模擬", exact: true }).click();
+  await expect(page.getByTestId("sim-clock")).not.toHaveText("14:15:00", {
+    timeout: 10000,
+  });
+  await page.getByRole("button", { name: "暫停模擬", exact: true }).click();
   await page.getByRole("button", { name: "返回 AAR", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "行動檢討報告" }),
@@ -163,6 +168,7 @@ try {
       "AAR",
       "verified replay",
       "seek",
+      "real-time replay playback/pause",
     ],
     errors,
     warnings,

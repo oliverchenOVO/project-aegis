@@ -7,7 +7,7 @@ import {
 } from "../../domain/src/index";
 import { emit } from "./events";
 import { SeededRandom } from "./random";
-import { route } from "./routing";
+import { route, edge, cost } from "./routing";
 import { observe, unitReport } from "./intelligence";
 export function issue(w: WorldState, input: CommandInput): PlayerCommand {
   const parsed = CommandInputSchema.parse(input);
@@ -112,7 +112,12 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
       continue;
     }
     const destination = c.type === "RECALL_UNIT" ? u.homeId : i!.nodeId;
-    const path = route(w, u.nodeId, destination);
+    const pendingEdge =
+      u.route[0] && u.edgeProgress > 0
+        ? edge(w, u.nodeId, u.route[0])
+        : undefined;
+    const continuing = pendingEdge && pendingEdge.state !== "BLOCKED";
+    const path = route(w, continuing ? u.route[0] : u.nodeId, destination);
     if (!path) {
       fail(w, c, "道路阻斷，無可用路線");
       continue;
@@ -122,11 +127,26 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
       c.cause,
     ]);
     const priorAssignment = u.assignment;
+    for (const earlier of w.commands.filter(
+      (order) =>
+        order.id !== c.id &&
+        order.target === u.id &&
+        order.executionStatus === "EXECUTING",
+    )) {
+      earlier.executionStatus = "FAILED";
+      earlier.failure = "已由更新任務取代";
+      emit(
+        w,
+        "COMMAND_FAILED",
+        { commandId: earlier.id, reason: earlier.failure },
+        [earlier.cause, c.cause],
+      );
+    }
     u.assignment = c.type === "RECALL_UNIT" ? undefined : i!.id;
     u.missionCause = c.cause;
-    u.route = path.nodes;
-    u.edgeProgress = 0;
-    u.eta = path.eta;
+    u.route = continuing ? [u.route[0], ...path.nodes] : path.nodes;
+    u.edgeProgress = continuing ? u.edgeProgress : 0;
+    u.eta = path.eta + (continuing ? cost(pendingEdge) - u.edgeProgress : 0);
     u.blockedSince = undefined;
     u.state = c.type === "RECALL_UNIT" ? "RETURNING" : "DISPATCHED";
     c.executionStatus = "EXECUTING";

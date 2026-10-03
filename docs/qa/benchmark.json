@@ -4,8 +4,8 @@
   "crashes": 0,
   "invariantFailures": 0,
   "replayMismatches": 0,
-  "averageTicksPerSecond": 6547.932521227226,
-  "p95RuntimeMs": 536.5301999999938,
+  "averageTicksPerSecond": 3028.823368503048,
+  "p95RuntimeMs": 933.1263000000035,
   "maximumEventCount": 4008,
   "failures": []
 }
