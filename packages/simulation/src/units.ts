@@ -1,9 +1,9 @@
 import type { WorldState, Scenario, Unit } from "../../domain/src/index";
-import { route, edge, cost } from "./routing";
+import { route, edge, cost, passable } from "./routing";
 import { emit } from "./events";
 import { unitReport } from "./intelligence";
 function travelTo(w: WorldState, u: Unit, target: string): boolean {
-  const path = route(w, u.nodeId, target);
+  const path = route(w, u.nodeId, target, u.agency);
   if (!path) return false;
   u.route = path.nodes;
   u.edgeProgress = 0;
@@ -21,15 +21,25 @@ export function responders(w: WorldState, s: Scenario): void {
     if (u.state === "EN_ROUTE" || u.state === "RETURNING") {
       if (u.route.length) {
         const r = edge(w, u.nodeId, u.route[0]);
-        if (!r || r.state === "BLOCKED") {
+        if (!r || !passable(r, u.agency)) {
           const target = u.route[u.route.length - 1],
-            newPath = route(w, u.nodeId, target);
+            newPath = route(w, u.nodeId, target, u.agency);
           const cause = emit(
             w,
             "UNIT_REROUTED",
             { unitId: u.id, oldEta: u.eta },
             [u.missionCause, r?.cause],
           );
+          for (const patientId of u.patients) {
+            const patient = w.patients.find((p) => p.id === patientId);
+            if (patient)
+              patient.cause = emit(
+                w,
+                "TRANSPORT_DELAYED",
+                { patientId, unitId: u.id },
+                [patient.cause, cause],
+              );
+          }
           if (newPath) {
             u.route = newPath.nodes;
             u.edgeProgress = 0;
@@ -127,7 +137,7 @@ export function responders(w: WorldState, s: Scenario): void {
       .slice(0, 2);
     if (!patients.length) continue;
     const hospitals = w.hospitals
-      .map((h) => ({ h, path: route(w, u.nodeId, h.nodeId) }))
+      .map((h) => ({ h, path: route(w, u.nodeId, h.nodeId, u.agency) }))
       .filter(
         (
           h,

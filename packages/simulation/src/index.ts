@@ -6,9 +6,10 @@ import {
   type Scenario,
   type CommandInput,
   type AAR,
+  type CommandCenterView,
 } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
-import { initializeDisaster, scheduledEvents, hazards } from "./disasters";
+import { updateHazards } from "./hazards";
 import { infrastructure, medical } from "./medical";
 import { responders } from "./units";
 import { observe, transmit, projectView, unitReport } from "./intelligence";
@@ -82,7 +83,7 @@ export class Simulation {
       return this.#legacy.issue(LegacyCommandSchema.parse(input));
     return issue(this.state, input);
   }
-  view() {
+  view(): CommandCenterView {
     if (this.#legacy) return this.#legacy.view();
     return projectView(this.state, this.scenario);
   }
@@ -103,9 +104,7 @@ export class Simulation {
     for (let n = 0; n < count && !this.state.completed; n++) {
       const w = this.state;
       w.tick++;
-      if (w.tick === 1) initializeDisaster(w, this.scenario);
-      scheduledEvents(w, this.scenario);
-      hazards(w);
+      updateHazards(w, this.scenario);
       infrastructure(w);
       medical(w);
       responders(w, this.scenario);
@@ -113,6 +112,9 @@ export class Simulation {
       transmit(w, this.scenario);
       deliverCommands(w, this.scenario);
       const stabilized =
+        (!w.flood ||
+          (w.flood.rainEnded &&
+            w.flood.zones.every((z) => z.waterDepth < 0.2))) &&
         w.tick > this.scenario.aftershockTick + 20 &&
         w.schedule.length === 0 &&
         w.incidents.every((i) => i.status !== "ACTIVE") &&
@@ -122,11 +124,13 @@ export class Simulation {
       const fatalities = w.events.filter(
         (e) => e.type === "PATIENT_DIED",
       ).length;
-      if (stabilized || w.tick >= this.scenario.maxTicks || fatalities >= 60) {
+      const catastrophic =
+        this.scenario.hazardKind !== "FLOOD" && fatalities >= 60;
+      if (stabilized || w.tick >= this.scenario.maxTicks || catastrophic) {
         w.completed = true;
         w.completionReason = stabilized
           ? "主要事件已穩定"
-          : fatalities >= 60
+          : catastrophic
             ? "災難性傷亡門檻"
             : "作業時限已到";
         emit(w, "SCENARIO_COMPLETED", { reason: w.completionReason });
@@ -289,4 +293,16 @@ export function assertInvariants(w: WorldState, s: Scenario): void {
     previousTick = e.tick;
   }
   if (w.tick > s.maxTicks || w.events.length > 100000) fail("guard exceeded");
+  if (w.flood) {
+    const zones = new Set(w.flood.zones.map((z) => z.id));
+    for (const zone of w.flood.zones)
+      if (
+        !Number.isFinite(zone.waterDepth) ||
+        zone.waterDepth < 0 ||
+        zone.adjacency.some((id) => !zones.has(id)) ||
+        zone.nodeIds.some((id) => !nodes.has(id)) ||
+        zone.roadIds.some((id) => !w.roads.some((r) => r.id === id))
+      )
+        fail("invalid flood geometry or depth");
+  }
 }

@@ -1,4 +1,12 @@
-import type { WorldState } from "../../domain/src/index";
+import type { WorldState, Agency } from "../../domain/src/index";
+export function passable(
+  r: WorldState["roads"][number],
+  agency?: Agency,
+): boolean {
+  if (r.state === "BLOCKED" || r.state === "IMPASSABLE") return false;
+  const limit = agency === "FIRE" ? 0.8 : agency === "EMS" ? 0.55 : 0.4;
+  return r.waterDepth === undefined || r.waterDepth < limit;
+}
 export function edge(w: WorldState, a: string, b: string) {
   return w.roads.find(
     (r) => (r.from === a && r.to === b) || (r.from === b && r.to === a),
@@ -11,6 +19,7 @@ export function route(
   w: WorldState,
   start: string,
   end: string,
+  agency?: Agency,
 ): { nodes: string[]; eta: number } | undefined {
   if (start === end) return { nodes: [], eta: 0 };
   const distance = new Map<string, number>([[start, 0]]),
@@ -25,9 +34,7 @@ export function route(
     if (node === end) break;
     visited.add(node);
     for (const r of w.roads
-      .filter(
-        (r) => r.state !== "BLOCKED" && (r.from === node || r.to === node),
-      )
+      .filter((r) => passable(r, agency) && (r.from === node || r.to === node))
       .sort((a, b) => a.id.localeCompare(b.id, "en"))) {
       const next = r.from === node ? r.to : r.from,
         value = d + cost(r);

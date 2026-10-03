@@ -8,6 +8,13 @@ import type {
 } from "../../domain/src/index";
 import { emit } from "./events";
 import { SeededRandom } from "./random";
+function floodDescription(depth: number): string {
+  return depth < 0.25
+    ? "低度積水"
+    : depth < 0.7
+      ? "道路積水風險"
+      : "深度淹水・可能阻斷";
+}
 export function report(
   w: WorldState,
   s: Scenario,
@@ -92,6 +99,43 @@ export function observe(
 ): void {
   if (!forceSubject && w.tick !== 1 && w.tick % s.observationInterval !== 0)
     return;
+  for (const zone of w.flood?.zones ?? []) {
+    if (forceSubject && forceSubject !== zone.id) continue;
+    const value = floodDescription(zone.waterDepth),
+      rng = new SeededRandom(w.seed, w.rng, `observation:flood:${zone.id}`);
+    report(
+      w,
+      s,
+      `SENSOR-${zone.id}`,
+      zone.id,
+      "FLOOD",
+      {
+        value,
+        nodeId: zone.nodeIds[0],
+        estimatedDepth: Math.round(zone.waterDepth * 10) / 10,
+      },
+      value,
+      w.flood!.rainCause,
+    );
+    const estimate = Math.max(
+      0,
+      Math.round((zone.waterDepth + rng.integer(-3, 3) / 10) * 10) / 10,
+    );
+    report(
+      w,
+      s,
+      `CIV-${zone.id}`,
+      zone.id,
+      "FLOOD",
+      {
+        value: floodDescription(estimate),
+        nodeId: zone.nodeIds[0],
+        estimatedDepth: estimate,
+      },
+      value,
+      w.flood!.rainCause,
+    );
+  }
   for (const i of w.incidents.filter(
     (i) => !forceSubject || i.id === forceSubject,
   )) {
@@ -262,6 +306,10 @@ export function transmit(w: WorldState, s: Scenario): void {
   }
 }
 function factAtReceipt(w: WorldState, r: IntelReport): string {
+  if (r.subjectKind === "FLOOD")
+    return floodDescription(
+      w.flood!.zones.find((z) => z.id === r.subjectId)!.waterDepth,
+    );
   if (r.subjectKind === "UNIT")
     return w.units.find((u) => u.id === r.subjectId)!.state;
   if (r.subjectKind === "HOSPITAL") {
@@ -386,6 +434,14 @@ export function projectView(w: WorldState, s: Scenario): CommandCenterView {
       failure: c.failure,
     })),
     city: {
+      ...(s.flood
+        ? {
+            floodZones: s.flood.zones.map((z) => ({
+              id: z.id,
+              nodeIds: [...z.nodeIds],
+            })),
+          }
+        : {}),
       nodes: structuredClone(s.nodes),
       districts: structuredClone(s.districts),
       facilities: structuredClone(s.facilities),

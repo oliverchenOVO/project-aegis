@@ -20,9 +20,11 @@ export function createIncident(
         ? ["FIRE", "EMS", "POLICE"]
         : type === "MASS_CASUALTY"
           ? ["EMS"]
-          : type === "ROAD_BLOCKAGE"
-            ? ["POLICE"]
-            : ["UTILITY"];
+          : type === "FLOOD" || type === "STRANDED_CIVILIANS"
+            ? ["FIRE", "EMS", "POLICE", "UTILITY"]
+            : type === "ROAD_BLOCKAGE"
+              ? ["POLICE"]
+              : ["UTILITY"];
   const incident: Incident = {
     id,
     type,

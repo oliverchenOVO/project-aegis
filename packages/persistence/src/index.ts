@@ -10,7 +10,7 @@ import {
 import { hash } from "../../shared/src/index";
 import {
   ReplaySchema,
-  replay,
+  verifyReplay,
   validateReplay,
   type ReplayRecord,
 } from "../../replay/src/index";
@@ -170,13 +170,14 @@ export function load(bytes: Uint8Array): {
       hash(parseLines(text("events.ndjson"))) !== hash(state.events)
     )
       throw new Error("存檔校驗失敗");
-    const record = validateReplay(manifest.replay, scenario);
+    const verified = verifyReplay(scenario, manifest.replay),
+      record = verified.record;
     if (
       record.simulationVersion !== state.version ||
       record.endTick !== state.tick ||
       hash(JSON.parse(text("checkpoints.json"))) !==
         hash(checkpointIndex(record)) ||
-      replay(scenario, record).hash() !== hash(state)
+      verified.simulation.hash() !== hash(state)
     )
       throw new Error("存檔與重播不一致");
     return {

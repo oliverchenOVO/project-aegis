@@ -7,7 +7,7 @@ import {
 } from "../../domain/src/index";
 import { emit } from "./events";
 import { SeededRandom } from "./random";
-import { route, edge, cost } from "./routing";
+import { route, edge, cost, passable } from "./routing";
 import { observe, unitReport } from "./intelligence";
 export function issue(w: WorldState, input: CommandInput): PlayerCommand {
   const parsed = CommandInputSchema.parse(input);
@@ -116,8 +116,13 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
       u.route[0] && u.edgeProgress > 0
         ? edge(w, u.nodeId, u.route[0])
         : undefined;
-    const continuing = pendingEdge && pendingEdge.state !== "BLOCKED";
-    const path = route(w, continuing ? u.route[0] : u.nodeId, destination);
+    const continuing = pendingEdge && passable(pendingEdge, u.agency);
+    const path = route(
+      w,
+      continuing ? u.route[0] : u.nodeId,
+      destination,
+      u.agency,
+    );
     if (!path) {
       fail(w, c, "道路阻斷，無可用路線");
       continue;

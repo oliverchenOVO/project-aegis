@@ -15,6 +15,8 @@ export const IncidentTypeSchema = z.enum([
   "ROAD_BLOCKAGE",
   "POWER_FAILURE",
   "COMMUNICATION_FAILURE",
+  "FLOOD",
+  "STRANDED_CIVILIANS",
 ]);
 export const NodeSchema = z.object({
   id,
@@ -28,7 +30,9 @@ export const RoadSchema = z.object({
   from: id,
   to: id,
   travelTicks: z.number().int().positive(),
-  state: z.enum(["NORMAL", "DEGRADED", "BLOCKED"]),
+  state: z.enum(["NORMAL", "DEGRADED", "BLOCKED", "IMPASSABLE"]),
+  waterDepth: positive.optional(),
+  floodElevation: positive.optional(),
   cause: id.optional(),
 });
 export const UnitSchema = z.object({
@@ -98,6 +102,13 @@ export const HospitalSchema = z.object({
   overloadReported: z.boolean(),
 });
 export const EventTypes = [
+  "RAIN_STARTED",
+  "RAIN_ENDED",
+  "FLOOD_ZONE_RISE",
+  "FLOOD_ZONE_RECEDING",
+  "BUILDING_FLOODED",
+  "ROAD_DEGRADED",
+  "TRANSPORT_DELAYED",
   "EARTHQUAKE_OCCURRED",
   "INCIDENT_CREATED",
   "BUILDING_COLLAPSED",
@@ -157,6 +168,8 @@ export const ReportSchema = z.object({
     "ROAD",
     "POWER",
     "COMMS",
+    "FLOOD",
+    "CIVILIANS",
   ]),
   claim: z.object({
     value: z.string(),
@@ -168,6 +181,7 @@ export const ReportSchema = z.object({
     route: z.array(id).optional(),
     eta: positive.optional(),
     comms: UnitSchema.shape.communicationStatus.optional(),
+    estimatedDepth: positive.optional(),
   }),
   observedTick: tick,
   transmittedTick: tick.optional(),
@@ -252,6 +266,33 @@ export const ScenarioSchema = z.object({
   degradedReportDelay: z.tuple([tick, tick]),
   reportLoss: z.number().min(0).max(1),
   degradedReportLoss: z.number().min(0).max(1),
+  hazardKind: z.enum(["EARTHQUAKE", "FLOOD"]).optional(),
+  flood: z
+    .object({
+      zones: z
+        .array(
+          z.object({
+            id,
+            nodeIds: z.array(id).min(1),
+            roadIds: z.array(id),
+            elevation: positive,
+            waterDepth: positive,
+            inflow: positive,
+            outflow: positive,
+            drainageCapacity: positive,
+            adjacency: z.array(id),
+          }),
+        )
+        .min(4),
+      rainfallIntensity: positive,
+      rainfallDuration: tick,
+      updateInterval: z.number().int().positive(),
+      degradedDepth: positive,
+      impassableDepth: positive,
+      buildingDepth: positive,
+      powerDepth: positive,
+    })
+    .optional(),
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 export const WorldSchema = z.object({
@@ -276,6 +317,15 @@ export const WorldSchema = z.object({
   commsCause: id.optional(),
   completed: z.boolean(),
   completionReason: z.string().optional(),
+  flood: z
+    .object({
+      zones: ScenarioSchema.shape.flood.unwrap().shape.zones,
+      rainfallIntensity: positive,
+      rainCause: id,
+      buildingImpacts: z.array(id),
+      rainEnded: z.boolean(),
+    })
+    .optional(),
   counters: z.object({
     event: tick,
     report: tick,
@@ -339,6 +389,7 @@ export interface CommandCenterView {
   commands: CommandReceipt[];
   city: Pick<Scenario, "nodes" | "districts" | "facilities"> & {
     roads: { id: string; from: string; to: string }[];
+    floodZones?: { id: string; nodeIds: string[] }[];
     hospitals: {
       id: string;
       nodeId: string;

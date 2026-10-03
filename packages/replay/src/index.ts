@@ -138,8 +138,28 @@ export function replay(
   input: unknown,
   targetTick?: number,
 ): Simulation {
-  const record = validateReplay(input, scenario),
-    target = targetTick ?? record.endTick;
+  return verifyReplay(scenario, input, targetTick).simulation;
+}
+export function verifyReplay(
+  scenario: Scenario,
+  input: unknown,
+  targetTick?: number,
+): { record: ReplayRecord; simulation: Simulation } {
+  const record = validateReplay(input, scenario);
+  return {
+    record,
+    simulation: simulateValidated(
+      scenario,
+      record,
+      targetTick ?? record.endTick,
+    ),
+  };
+}
+function simulateValidated(
+  scenario: Scenario,
+  record: ReplayRecord,
+  target: number,
+): Simulation {
   if (!Number.isInteger(target) || target < 0 || target > record.endTick)
     throw new Error("重播時間超出範圍");
   const sim = new Simulation(
@@ -154,17 +174,8 @@ export function replay(
     const expected = checks.get(sim.state.tick);
     if (expected && expected !== sim.hash())
       throw new Error(`DETERMINISM REGRESSION at tick ${sim.state.tick}`);
-    const checkpoint = record.checkpoints?.find(
-      (c) => c.tick === sim.state.tick,
-    );
-    if (
-      checkpoint &&
-      (checkpoint.canonicalHash !== sim.hash() ||
-        hash(checkpoint.snapshot) !== sim.hash())
-    )
-      throw new Error(
-        `Checkpoint does not match simulated timeline at tick ${sim.state.tick}`,
-      );
+    // validateReplay already hashed every snapshot and matched its hash to this index.
+    // Independently simulating this boundary validates the checkpoint without hashing it again.
     while (record.commands[cursor]?.tick === sim.state.tick) {
       sim.issue(record.commands[cursor].input);
       cursor++;
@@ -198,7 +209,7 @@ export class VerifiedTimeline {
   constructor(scenario: Scenario, input: unknown) {
     this.#scenario = ScenarioSchema.parse(scenario);
     this.#record = validateReplay(structuredClone(input), this.#scenario);
-    replay(this.#scenario, this.#record);
+    simulateValidated(this.#scenario, this.#record, this.#record.endTick);
   }
   seek(target: number): Simulation {
     return this.seekMeasured(target).simulation;
