@@ -8,7 +8,11 @@ import { color, incidentNames } from "./labels";
 import { drawArchitecture, layer, mapLabel } from "./map/architecture";
 import { cityKey, type Identity } from "./map/city";
 import { detailForScale, MAP_LAYERS, mapTheme, type Detail } from "./map/theme";
-import { positionedUnits, floodAppearance } from "./map/knowledge";
+import {
+  positionedUnits,
+  floodAppearance,
+  incidentCallouts,
+} from "./map/knowledge";
 import { cameraPosition, invalidator } from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
@@ -412,18 +416,20 @@ export function SituationMap({ view, identity }: MapProps) {
         infrastructure.addChild(hit);
       }
     }
+    const calloutPositions = incidentCallouts(view);
     if (layers.includes("INCIDENTS"))
       for (const b of view.beliefs.filter((b) => b.kind === "INCIDENT")) {
         const n = nodes.get(b.claim.nodeId!)!;
         if (!n) continue;
         const c = b.claim.value === "已解除" ? 0x7fa18b : 0xe58b54;
         const marker = new Container();
-        marker.position.set(n.x, n.y - 42);
+        const callout = calloutPositions.get(b.subjectId)!;
+        marker.position.set(callout.x, callout.y);
         const anchor = new Graphics()
           .circle(n.x, n.y, 10)
           .stroke({ color: c, width: 2, alpha: 0.9 })
           .moveTo(n.x, n.y - 10)
-          .lineTo(n.x, n.y - 27)
+          .lineTo(callout.x, callout.y + 17)
           .stroke({ color: c, width: 1.3 });
         ground.addChild(anchor);
         if (b.claim.value !== "已解除" && b.claim.incidentType === "FIRE") {
@@ -561,7 +567,12 @@ export function SituationMap({ view, identity }: MapProps) {
               routeLayer.addChild(route);
               last = next;
             }
-            if(u.belief!.claim.route?.length) routeLayer.addChild(new Graphics().circle(last.x,last.y,7).stroke({color:mapTheme.route,width:2}));
+            if (u.belief!.claim.route?.length)
+              routeLayer.addChild(
+                new Graphics()
+                  .circle(last.x, last.y, 7)
+                  .stroke({ color: mapTheme.route, width: 2 }),
+              );
           }
         }
       }

@@ -18,3 +18,34 @@ export function floodAppearance(estimatedDepth: number | undefined) {
         : Math.min(0.26, 0.06 + estimatedDepth * 0.06),
   };
 }
+export function incidentCallouts(view: CommandCenterView) {
+  const nodes = new Map(view.city.nodes.map((n) => [n.id, n]));
+  const placed = new Map<string, { x: number; y: number }>();
+  for (const b of view.beliefs
+    .filter((b) => b.kind === "INCIDENT")
+    .sort((a, b) => a.subjectId.localeCompare(b.subjectId))) {
+    const n = nodes.get(b.claim.nodeId ?? "");
+    if (!n) continue;
+    const candidates = [
+      [0, -42],
+      [0, -78],
+      [-105, -42],
+      [105, -42],
+      [0, 42],
+      [-105, -78],
+      [105, -78],
+    ];
+    const point = candidates
+      .map(([dx, dy]) => ({
+        x: Math.max(15, Math.min(719, n.x + dx)),
+        y: Math.max(15, Math.min(558, n.y + dy)),
+      }))
+      .find((p) =>
+        [...placed.values()].every(
+          (q) => Math.abs(p.x - q.x) >= 98 || Math.abs(p.y - q.y) >= 34,
+        ),
+      ) ?? { x: n.x, y: n.y - 42 };
+    placed.set(b.subjectId, point);
+  }
+  return placed;
+}

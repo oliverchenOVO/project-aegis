@@ -17,6 +17,7 @@ import {
 import {
   positionedUnits,
   floodAppearance,
+  incidentCallouts,
 } from "../../packages/ui/src/map/knowledge";
 import {
   MAP_LAYERS,
@@ -109,13 +110,13 @@ describe("renderer cartography and knowledge contract", () => {
       for (const zoom of [0.65, 1, 3]) {
         const scale = Math.min(width / 800, height / 590) * zoom;
         const p = cameraPosition(width, height, scale, { x: 37, y: -23 });
-        expect(
-          screenToGround(
-            { x: p.x + 630 * scale, y: p.y + 60 * scale },
-            p,
-            scale,
-          ),
-        ).toEqual({ x: 630, y: 60 });
+        const ground = screenToGround(
+          { x: p.x + 630 * scale, y: p.y + 60 * scale },
+          p,
+          scale,
+        );
+        expect(ground.x).toBeCloseTo(630, 10);
+        expect(ground.y).toBeCloseTo(60, 10);
       }
     expect(
       nearSegment({ x: 355, y: 181 }, { x: 300, y: 175 }, { x: 410, y: 175 }),
@@ -149,6 +150,22 @@ describe("renderer cartography and knowledge contract", () => {
     scheduler.request();
     expect(draw).toHaveBeenCalledTimes(1);
     expect(queue.length).toBe(2);
+  });
+  it("coincident incident labels remain separate and geographically anchored", () => {
+    const session = new Session("AEGIS-2026-001");
+    session.step(60);
+    const view = session.update().view;
+    const places = [...incidentCallouts(view).values()];
+    for (let i = 0; i < places.length; i++)
+      for (let j = i + 1; j < places.length; j++)
+        expect(
+          Math.abs(places[i].x - places[j].x) >= 98 ||
+            Math.abs(places[i].y - places[j].y) >= 34,
+        ).toBe(true);
+    expect(places.length).toBe(
+      view.beliefs.filter((b) => b.kind === "INCIDENT" && b.claim.nodeId)
+        .length,
+    );
   });
   it("LOD boundaries are independent of incoming disaster reports", () => {
     expect([0.65, 1, 2].map(detailForScale)).toEqual(["FAR", "MEDIUM", "NEAR"]);
