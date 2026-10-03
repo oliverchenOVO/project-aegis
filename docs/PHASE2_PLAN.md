@@ -37,3 +37,9 @@ Risks: same-tick command duplication, old snapshot schema defaults changing hash
 ## Performance and evidence targets
 
 Keep invariants enabled. Headless release minimum 200 ticks/sec; target 500+. Performance scenario: 4 districts, 18 responders, 100+ cohorts, 2 hospitals, power/comms network and 50+ incidents with flood propagation. Report actual scenario runtime p95, seek p50/p95 and package size. Measure cold replay, checkpoint restoration, forward simulation and total latency at 5/25/50/75/95% for 10/20/30-minute records. Target 30-minute 95% seek p95 <250 ms when hardware permits; no concealed failures or fabricated numbers.
+
+## Completed implementation and validation
+
+A–I are implemented and committed. J now records 103 passing local tests (15 files, 119.52 seconds), passing lint/typecheck, six new golden contracts, 100 earthquake and 100 flood seeds with zero robustness failures, and a complete stress run with 54 incidents/188 cohorts. Actual aggregate recorded-step throughput is 523.84 ticks/sec. All 45 seek combinations have zero mismatches; frozen Phase 1 30-minute 95% seek p95 is 98.40 ms. Actual final packaged/portable workflows, command-caused evacuation, legacy process restarts and hospital overload checks passed. Static map rendering now occurs on changes; idle/zoom/layer assertions pass locally and in CI.
+
+The final report, package SHA-256, raw seed rows, test results and GUI evidence are under PHASE2_REPORT.md and qa/. Publication requires a clean pushed main, successful CI on the final commit, then the private v0.2.0 tag/release with the exact tested portable asset. Existing v0.1.0 remains unchanged. The canonical release commit resolves from v0.2.0.

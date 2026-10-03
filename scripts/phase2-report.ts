@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 const read = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 const benchmark = read("docs/qa/phase2-benchmark.json"),
   seek = read("docs/qa/phase2-replay-seek.json"),
@@ -7,6 +8,50 @@ const benchmark = read("docs/qa/phase2-benchmark.json"),
   tests = read(process.argv[2] ?? "test-results/final-tests.json");
 const packaged = read("docs/qa/phase2-ui-packaged.json"),
   portable = read("docs/qa/phase2-ui-portable.json");
+const ci = read("docs/qa/phase2-ci-validation.json");
+if (
+  ci.status !== "completed" ||
+  ci.conclusion !== "success" ||
+  ci.jobs.some((job: { conclusion: string }) => job.conclusion !== "success")
+)
+  throw new Error("CI gate failed");
+const expectedSeeds = ["earthquake", "flood"]
+  .flatMap((profile) =>
+    Array.from(
+      { length: 100 },
+      (_, index) => `phase2-${profile}-${String(index).padStart(4, "0")}`,
+    ),
+  )
+  .concat("phase2-stress-0000");
+if (
+  benchmark.rows.length !== expectedSeeds.length ||
+  new Set(benchmark.rows.map((row: { seed: string }) => row.seed)).size !==
+    expectedSeeds.length ||
+  expectedSeeds.some(
+    (seed) =>
+      !benchmark.rows.some((row: { seed: string }) => row.seed === seed),
+  )
+)
+  throw new Error("Missing or duplicate required seed");
+for (const row of benchmark.rows)
+  for (const field of [
+    "replayMismatch",
+    "branchMismatch",
+    "saveFailure",
+    "invariantFailure",
+    "parentMutation",
+  ])
+    if (row[field] !== 0)
+      throw new Error(`Seed robustness failure: ${row.seed}/${field}`);
+if (
+  createHash("sha256")
+    .update(readFileSync(pack.portablePath))
+    .digest("hex")
+    .toUpperCase() !== pack.portableSha256
+)
+  throw new Error(
+    "Final portable bytes differ from validated package metadata",
+  );
 if (
   !benchmark.complete ||
   benchmark.seedsCompleted !== 200 ||
@@ -21,11 +66,13 @@ if (
   seek.rows.some((r: { mismatches: number }) => r.mismatches)
 )
   throw new Error("Replay gate failed");
-if (!tests.success || tests.numFailedTests !== 0)
+if (!tests.success || tests.numFailedTests !== 0 || tests.numPassedTests < 103)
   throw new Error("Full test gate failed");
 for (const qa of [packaged, portable])
   if (
     qa.errors.length ||
+    qa.warnings.length ||
+    !qa.checks.mapRendering ||
     !qa.checks.evacuation ||
     !qa.checks.branch ||
     !qa.checks.replay
@@ -81,6 +128,7 @@ const summary = {
   phase1Seek: phase1,
   floodSeek,
   package: pack,
+  ci,
 };
 writeFileSync(
   "docs/qa/phase2-release-summary.json",
@@ -100,7 +148,7 @@ Complete verified checkpoints and accelerated seek; pure v1 save migration retai
 
 Full regression suite: **${tests.numPassedTests} passed, ${tests.numFailedTests} failed**. Original Phase 1 regression and immutable v1 saves remain intact. Six new Phase 2 golden contracts cover three earthquake and three flood seeds, final worlds/events/AAR, commands and checkpoint hashes. The generator refuses to overwrite existing expectations.
 
-Release benchmark: **100 earthquake + 100 flood seeds**, plus one explicit stress profile. **0 crashes, invariant failures, replay mismatches, branch mismatches, save failures and parent mutations**. Every run checks population/patient/hospital/event invariants every 30 ticks, independently cold-replays the entire world/events/AAR, compares checkpoint seek with cold seek, reloads original saves, repeats a command-only branch, cold-replays and reloads that branch, and checks the unchanged parent record. Progress is persisted after each seed and resumes only with identical authoritative/runner content fingerprints. Evidence: [complete rows](qa/phase2-benchmark.json).
+Release benchmark: **100 earthquake + 100 flood seeds**, plus one explicit stress profile. **0 crashes, invariant failures, replay mismatches, branch mismatches, save failures and parent mutations**. Every run checks population/patient/hospital/event invariants every 30 ticks, independently cold-replays the entire world/events/AAR, compares checkpoint seek with cold seek, reloads original saves, repeats a command-only branch, cold-replays and reloads that branch, and checks the unchanged parent record. Progress resumes with identical content fingerprints, or a recorded orchestration-only migration that reconstructs the prior runner fingerprint against current authoritative bytes. The first serial measurements remain intact; remaining seeds run in two isolated processes with private files and serial parent merges. Evidence: [complete rows](qa/phase2-benchmark.json), [serial history](qa/phase2-benchmark-serial-history.json). These CLI workers do not change deterministic simulation steps.
 
 ## Performance
 
@@ -108,7 +156,7 @@ Release benchmark: **100 earthquake + 100 flood seeds**, plus one explicit stres
 |---|---:|---:|---:|---|
 ${profiles.map((p) => `| ${p.profile} | ${p.runs} | ${fmt(p.ticksPerSecond)} | ${fmt(p.p95Ms)} | ${p.maxIncidents} / ${p.maxCohorts} / ${p.maxEvents} |`).join("\n")}
 
-Combined throughput: **${fmt(benchmark.aggregateTicksPerSecond)} ticks/sec**; release floor 200, target 500. Timings include recorded simulation stepping, periodic invariants and checkpoint generation, and exclude initialization plus subsequent verification/save/branch work. Shared machine load affects timings. No event, population or checkpoint assertions were removed for speed. Optional 1,000-seed extended validation was not run; the required 200 complete runs and stress checks took priority.
+Combined throughput: **${fmt(benchmark.aggregateTicksPerSecond)} ticks/sec**; release floor 200 average, target 500. The minimum individual recorded run was **${fmt(benchmark.minimumTicksPerSecond)} ticks/sec**, retained without deletion; the requested floor applies to the average. Timings include recorded simulation stepping, periodic invariants and checkpoint generation, and exclude initialization plus subsequent verification/save/branch work. Shared machine load affects timings. No event, population or checkpoint assertions were removed for speed. Optional 1,000-seed extended validation was not run; the required 200 complete runs and stress checks took priority.
 
 ## Replay
 
@@ -138,7 +186,11 @@ Portable: **${pack.portableBytes} bytes (${fmt(pack.portableBytes / 1048576)} Mi
 
 The first 70-incident/high-injury stress initialization hit the existing 1,000-events-per-tick guard; preserved in [probe](qa/phase2-benchmark-probe.json). Its replacement initializes 50 sparse-injury hazards and reaches at least 50 actual incidents/100 cohorts without relaxing guards. Earlier communication performance and zero-delta rescue probes are preserved in their milestone documentation. The late UI evacuation was actually lost; final QA now requires successful execution and command-caused shelter arrivals.
 
-CI runs 37132433969 and 37133799517 failed Windows GUI timing/capture checks, despite passing core tests. No failed build was released. The harness preserves failed screenshot/DOM and timing, releases headless fixture memory in a separate process, and supports explicit CPU graphics on CI while local ordinary graphics QA remains separate. Final passing CI, a clean main tree and private push are required before v0.2.0 is tagged.
+CI runs 37132433969, 37133799517 and 37134822468 failed Windows GUI timing/capture checks, despite passing core tests. No failed build was released. Continuous static Pixi rendering consumed renderer time on software graphics. The product now renders only after relevant state/viewport changes; actual WebGL instrumentation checks unchanged draw counts while paused and changed pixels after zoom/layer actions. Run 37136960805 passed this fix, and merged run 37137877377 passed the combined harness. The latest code validation [CI run ${ci.databaseId}](${ci.url}) passed all jobs at ${ci.headSha}; [raw CI evidence](qa/phase2-ci-validation.json) and [103-test results](qa/phase2-core-tests-ci.json) are retained. Native capture validates physical dimensions against display scaling. Local ordinary graphics QA remains separate.
+
+## Git and release gates
+
+Branch: main. Repository: private oliverchenOVO/project-aegis. All A–R functional/build/desktop gates pass with the evidence above. Publication checks a pushed final documentation/evidence commit, its passing CI and a clean working tree (gates S–T). Release tag: v0.2.0. The [resolved final tag commit](https://github.com/oliverchenOVO/project-aegis/commit/v0.2.0) is canonical (git rev-parse v0.2.0^{commit}); a tracked report cannot contain its own commit hash. Validation commit before this report: ${source}. Release title: Project AEGIS v0.2.0 — Systemic Crisis Simulation. The portable asset's exact bytes and SHA-256 are recorded above. Publication verifies the private repository, tag target and uploaded asset digest. [Release](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.0).
 
 ## Known limitations and next recommendation
 

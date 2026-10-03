@@ -1,13 +1,149 @@
 {
   "executable": "release/AEGIS-0.2.0-Windows-x64.exe",
   "browser": "Browser plugin not available; Playwright Electron used",
+  "graphics": "ordinary desktop graphics",
   "checks": {
+    "workerTimings": [
+      {
+        "action": "start",
+        "elapsedMs": 104.70000000298023
+      },
+      {
+        "action": "command",
+        "elapsedMs": 2.3999999910593033
+      },
+      {
+        "action": "step",
+        "elapsedMs": 129
+      },
+      {
+        "action": "step",
+        "elapsedMs": 194
+      },
+      {
+        "action": "save",
+        "elapsedMs": 533.4000000059605
+      },
+      {
+        "action": "load",
+        "elapsedMs": 11416.09999999404
+      },
+      {
+        "action": "fork",
+        "elapsedMs": 13792.199999988079
+      },
+      {
+        "action": "saveBranch",
+        "elapsedMs": 7898.399999991059
+      },
+      {
+        "action": "seek",
+        "elapsedMs": 293.29999999701977
+      },
+      {
+        "action": "seek",
+        "elapsedMs": 61.6000000089407
+      },
+      {
+        "action": "start",
+        "elapsedMs": 8.699999988079071
+      },
+      {
+        "action": "step",
+        "elapsedMs": 20
+      }
+    ],
+    "runtime": {
+      "versions": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "gpu": {
+        "2d_canvas": "disabled_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "webgl": "disabled_off",
+        "webgpu": "disabled_off",
+        "webnn": "disabled_off"
+      },
+      "windows": [
+        {
+          "visible": true,
+          "minimized": false,
+          "backgroundThrottling": false
+        }
+      ]
+    },
     "identity": {
-      "url": "file:///C:/Users/oliver/AppData/Local/Temp/3KBnlb02QFWBKJ8AUHBWiOkSrB5/resources/app.asar/dist/index.html",
+      "url": "file:///C:/Users/oliver/AppData/Local/Temp/nsxA0AE.tmp/app/resources/app.asar/dist/index.html",
       "title": "Project AEGIS — AI 災難指揮中心"
     },
     "initialFog": "unknown units/power; no initial truth",
+    "mapRendering": {
+      "idleDraws": [11, 11, 11, 11, 11, 11],
+      "zoomRedrawn": true,
+      "layerRedrawn": true
+    },
     "hospitalInspector": "received census/queue/ICU/handover/power with age/source",
+    "evacuation": {
+      "commandId": "CMD-1",
+      "executionStatus": "COMPLETED",
+      "shelteredPeople": 324,
+      "eventIds": [
+        "evt-423",
+        "evt-424",
+        "evt-425",
+        "evt-574",
+        "evt-575",
+        "evt-576",
+        "evt-615",
+        "evt-616",
+        "evt-617",
+        "evt-618",
+        "evt-619",
+        "evt-1581",
+        "evt-1959",
+        "evt-1998",
+        "evt-2389"
+      ]
+    },
     "branch": {
       "originalHash": "4eb523d46aa39a2a",
       "alternativeHash": "2a2b76b4e6376144",

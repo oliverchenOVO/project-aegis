@@ -10,5 +10,6 @@
   "fileVersion": "0.2.0",
   "company": "CHEN, KUEI-HENG",
   "signature": "NotSigned",
-  "phase1PortableBytes": 510653100
+  "phase1PortableBytes": 510653100,
+  "sourceCommit": "d72eb235f2169e9c1989258dde2338981271e615"
 }

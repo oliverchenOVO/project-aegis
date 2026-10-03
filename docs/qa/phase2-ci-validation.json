@@ -1,0 +1,11 @@
+{
+  "conclusion": "success",
+  "databaseId": 37139077207,
+  "headSha": "3681fab5b2cf2cf5be93ec7464e081929bfc33b5",
+  "jobs": [
+    { "conclusion": "success", "name": "core", "status": "completed" },
+    { "conclusion": "success", "name": "windows", "status": "completed" }
+  ],
+  "status": "completed",
+  "url": "https://github.com/oliverchenOVO/project-aegis/actions/runs/37139077207"
+}

@@ -1,0 +1,1299 @@
+{
+  "numTotalTestSuites": 19,
+  "numPassedTestSuites": 19,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 103,
+  "numPassedTests": 103,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791048370260,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "pure simulation has no renderer, runtime clock, network or host imports",
+          "status": "passed",
+          "title": "pure simulation has no renderer, runtime clock, network or host imports",
+          "duration": 10.786799999999971,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "presentation imports only read DTOs, shared helpers and application port",
+          "status": "passed",
+          "title": "presentation imports only read DTOs, shared helpers and application port",
+          "duration": 6.015100000000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048456848,
+      "endTime": 1791048456865.0151,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/integration/boundaries.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "all five command types traverse communications and support recall/reassignment",
+          "status": "passed",
+          "title": "all five command types traverse communications and support recall/reassignment",
+          "duration": 80.24199999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "a blocked next edge forces a longer route with a recorded causal chain",
+          "status": "passed",
+          "title": "a blocked next edge forces a longer route with a recorded causal chain",
+          "duration": 5.558200000000056,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "EMS actually transports patients and admits them to reachable hospitals",
+          "status": "passed",
+          "title": "EMS actually transports patients and admits them to reachable hospitals",
+          "duration": 53.55720000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "response strategy changes real fatalities and infrastructure outcomes",
+          "status": "passed",
+          "title": "response strategy changes real fatalities and infrastructure outcomes",
+          "duration": 424.48429999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "unknown/live truth changes cannot leak into normal read model",
+          "status": "passed",
+          "title": "unknown/live truth changes cannot leak into normal read model",
+          "duration": 8.576900000000023,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "beliefs distinguish stale, corroborated and conflicting reports",
+          "status": "passed",
+          "title": "beliefs distinguish stale, corroborated and conflicting reports",
+          "duration": 34.47260000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "scenario schema rejects malformed data and impossible topology during simulation validation",
+          "status": "passed",
+          "title": "scenario schema rejects malformed data and impossible topology during simulation validation",
+          "duration": 6.017100000000028,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "maximum time completion and active AAR gate work without force completion",
+          "status": "passed",
+          "title": "maximum time completion and active AAR gate work without force completion",
+          "duration": 80.68860000000018,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048454210,
+      "endTime": 1791048454904.6887,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/integration/consequences.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "v1 fixture migration is pure, deterministic, resumable and portable: tests/fixtures/legacy/legacy-save-basic…",
+          "status": "passed",
+          "title": "v1 fixture migration is pure, deterministic, resumable and portable: tests/fixtures/legacy/legacy-save-basic…",
+          "duration": 449.7176,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "v1 fixture migration is pure, deterministic, resumable and portable: tests/fixtures/legacy/legacy-save-midin…",
+          "status": "passed",
+          "title": "v1 fixture migration is pure, deterministic, resumable and portable: tests/fixtures/legacy/legacy-save-midin…",
+          "duration": 1283.1935999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "future versions and corrupt migrations fail atomically without replacing live session",
+          "status": "passed",
+          "title": "future versions and corrupt migrations fail atomically without replacing live session",
+          "duration": 75.14270000000033,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "migration registry validates both sides and never mutates its input",
+          "status": "passed",
+          "title": "migration registry validates both sides and never mutates its input",
+          "duration": 2.951600000000326,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "Session continues migrated save, exports V2, closes/recreates and verifies replay",
+          "status": "passed",
+          "title": "Session continues migrated save, exports V2, closes/recreates and verifies replay",
+          "duration": 2095.1841999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048441834,
+      "endTime": 1791048445741.184,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/integration/migrations.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "save/load resumes RNG and pending transmissions exactly",
+          "status": "passed",
+          "title": "save/load resumes RNG and pending transmissions exactly",
+          "duration": 632.8131,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "corrupt container, incompatible version, edited event log are rejected",
+          "status": "passed",
+          "title": "corrupt container, incompatible version, edited event log are rejected",
+          "duration": 45.424000000000206,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048455658,
+      "endTime": 1791048456336.424,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/integration/persistence.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "session exposes only received views, verifies replay and preserves live save",
+          "status": "passed",
+          "title": "session exposes only received views, verifies replay and preserves live save",
+          "duration": 752.9674,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048451199,
+      "endTime": 1791048451951.9673,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/integration/session.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "same future commands reproduce the original across exact/near checkpoint forks: branch-a",
+          "status": "passed",
+          "title": "same future commands reproduce the original across exact/near checkpoint forks: branch-a",
+          "duration": 1280.9928,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "same future commands reproduce the original across exact/near checkpoint forks: branch-b",
+          "status": "passed",
+          "title": "same future commands reproduce the original across exact/near checkpoint forks: branch-b",
+          "duration": 1147.0668,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "same future commands reproduce the original across exact/near checkpoint forks: branch-c",
+          "status": "passed",
+          "title": "same future commands reproduce the original across exact/near checkpoint forks: branch-c",
+          "duration": 1483.2655,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "remove/add/replace alternatives and repeated forks are immutable and deterministic",
+          "status": "passed",
+          "title": "remove/add/replace alternatives and repeated forks are immutable and deterministic",
+          "duration": 1239.4534000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "branches cold replay, seek, continue and reopen with their lineage intact",
+          "status": "passed",
+          "title": "branches cold replay, seek, continue and reopen with their lineage intact",
+          "duration": 1659.6157999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "fork bounds, unsupported world edits, malformed lineage and invalid command plans fail",
+          "status": "passed",
+          "title": "fork bounds, unsupported world edits, malformed lineage and invalid command plans fail",
+          "duration": 795.6164999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "routed cohort world supports real deterministic alternatives: urban-earthquake",
+          "status": "passed",
+          "title": "routed cohort world supports real deterministic alternatives: urban-earthquake",
+          "duration": 2562.0905999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "routed cohort world supports real deterministic alternatives: flood-urban-v1",
+          "status": "passed",
+          "title": "routed cohort world supports real deterministic alternatives: flood-urban-v1",
+          "duration": 4789.33,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "session branch generation and branch export leave the original save/replay unchanged",
+          "status": "passed",
+          "title": "session branch generation and branch export leave the original save/replay unchanged",
+          "duration": 1847.9652999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "session retains only the four latest exportable branches without changing its parent",
+          "status": "passed",
+          "title": "session retains only the four latest exportable branches without changing its parent",
+          "duration": 716.0684000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048393674,
+      "endTime": 1791048411198.0684,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/replay/branches.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-1",
+          "status": "passed",
+          "title": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-1",
+          "duration": 2354.4578,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-2",
+          "status": "passed",
+          "title": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-2",
+          "duration": 3671.4858999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-3",
+          "status": "passed",
+          "title": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-3",
+          "duration": 3051.2507000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-4",
+          "status": "passed",
+          "title": "25 random seeks and event/command boundaries exactly match cold timeline: checkpoint-4",
+          "duration": 4120.239000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "checkpoint verification rejects edited snapshots and forged matching hashes",
+          "status": "passed",
+          "title": "checkpoint verification rejects edited snapshots and forged matching hashes",
+          "duration": 1734.3678,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "verified timeline is isolated from caller mutation and repeated seeking",
+          "status": "passed",
+          "title": "verified timeline is isolated from caller mutation and repeated seeking",
+          "duration": 1676.0537000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "fixed v0.1 fixtures retain original hashes while migration adds checkpoints",
+          "status": "passed",
+          "title": "fixed v0.1 fixtures retain original hashes while migration adds checkpoints",
+          "duration": 489.13640000000305,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048411695,
+      "endTime": 1791048428793.1365,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/replay/checkpoints.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden phase2-earthquake-0000",
+          "status": "passed",
+          "title": "preserves Phase 2 golden phase2-earthquake-0000",
+          "duration": 1192.7739000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden phase2-earthquake-0001",
+          "status": "passed",
+          "title": "preserves Phase 2 golden phase2-earthquake-0001",
+          "duration": 1325.1663,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden phase2-earthquake-0002",
+          "status": "passed",
+          "title": "preserves Phase 2 golden phase2-earthquake-0002",
+          "duration": 2372.5742,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden AEGIS-FLOOD-2026-001",
+          "status": "passed",
+          "title": "preserves Phase 2 golden AEGIS-FLOOD-2026-001",
+          "duration": 10057.2119,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden phase2-flood-0000",
+          "status": "passed",
+          "title": "preserves Phase 2 golden phase2-flood-0000",
+          "duration": 8514.873800000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "preserves Phase 2 golden phase2-flood-0001",
+          "status": "passed",
+          "title": "preserves Phase 2 golden phase2-flood-0001",
+          "duration": 8896.239700000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048457416,
+      "endTime": 1791048489775.2397,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/replay/phase2-golden.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "replay from zero validates checkpoints, commands, events and AAR one",
+          "status": "passed",
+          "title": "replay from zero validates checkpoints, commands, events and AAR one",
+          "duration": 1588.2828,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "replay from zero validates checkpoints, commands, events and AAR two",
+          "status": "passed",
+          "title": "replay from zero validates checkpoints, commands, events and AAR two",
+          "duration": 958.6967,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "replay from zero validates checkpoints, commands, events and AAR three",
+          "status": "passed",
+          "title": "replay from zero validates checkpoints, commands, events and AAR three",
+          "duration": 1040.2240000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "replay from zero validates checkpoints, commands, events and AAR AEGIS-2026-001",
+          "status": "passed",
+          "title": "replay from zero validates checkpoints, commands, events and AAR AEGIS-2026-001",
+          "duration": 1014.4142000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048436654,
+      "endTime": 1791048441256.4143,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/replay/replay.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "seven classifications distinguish observation error, changed truth, missing fields and delivery loss",
+          "status": "passed",
+          "title": "seven classifications distinguish observation error, changed truth, missing fields and delivery loss",
+          "duration": 20.640499999999975,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "corroboration uses only earlier received independent sources and matching claim identities",
+          "status": "passed",
+          "title": "corroboration uses only earlier received independent sources and matching claim identities",
+          "duration": 3.749300000000062,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "causal display includes only direct recorded edges, explicitly bounds depth and node count",
+          "status": "passed",
+          "title": "causal display includes only direct recorded edges, explicitly bounds depth and node count",
+          "duration": 1.1804999999999382,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "missing, future, self, duplicate and reversed-time causal links fail",
+          "status": "passed",
+          "title": "missing, future, self, duplicate and reversed-time causal links fail",
+          "duration": 1.269200000000069,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "decision outcomes follow descendants and never nearby timestamps",
+          "status": "passed",
+          "title": "decision outcomes follow descendants and never nearby timestamps",
+          "duration": 0.5605000000000473,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "AAR2 is pure and exactly reproduced by cold replay: urban-earthquake",
+          "status": "passed",
+          "title": "AAR2 is pure and exactly reproduced by cold replay: urban-earthquake",
+          "duration": 859.1880000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "AAR2 is pure and exactly reproduced by cold replay: flood-urban-v1",
+          "status": "passed",
+          "title": "AAR2 is pure and exactly reproduced by cold replay: flood-urban-v1",
+          "duration": 1177.2194,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048446523,
+      "endTime": 1791048448587.2195,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/after-action.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "100 deterministic cohort splits preserve every original population source",
+          "status": "passed",
+          "title": "100 deterministic cohort splits preserve every original population source",
+          "duration": 24.61869999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "exposure, injuries, transport and deaths conserve population: civilian-a",
+          "status": "passed",
+          "title": "exposure, injuries, transport and deaths conserve population: civilian-a",
+          "duration": 1537.0625,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "exposure, injuries, transport and deaths conserve population: civilian-b",
+          "status": "passed",
+          "title": "exposure, injuries, transport and deaths conserve population: civilian-b",
+          "duration": 1546.9587999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "exposure, injuries, transport and deaths conserve population: civilian-c",
+          "status": "passed",
+          "title": "exposure, injuries, transport and deaths conserve population: civilian-c",
+          "duration": 2519.3473000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "evacuation is delivered/acknowledged and changes actual shelter outcomes",
+          "status": "passed",
+          "title": "evacuation is delivered/acknowledged and changes actual shelter outcomes",
+          "duration": 456.2484000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "earthquake v2 cohorts link real casualties while v1 remains separate",
+          "status": "passed",
+          "title": "earthquake v2 cohorts link real casualties while v1 remains separate",
+          "duration": 224.9288000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "split/event/queue runaway guards fail explicitly",
+          "status": "passed",
+          "title": "split/event/queue runaway guards fail explicitly",
+          "duration": 9.288499999999658,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048429347,
+      "endTime": 1791048435667.2886,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/civilians.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations canonical ordering and seeded stream isolation",
+          "status": "passed",
+          "title": "canonical ordering and seeded stream isolation",
+          "duration": 6.146400000000085,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations same seed produces identical state/events/AAR: alpha",
+          "status": "passed",
+          "title": "same seed produces identical state/events/AAR: alpha",
+          "duration": 567.0858,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations same seed produces identical state/events/AAR: beta",
+          "status": "passed",
+          "title": "same seed produces identical state/events/AAR: beta",
+          "duration": 202.70679999999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations same seed produces identical state/events/AAR: AEGIS-2026-001",
+          "status": "passed",
+          "title": "same seed produces identical state/events/AAR: AEGIS-2026-001",
+          "duration": 199.69939999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations shortest path avoids blocked edges and has deterministic ties",
+          "status": "passed",
+          "title": "shortest path avoids blocked edges and has deterministic ties",
+          "duration": 1.794800000000123,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations commands do not immediately mutate assignments; received orders move along roads",
+          "status": "passed",
+          "title": "commands do not immediately mutate assignments; received orders move along roads",
+          "duration": 3.389799999999923,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations hospital report describes observation, not live generator state",
+          "status": "passed",
+          "title": "hospital report describes observation, not live generator state",
+          "duration": 7.113600000000133,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["deterministic foundations"],
+          "fullName": "deterministic foundations dead casualties never revive and all invariants hold across ticks",
+          "status": "passed",
+          "title": "dead casualties never revive and all invariants hold across ticks",
+          "duration": 196.18049999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048449551,
+      "endTime": 1791048450736.1804,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/core.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["flood complete timeline: flood-one"],
+          "fullName": "flood complete timeline: flood-one shared hazards, actual power/communication causes and vehicle rerouting",
+          "status": "passed",
+          "title": "shared hazards, actual power/communication causes and vehicle rerouting",
+          "duration": 6.307399999999689,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-one"],
+          "fullName": "flood complete timeline: flood-one cold replay exactly reproduces final state and AAR",
+          "status": "passed",
+          "title": "cold replay exactly reproduces final state and AAR",
+          "duration": 8035.3868999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-one"],
+          "fullName": "flood complete timeline: flood-one a verified checkpoint timeline reaches the exact requested cursor",
+          "status": "passed",
+          "title": "a verified checkpoint timeline reaches the exact requested cursor",
+          "duration": 7213.484,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-one"],
+          "fullName": "flood complete timeline: flood-one encodes a full portable save with its replay and checkpoint index",
+          "status": "passed",
+          "title": "encodes a full portable save with its replay and checkpoint index",
+          "duration": 5500.737799999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-one"],
+          "fullName": "flood complete timeline: flood-one reopens the encoded save with independent replay verification",
+          "status": "passed",
+          "title": "reopens the encoded save with independent replay verification",
+          "duration": 8312.323300000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-two"],
+          "fullName": "flood complete timeline: flood-two shared hazards, actual power/communication causes and vehicle rerouting",
+          "status": "passed",
+          "title": "shared hazards, actual power/communication causes and vehicle rerouting",
+          "duration": 2.3131999999968684,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-two"],
+          "fullName": "flood complete timeline: flood-two cold replay exactly reproduces final state and AAR",
+          "status": "passed",
+          "title": "cold replay exactly reproduces final state and AAR",
+          "duration": 6246.465400000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-two"],
+          "fullName": "flood complete timeline: flood-two a verified checkpoint timeline reaches the exact requested cursor",
+          "status": "passed",
+          "title": "a verified checkpoint timeline reaches the exact requested cursor",
+          "duration": 6121.213800000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-two"],
+          "fullName": "flood complete timeline: flood-two encodes a full portable save with its replay and checkpoint index",
+          "status": "passed",
+          "title": "encodes a full portable save with its replay and checkpoint index",
+          "duration": 5340.951400000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: flood-two"],
+          "fullName": "flood complete timeline: flood-two reopens the encoded save with independent replay verification",
+          "status": "passed",
+          "title": "reopens the encoded save with independent replay verification",
+          "duration": 9193.910799999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: AEGIS-FLOOD-2026-001"],
+          "fullName": "flood complete timeline: AEGIS-FLOOD-2026-001 shared hazards, actual power/communication causes and vehicle rerouting",
+          "status": "passed",
+          "title": "shared hazards, actual power/communication causes and vehicle rerouting",
+          "duration": 3.0596999999979744,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: AEGIS-FLOOD-2026-001"],
+          "fullName": "flood complete timeline: AEGIS-FLOOD-2026-001 cold replay exactly reproduces final state and AAR",
+          "status": "passed",
+          "title": "cold replay exactly reproduces final state and AAR",
+          "duration": 6276.326000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: AEGIS-FLOOD-2026-001"],
+          "fullName": "flood complete timeline: AEGIS-FLOOD-2026-001 a verified checkpoint timeline reaches the exact requested cursor",
+          "status": "passed",
+          "title": "a verified checkpoint timeline reaches the exact requested cursor",
+          "duration": 4969.942299999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: AEGIS-FLOOD-2026-001"],
+          "fullName": "flood complete timeline: AEGIS-FLOOD-2026-001 encodes a full portable save with its replay and checkpoint index",
+          "status": "passed",
+          "title": "encodes a full portable save with its replay and checkpoint index",
+          "duration": 5697.25940000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["flood complete timeline: AEGIS-FLOOD-2026-001"],
+          "fullName": "flood complete timeline: AEGIS-FLOOD-2026-001 reopens the encoded save with independent replay verification",
+          "status": "passed",
+          "title": "reopens the encoded save with independent replay verification",
+          "duration": 8702.341700000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "flood fields and infrastructure truth never leak into received knowledge",
+          "status": "passed",
+          "title": "flood fields and infrastructure truth never leak into received knowledge",
+          "duration": 24.535900000002584,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "road constraints prevent ambulance/utility traversal at unsafe water depths",
+          "status": "passed",
+          "title": "road constraints prevent ambulance/utility traversal at unsafe water depths",
+          "duration": 2.6595999999990454,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "shared earthquake hazard wrapper preserves engine behavior and frozen v1 timeline",
+          "status": "passed",
+          "title": "shared earthquake hazard wrapper preserves engine behavior and frozen v1 timeline",
+          "duration": 703.915399999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048379169,
+      "endTime": 1791048476726.9153,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/flood.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "overload remains counted during a power emergency and peaks preserve actual pressure",
+          "status": "passed",
+          "title": "overload remains counted during a power emergency and peaks preserve actual pressure",
+          "duration": 37.74630000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "triage priority consumes finite throughput and ICU capacity before admitting a queue",
+          "status": "passed",
+          "title": "triage priority consumes finite throughput and ICU capacity before admitting a queue",
+          "duration": 11.966699999999946,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "ambulance handover holds the actual vehicle longer under hospital congestion",
+          "status": "passed",
+          "title": "ambulance handover holds the actual vehicle longer under hospital congestion",
+          "duration": 9.106600000000071,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "queue saturation and loss of power cause measured deterioration and death",
+          "status": "passed",
+          "title": "queue saturation and loss of power cause measured deterioration and death",
+          "duration": 7.460800000000063,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "partial treatment splits a real injury cohort without creating population",
+          "status": "passed",
+          "title": "partial treatment splits a real injury cohort without creating population",
+          "duration": 273.5068000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "full treatment produces an explicit recovery outcome and frees a bed",
+          "status": "passed",
+          "title": "full treatment produces an explicit recovery outcome and frees a bed",
+          "duration": 6.038999999999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "an inpatient who deteriorates must wait for a full ICU rather than exceed specialty beds",
+          "status": "passed",
+          "title": "an inpatient who deteriorates must wait for a full ICU rather than exceed specialty beds",
+          "duration": 9.207999999999856,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real dispatch medical timeline replays and survives checkpoint/save: clinical-a",
+          "status": "passed",
+          "title": "real dispatch medical timeline replays and survives checkpoint/save: clinical-a",
+          "duration": 9243.164,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "real dispatch medical timeline replays and survives checkpoint/save: clinical-b",
+          "status": "passed",
+          "title": "real dispatch medical timeline replays and survives checkpoint/save: clinical-b",
+          "duration": 11708.735700000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048371627,
+      "endTime": 1791048392934.7356,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/hospital.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "fullName": "source capabilities and local subjects prevent impossible observations",
+          "status": "passed",
+          "title": "source capabilities and local subjects prevent impossible observations",
+          "duration": 42.37570000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "bandwidth limits actual hop departures and a burst creates measurable queue delay",
+          "status": "passed",
+          "title": "bandwidth limits actual hop departures and a burst creates measurable queue delay",
+          "duration": 29.267600000000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "a delivered command remains unknown to the player until its actual return ACK",
+          "status": "passed",
+          "title": "a delivered command remains unknown to the player until its actual return ACK",
+          "duration": 19.945100000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "grid backup exhaustion removes the repeater while an independent EMS circuit remains reachable",
+          "status": "passed",
+          "title": "grid backup exhaustion removes the repeater while an independent EMS circuit remains reachable",
+          "duration": 70.07679999999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "isolated sources wait in a bounded queue and expire with a factual loss event",
+          "status": "passed",
+          "title": "isolated sources wait in a bounded queue and expire with a factual loss event",
+          "duration": 4.0487000000000535,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "received knowledge ignores later network/hospital/cohort truth changes",
+          "status": "passed",
+          "title": "received knowledge ignores later network/hospital/cohort truth changes",
+          "duration": 35.64280000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "malformed initial topology and combined pending-message guards fail before mutation",
+          "status": "passed",
+          "title": "malformed initial topology and combined pending-message guards fail before mutation",
+          "duration": 7.139999999999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "pending hops and ACKs are deterministic across checkpoint restore and continuation",
+          "status": "passed",
+          "title": "pending hops and ACKs are deterministic across checkpoint restore and continuation",
+          "duration": 891.5986999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [],
+          "fullName": "network references, early arrivals and duplicate sources fail explicitly",
+          "status": "passed",
+          "title": "network references, early arrivals and duplicate sources fail explicitly",
+          "duration": 4.089900000000171,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791048452495,
+      "endTime": 1791048453600.0898,
+      "status": "passed",
+      "message": "",
+      "name": "F:/CodeX開發小東東/AI 災難指揮中心/tests/simulation/network.test.ts"
+    }
+  ]
+}

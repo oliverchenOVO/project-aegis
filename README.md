@@ -27,10 +27,12 @@ pnpm smoke "release/windows-runtime/Project AEGIS.exe"
 pnpm smoke release/AEGIS-0.2.0-Windows-x64.exe --portable
 pnpm exec tsx tests/e2e/migration-restart.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
 pnpm exec tsx tests/e2e/overload.ts release/AEGIS-0.2.0-Windows-x64.exe --portable
-pnpm exec tsx benchmarks/phase2.ts 100
+pnpm exec tsx benchmarks/phase2.ts 100 test-results/phase2-local.json
 pnpm exec tsx benchmarks/phase2-seek.ts
 ```
 
 UI dev port is 5173. If occupied, `pnpm exec vite --host 127.0.0.1 --port 5187`. The packaged app opens local production assets and isolates the renderer from Node. Simulation runs in a separate worker and only exposes received views.
 
 See [architecture](docs/ARCHITECTURE.md), [simulation](docs/SIMULATION.md), [information fog](docs/INFORMATION_FOG.md), [replay/save format](docs/REPLAY_FORMAT.md), [Phase 2 results](docs/PHASE2_REPORT.md) and preserved [Phase 1 results](docs/PHASE1_REPORT.md).
+
+The 200-seed validation includes independent replay, checkpoint seek, original/branch save reload, repeated branches and invariants; it takes substantially longer than recorded-step timing alone. Use a fresh local output path to retain the published evidence. Interrupted runs resume only when authoritative content and validation fingerprints match. `benchmarks/phase2-parallel.ts` can resume an existing output using two isolated CLI workers; neither worker writes the shared evidence file.

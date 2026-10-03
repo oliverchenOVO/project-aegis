@@ -1,0 +1,104 @@
+{
+  "sourceCommit": "3681fab5b2cf2cf5be93ec7464e081929bfc33b5",
+  "tests": 103,
+  "benchmark": [
+    {
+      "profile": "earthquake",
+      "runs": 100,
+      "ticksPerSecond": 1590.7763506653994,
+      "p95Ms": 1850.0407000000123,
+      "maxIncidents": 11,
+      "maxCohorts": 171,
+      "maxEvents": 12131
+    },
+    {
+      "profile": "flood",
+      "runs": 100,
+      "ticksPerSecond": 348.521577371873,
+      "p95Ms": 11573.104199999943,
+      "maxIncidents": 100,
+      "maxCohorts": 720,
+      "maxEvents": 34681
+    },
+    {
+      "profile": "stress",
+      "runs": 1,
+      "ticksPerSecond": 523.7519776001755,
+      "p95Ms": 3436.7412,
+      "maxIncidents": 54,
+      "maxCohorts": 188,
+      "maxEvents": 29548
+    }
+  ],
+  "aggregateTicksPerSecond": 523.8371267995088,
+  "phase1Seek": {
+    "profile": "phase1",
+    "simulationVersion": "0.1.0",
+    "scenarioVersion": "1.0.0",
+    "minutes": 30,
+    "fraction": 0.95,
+    "target": 1710,
+    "coldMs": 315.1221000000005,
+    "firstVerificationMs": 322.8179,
+    "restoredTick": 1500,
+    "forwardTicks": 210,
+    "restoreMs": 24.85450000000128,
+    "forwardMs": 49.05419999999867,
+    "p50Ms": 66.37459999999919,
+    "p95Ms": 98.40209999999934,
+    "samples": 20,
+    "mismatches": 0
+  },
+  "floodSeek": {
+    "profile": "flood",
+    "simulationVersion": "0.2.0",
+    "scenarioVersion": "1.4.0",
+    "minutes": 30,
+    "fraction": 0.95,
+    "target": 1710,
+    "coldMs": 2460.3800000000047,
+    "firstVerificationMs": 1689.720399999991,
+    "restoredTick": 1500,
+    "forwardTicks": 210,
+    "restoreMs": 157.9781999999832,
+    "forwardMs": 439.2018000000098,
+    "p50Ms": 464.5581999999995,
+    "p95Ms": 1446.3505000000005,
+    "samples": 20,
+    "mismatches": 0
+  },
+  "package": {
+    "portablePath": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\AEGIS-0.2.0-Windows-x64.exe",
+    "portableBytes": 100341421,
+    "portableSha256": "696D9453D6E69B1A1DD6DF907576C0338A1EF1331CA4F0E2215A48CBB3135EC7",
+    "runtimeBytes": 245726720,
+    "runtimeSha256": "B9C4564101E88762E87F80A05E9A2A9D0BD452FD6CE566971C753839E2CEAFDB",
+    "asarBytes": 14170073,
+    "product": "Project AEGIS",
+    "productVersion": "0.2.0.0",
+    "fileVersion": "0.2.0",
+    "company": "CHEN, KUEI-HENG",
+    "signature": "NotSigned",
+    "phase1PortableBytes": 510653100,
+    "sourceCommit": "d72eb235f2169e9c1989258dde2338981271e615"
+  },
+  "ci": {
+    "conclusion": "success",
+    "databaseId": 37139077207,
+    "headSha": "3681fab5b2cf2cf5be93ec7464e081929bfc33b5",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "core",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "windows",
+        "status": "completed"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/oliverchenOVO/project-aegis/actions/runs/37139077207"
+  }
+}
