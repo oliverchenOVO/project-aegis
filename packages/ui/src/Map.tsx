@@ -14,6 +14,7 @@ import {
   floodAppearance,
   incidentCallouts,
   operationalAppearance,
+  roadAppearance,
 } from "./map/knowledge";
 import {
   cameraPosition,
@@ -89,7 +90,7 @@ export function SituationMap({ view, identity }: MapProps) {
     );
     e.scene.position.set(position.x, position.y);
     refreshArchitecture(e, detailForScale(e.base * e.zoom));
-    e.invalidation.request();
+    e.invalidation.flush();
   };
   const zoom = (factor: number) => {
     const e = engine.current;
@@ -258,12 +259,9 @@ export function SituationMap({ view, identity }: MapProps) {
         known = view.beliefs.find(
           (k) => k.kind === "ROAD" && k.subjectId === r.id,
         );
-      const blocked =
-        layers.includes("TRAFFIC") && known?.claim.value === "BLOCKED";
-      if (
-        blocked ||
-        (layers.includes("TRAFFIC") && known?.claim.value === "DEGRADED")
-      ) {
+      const severity = roadAppearance(known?.claim.value);
+      const blocked = layers.includes("TRAFFIC") && severity === "BLOCKED";
+      if (blocked || (layers.includes("TRAFFIC") && severity === "DEGRADED")) {
         g.moveTo(a.x, a.y)
           .lineTo(b.x, b.y)
           .stroke({

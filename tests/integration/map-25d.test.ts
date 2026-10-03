@@ -20,6 +20,7 @@ import {
   floodAppearance,
   incidentCallouts,
   operationalAppearance,
+  roadAppearance,
 } from "../../packages/ui/src/map/knowledge";
 import {
   MAP_LAYERS,
@@ -154,6 +155,31 @@ describe("renderer cartography and knowledge contract", () => {
     expect(draw).toHaveBeenCalledTimes(1);
     expect(queue.length).toBe(2);
   });
+  it("camera flush cancels a queued frame without duplicate drawing or an idle loop", () => {
+    const queue: (() => void)[] = [],
+      draw = vi.fn(),
+      cancel = vi.fn();
+    const scheduler = invalidator(
+      (fn) => {
+        queue.push(fn);
+        return queue.length;
+      },
+      cancel,
+      draw,
+    );
+    scheduler.request();
+    scheduler.flush();
+    expect(cancel).toHaveBeenCalledWith(1);
+    queue[0]();
+    expect(draw).toHaveBeenCalledTimes(1);
+    scheduler.request();
+    queue[1]();
+    expect(draw).toHaveBeenCalledTimes(2);
+    scheduler.dispose();
+    scheduler.flush();
+    expect(draw).toHaveBeenCalledTimes(2);
+    expect(queue.length).toBe(2);
+  });
   it("coincident incident labels remain separate and geographically anchored", () => {
     const session = new Session("AEGIS-2026-001");
     session.step(60);
@@ -197,6 +223,13 @@ describe("renderer cartography and knowledge contract", () => {
     expect(destroy).toHaveBeenCalledTimes(2);
     cache.clear();
     expect(destroy).toHaveBeenCalledTimes(3);
+  });
+  it("both hazard road vocabularies display received restrictions, never hidden state", () => {
+    expect(roadAppearance(undefined)).toBe("UNKNOWN");
+    expect(roadAppearance("IMPASSABLE")).toBe("BLOCKED");
+    expect(roadAppearance("BLOCKED")).toBe("BLOCKED");
+    expect(roadAppearance("RESTRICTED")).toBe("DEGRADED");
+    expect(roadAppearance("OPEN")).toBe("NORMAL");
   });
   it("LOD boundaries are independent of incoming disaster reports", () => {
     expect([0.65, 1, 2].map(detailForScale)).toEqual(["FAR", "MEDIUM", "NEAR"]);

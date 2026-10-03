@@ -1,5 +1,10 @@
 import type { CommandCenterView } from "../../../domain/src/index";
 import { mapTheme } from "./theme";
+export function roadAppearance(value: string | undefined) {
+  if (value === "BLOCKED" || value === "IMPASSABLE") return "BLOCKED";
+  if (value === "DEGRADED" || value === "RESTRICTED") return "DEGRADED";
+  return value === "OPEN" || value === "NORMAL" ? "NORMAL" : "UNKNOWN";
+}
 export function operationalAppearance(value: string | undefined) {
   if (value === undefined)
     return { color: mapTheme.label, warning: false, known: false };

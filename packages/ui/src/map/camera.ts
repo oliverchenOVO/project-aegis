@@ -46,17 +46,29 @@ export function invalidator(
   draw: () => void,
 ) {
   let pending: number | undefined,
-    disposed = false;
+    disposed = false,
+    generation = 0;
   return {
+    flush() {
+      if (disposed) return;
+      generation++;
+      if (pending !== undefined) cancel(pending);
+      pending = undefined;
+      draw();
+    },
     request() {
-      if (!disposed && pending === undefined)
+      if (!disposed && pending === undefined) {
+        const current = ++generation;
         pending = request(() => {
+          if (current !== generation) return;
           pending = undefined;
           if (!disposed) draw();
         });
+      }
     },
     dispose() {
       disposed = true;
+      generation++;
       if (pending !== undefined) cancel(pending);
       pending = undefined;
     },
