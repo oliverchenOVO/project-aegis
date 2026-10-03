@@ -1,0 +1,1520 @@
+{
+  "scenarioId": "flood-urban-v1",
+  "scenarioVersion": "1.4.0",
+  "seed": "AEGIS-FLOOD-2026-001",
+  "worldHash": "4eb523d46aa39a2a",
+  "eventTypes": [
+    "REPORT_CREATED",
+    "MESSAGE_QUEUED",
+    "RAIN_STARTED",
+    "INCIDENT_CREATED",
+    "COHORT_SPLIT",
+    "MESSAGE_HOP_SENT",
+    "REPORT_TRANSMITTED",
+    "MESSAGE_HOP_RECEIVED",
+    "MESSAGE_DELIVERED",
+    "REPORT_RECEIVED",
+    "MESSAGE_LOST",
+    "REPORT_LOST",
+    "FLOOD_ZONE_RISE",
+    "COMMAND_ISSUED",
+    "COMMAND_RECEIVED",
+    "UNIT_RECEIVED_ORDER",
+    "UNIT_DISPATCHED",
+    "UNIT_DEPARTED",
+    "COMMAND_ACKNOWLEDGED",
+    "ROAD_DEGRADED",
+    "BUILDING_FLOODED",
+    "TRANSPORT_DELAYED",
+    "POWER_NODE_FAILED",
+    "COMMUNICATION_DEGRADED",
+    "EVACUATION_STARTED",
+    "CIVILIANS_STRANDED",
+    "NETWORK_NODE_STATUS_CHANGED",
+    "ROAD_BLOCKED",
+    "CIVILIANS_SHELTERED",
+    "CIVILIANS_EXPOSED",
+    "GENERATOR_FAILED",
+    "HOSPITAL_STATUS_CHANGED",
+    "PATIENT_DIED",
+    "UNIT_REROUTED",
+    "PATIENT_DETERIORATED",
+    "UNIT_DISABLED",
+    "RAIN_ENDED",
+    "FLOOD_ZONE_RECEDING",
+    "SCENARIO_COMPLETED"
+  ],
+  "selected": [
+    {
+      "type": "RAIN_STARTED",
+      "count": 1,
+      "first": {
+        "id": "evt-37",
+        "tick": 1,
+        "type": "RAIN_STARTED",
+        "payload": {
+          "intensity": 1.4
+        },
+        "causedByEventIds": []
+      }
+    },
+    {
+      "type": "FLOOD_ZONE_RISE",
+      "count": 200,
+      "first": {
+        "id": "evt-530",
+        "tick": 30,
+        "type": "FLOOD_ZONE_RISE",
+        "payload": {
+          "zoneId": "F-A",
+          "depth": 0.09082626673839983,
+          "previousDepth": 0
+        },
+        "causedByEventIds": [
+          "evt-37"
+        ]
+      }
+    },
+    {
+      "type": "ROAD_BLOCKED",
+      "count": 58,
+      "first": {
+        "id": "evt-1666",
+        "tick": 180,
+        "type": "ROAD_BLOCKED",
+        "payload": {
+          "roadId": "R26",
+          "state": "IMPASSABLE"
+        },
+        "causedByEventIds": [
+          "evt-1665"
+        ]
+      }
+    },
+    {
+      "type": "UNIT_REROUTED",
+      "count": 1092,
+      "first": {
+        "id": "evt-4454",
+        "tick": 420,
+        "type": "UNIT_REROUTED",
+        "payload": {
+          "unitId": "AMB-01",
+          "oldEta": 0
+        },
+        "causedByEventIds": [
+          "evt-568",
+          "evt-739"
+        ]
+      }
+    },
+    {
+      "type": "POWER_NODE_FAILED",
+      "count": 1,
+      "first": {
+        "id": "evt-1536",
+        "tick": 150,
+        "type": "POWER_NODE_FAILED",
+        "payload": {
+          "nodeId": "PWR"
+        },
+        "causedByEventIds": [
+          "evt-1535"
+        ]
+      }
+    },
+    {
+      "type": "GENERATOR_FAILED",
+      "count": 2,
+      "first": {
+        "id": "evt-2841",
+        "tick": 329,
+        "type": "GENERATOR_FAILED",
+        "payload": {
+          "hospitalId": "H-B"
+        },
+        "causedByEventIds": [
+          "evt-1536"
+        ]
+      }
+    },
+    {
+      "type": "NETWORK_NODE_STATUS_CHANGED",
+      "count": 14,
+      "first": {
+        "id": "evt-1544",
+        "tick": 150,
+        "type": "NETWORK_NODE_STATUS_CHANGED",
+        "payload": {
+          "networkNodeId": "NET-RAD",
+          "status": "DEGRADED",
+          "backupFuel": 119
+        },
+        "causedByEventIds": [
+          "evt-1536",
+          "evt-1539"
+        ]
+      }
+    },
+    {
+      "type": "MESSAGE_QUEUED",
+      "count": 5096,
+      "first": {
+        "id": "evt-2",
+        "tick": 0,
+        "type": "MESSAGE_QUEUED",
+        "payload": {
+          "messageId": "MSG-1",
+          "kind": "REPORT",
+          "referenceId": "RPT-1",
+          "source": "NET-FIRE",
+          "destination": "NET-DC"
+        },
+        "causedByEventIds": [
+          "evt-1"
+        ]
+      }
+    },
+    {
+      "type": "MESSAGE_HOP_SENT",
+      "count": 5472,
+      "first": {
+        "id": "evt-141",
+        "tick": 1,
+        "type": "MESSAGE_HOP_SENT",
+        "payload": {
+          "messageId": "MSG-1",
+          "edgeId": "LINK-3",
+          "from": "NET-FIRE",
+          "to": "NET-RAD",
+          "arrivalTick": 6,
+          "backupRoute": false
+        },
+        "causedByEventIds": [
+          "evt-2"
+        ]
+      }
+    },
+    {
+      "type": "REPORT_RECEIVED",
+      "count": 2253,
+      "first": {
+        "id": "evt-247",
+        "tick": 5,
+        "type": "REPORT_RECEIVED",
+        "payload": {
+          "reportId": "RPT-52",
+          "latency": 4
+        },
+        "causedByEventIds": [
+          "evt-131",
+          "evt-242"
+        ]
+      }
+    },
+    {
+      "type": "PATIENT_DIED",
+      "count": 524,
+      "first": {
+        "id": "evt-4156",
+        "tick": 400,
+        "type": "PATIENT_DIED",
+        "payload": {
+          "hospitalId": "H-B",
+          "baseline": true,
+          "count": 1
+        },
+        "causedByEventIds": [
+          "evt-2841"
+        ]
+      }
+    },
+    {
+      "type": "COMMAND_ISSUED",
+      "count": 6,
+      "first": {
+        "id": "evt-534",
+        "tick": 30,
+        "type": "COMMAND_ISSUED",
+        "payload": {
+          "commandId": "CMD-1",
+          "target": "AMB-01",
+          "type": "DISPATCH_UNIT",
+          "incidentId": "INC-1"
+        },
+        "causedByEventIds": []
+      }
+    }
+  ],
+  "chains": [
+    {
+      "rootEventId": "evt-4156",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        },
+        {
+          "id": "evt-2841",
+          "tick": 329,
+          "type": "GENERATOR_FAILED",
+          "payload": {
+            "hospitalId": "H-B"
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        },
+        {
+          "id": "evt-4156",
+          "tick": 400,
+          "type": "PATIENT_DIED",
+          "payload": {
+            "hospitalId": "H-B",
+            "baseline": true,
+            "count": 1
+          },
+          "causedByEventIds": [
+            "evt-2841"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-2841"
+        },
+        {
+          "causeId": "evt-2841",
+          "effectId": "evt-4156"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-7183",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        },
+        {
+          "id": "evt-2841",
+          "tick": 329,
+          "type": "GENERATOR_FAILED",
+          "payload": {
+            "hospitalId": "H-B"
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        },
+        {
+          "id": "evt-7183",
+          "tick": 500,
+          "type": "PATIENT_DIED",
+          "payload": {
+            "hospitalId": "H-B",
+            "baseline": true,
+            "count": 1
+          },
+          "causedByEventIds": [
+            "evt-2841"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-2841"
+        },
+        {
+          "causeId": "evt-2841",
+          "effectId": "evt-7183"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-4898",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-43",
+          "tick": 1,
+          "type": "INCIDENT_CREATED",
+          "payload": {
+            "incidentId": "INC-2",
+            "type": "STRANDED_CIVILIANS",
+            "nodeId": "N4"
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-776",
+          "tick": 120,
+          "type": "TRANSPORT_DELAYED",
+          "payload": {
+            "patientId": "PAT-5",
+            "reason": "AWAITING_TRANSPORT"
+          },
+          "causedByEventIds": [
+            "evt-43"
+          ]
+        },
+        {
+          "id": "evt-4898",
+          "tick": 436,
+          "type": "PATIENT_DETERIORATED",
+          "payload": {
+            "patientId": "PAT-5",
+            "previous": "IMMEDIATE",
+            "triage": "EXPECTANT",
+            "count": 1
+          },
+          "causedByEventIds": [
+            "evt-776"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-43"
+        },
+        {
+          "causeId": "evt-43",
+          "effectId": "evt-776"
+        },
+        {
+          "causeId": "evt-776",
+          "effectId": "evt-4898"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-4973",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-48",
+          "tick": 1,
+          "type": "INCIDENT_CREATED",
+          "payload": {
+            "incidentId": "INC-3",
+            "type": "STRANDED_CIVILIANS",
+            "nodeId": "N16"
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-780",
+          "tick": 120,
+          "type": "TRANSPORT_DELAYED",
+          "payload": {
+            "patientId": "PAT-9",
+            "reason": "AWAITING_TRANSPORT"
+          },
+          "causedByEventIds": [
+            "evt-48"
+          ]
+        },
+        {
+          "id": "evt-4973",
+          "tick": 439,
+          "type": "PATIENT_DETERIORATED",
+          "payload": {
+            "patientId": "PAT-9",
+            "previous": "IMMEDIATE",
+            "triage": "EXPECTANT",
+            "count": 1
+          },
+          "causedByEventIds": [
+            "evt-780"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-48"
+        },
+        {
+          "causeId": "evt-48",
+          "effectId": "evt-780"
+        },
+        {
+          "causeId": "evt-780",
+          "effectId": "evt-4973"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-4454",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-534",
+          "tick": 30,
+          "type": "COMMAND_ISSUED",
+          "payload": {
+            "commandId": "CMD-1",
+            "target": "AMB-01",
+            "type": "DISPATCH_UNIT",
+            "incidentId": "INC-1"
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-535",
+          "tick": 30,
+          "type": "MESSAGE_QUEUED",
+          "payload": {
+            "messageId": "MSG-57",
+            "kind": "COMMAND",
+            "referenceId": "CMD-1",
+            "source": "NET-DC",
+            "destination": "NET-EMS"
+          },
+          "causedByEventIds": [
+            "evt-534"
+          ]
+        },
+        {
+          "id": "evt-546",
+          "tick": 31,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-57",
+            "edgeId": "LINK-1",
+            "from": "NET-DC",
+            "to": "NET-RAD",
+            "arrivalTick": 35,
+            "backupRoute": false
+          },
+          "causedByEventIds": [
+            "evt-535"
+          ]
+        },
+        {
+          "id": "evt-552",
+          "tick": 35,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-57",
+            "nodeId": "NET-RAD"
+          },
+          "causedByEventIds": [
+            "evt-546"
+          ]
+        },
+        {
+          "id": "evt-554",
+          "tick": 35,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-57",
+            "edgeId": "LINK-4",
+            "from": "NET-RAD",
+            "to": "NET-EMS",
+            "arrivalTick": 40,
+            "backupRoute": false
+          },
+          "causedByEventIds": [
+            "evt-552"
+          ]
+        },
+        {
+          "id": "evt-564",
+          "tick": 40,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-57",
+            "nodeId": "NET-EMS"
+          },
+          "causedByEventIds": [
+            "evt-554"
+          ]
+        },
+        {
+          "id": "evt-566",
+          "tick": 40,
+          "type": "MESSAGE_DELIVERED",
+          "payload": {
+            "messageId": "MSG-57",
+            "kind": "COMMAND",
+            "referenceId": "CMD-1",
+            "latency": 10,
+            "queueDelay": 0
+          },
+          "causedByEventIds": [
+            "evt-564"
+          ]
+        },
+        {
+          "id": "evt-568",
+          "tick": 40,
+          "type": "COMMAND_RECEIVED",
+          "payload": {
+            "commandId": "CMD-1"
+          },
+          "causedByEventIds": [
+            "evt-566"
+          ]
+        },
+        {
+          "id": "evt-738",
+          "tick": 120,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-A",
+            "depth": 0.25218603239543924,
+            "previousDepth": 0.21231548112768342
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-739",
+          "tick": 120,
+          "type": "ROAD_DEGRADED",
+          "payload": {
+            "roadId": "R0",
+            "state": "DEGRADED"
+          },
+          "causedByEventIds": [
+            "evt-738"
+          ]
+        },
+        {
+          "id": "evt-4454",
+          "tick": 420,
+          "type": "UNIT_REROUTED",
+          "payload": {
+            "unitId": "AMB-01",
+            "oldEta": 0
+          },
+          "causedByEventIds": [
+            "evt-568",
+            "evt-739"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-534",
+          "effectId": "evt-535"
+        },
+        {
+          "causeId": "evt-535",
+          "effectId": "evt-546"
+        },
+        {
+          "causeId": "evt-546",
+          "effectId": "evt-552"
+        },
+        {
+          "causeId": "evt-552",
+          "effectId": "evt-554"
+        },
+        {
+          "causeId": "evt-554",
+          "effectId": "evt-564"
+        },
+        {
+          "causeId": "evt-564",
+          "effectId": "evt-566"
+        },
+        {
+          "causeId": "evt-566",
+          "effectId": "evt-568"
+        },
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-738"
+        },
+        {
+          "causeId": "evt-738",
+          "effectId": "evt-739"
+        },
+        {
+          "causeId": "evt-568",
+          "effectId": "evt-4454"
+        },
+        {
+          "causeId": "evt-739",
+          "effectId": "evt-4454"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-4457",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-536",
+          "tick": 30,
+          "type": "COMMAND_ISSUED",
+          "payload": {
+            "commandId": "CMD-2",
+            "target": "AMB-02",
+            "type": "DISPATCH_UNIT",
+            "incidentId": "INC-1"
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-537",
+          "tick": 30,
+          "type": "MESSAGE_QUEUED",
+          "payload": {
+            "messageId": "MSG-58",
+            "kind": "COMMAND",
+            "referenceId": "CMD-2",
+            "source": "NET-DC",
+            "destination": "NET-EMS"
+          },
+          "causedByEventIds": [
+            "evt-536"
+          ]
+        },
+        {
+          "id": "evt-547",
+          "tick": 31,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-58",
+            "edgeId": "LINK-1",
+            "from": "NET-DC",
+            "to": "NET-RAD",
+            "arrivalTick": 35,
+            "backupRoute": false
+          },
+          "causedByEventIds": [
+            "evt-537"
+          ]
+        },
+        {
+          "id": "evt-553",
+          "tick": 35,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-58",
+            "nodeId": "NET-RAD"
+          },
+          "causedByEventIds": [
+            "evt-547"
+          ]
+        },
+        {
+          "id": "evt-555",
+          "tick": 35,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-58",
+            "edgeId": "LINK-4",
+            "from": "NET-RAD",
+            "to": "NET-EMS",
+            "arrivalTick": 40,
+            "backupRoute": false
+          },
+          "causedByEventIds": [
+            "evt-553"
+          ]
+        },
+        {
+          "id": "evt-565",
+          "tick": 40,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-58",
+            "nodeId": "NET-EMS"
+          },
+          "causedByEventIds": [
+            "evt-555"
+          ]
+        },
+        {
+          "id": "evt-567",
+          "tick": 40,
+          "type": "MESSAGE_DELIVERED",
+          "payload": {
+            "messageId": "MSG-58",
+            "kind": "COMMAND",
+            "referenceId": "CMD-2",
+            "latency": 10,
+            "queueDelay": 0
+          },
+          "causedByEventIds": [
+            "evt-565"
+          ]
+        },
+        {
+          "id": "evt-574",
+          "tick": 40,
+          "type": "COMMAND_RECEIVED",
+          "payload": {
+            "commandId": "CMD-2"
+          },
+          "causedByEventIds": [
+            "evt-567"
+          ]
+        },
+        {
+          "id": "evt-738",
+          "tick": 120,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-A",
+            "depth": 0.25218603239543924,
+            "previousDepth": 0.21231548112768342
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-739",
+          "tick": 120,
+          "type": "ROAD_DEGRADED",
+          "payload": {
+            "roadId": "R0",
+            "state": "DEGRADED"
+          },
+          "causedByEventIds": [
+            "evt-738"
+          ]
+        },
+        {
+          "id": "evt-4457",
+          "tick": 420,
+          "type": "UNIT_REROUTED",
+          "payload": {
+            "unitId": "AMB-02",
+            "oldEta": 0
+          },
+          "causedByEventIds": [
+            "evt-574",
+            "evt-739"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-536",
+          "effectId": "evt-537"
+        },
+        {
+          "causeId": "evt-537",
+          "effectId": "evt-547"
+        },
+        {
+          "causeId": "evt-547",
+          "effectId": "evt-553"
+        },
+        {
+          "causeId": "evt-553",
+          "effectId": "evt-555"
+        },
+        {
+          "causeId": "evt-555",
+          "effectId": "evt-565"
+        },
+        {
+          "causeId": "evt-565",
+          "effectId": "evt-567"
+        },
+        {
+          "causeId": "evt-567",
+          "effectId": "evt-574"
+        },
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-738"
+        },
+        {
+          "causeId": "evt-738",
+          "effectId": "evt-739"
+        },
+        {
+          "causeId": "evt-574",
+          "effectId": "evt-4457"
+        },
+        {
+          "causeId": "evt-739",
+          "effectId": "evt-4457"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-1536",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-1544",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        },
+        {
+          "id": "evt-1538",
+          "tick": 150,
+          "type": "COMMUNICATION_DEGRADED",
+          "payload": {
+            "nodeId": "RAD"
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        },
+        {
+          "id": "evt-1539",
+          "tick": 150,
+          "type": "INCIDENT_CREATED",
+          "payload": {
+            "incidentId": "INC-15",
+            "type": "COMMUNICATION_FAILURE",
+            "nodeId": "N10"
+          },
+          "causedByEventIds": [
+            "evt-1538"
+          ]
+        },
+        {
+          "id": "evt-1544",
+          "tick": 150,
+          "type": "NETWORK_NODE_STATUS_CHANGED",
+          "payload": {
+            "networkNodeId": "NET-RAD",
+            "status": "DEGRADED",
+            "backupFuel": 119
+          },
+          "causedByEventIds": [
+            "evt-1536",
+            "evt-1539"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-1538"
+        },
+        {
+          "causeId": "evt-1538",
+          "effectId": "evt-1539"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-1544"
+        },
+        {
+          "causeId": "evt-1539",
+          "effectId": "evt-1544"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-1545",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        },
+        {
+          "id": "evt-1545",
+          "tick": 150,
+          "type": "NETWORK_NODE_STATUS_CHANGED",
+          "payload": {
+            "networkNodeId": "NET-CELL",
+            "status": "DEGRADED",
+            "backupFuel": 179
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-1545"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    },
+    {
+      "rootEventId": "evt-21423",
+      "nodes": [
+        {
+          "id": "evt-37",
+          "tick": 1,
+          "type": "RAIN_STARTED",
+          "payload": {
+            "intensity": 1.4
+          },
+          "causedByEventIds": []
+        },
+        {
+          "id": "evt-1535",
+          "tick": 150,
+          "type": "FLOOD_ZONE_RISE",
+          "payload": {
+            "zoneId": "F-B",
+            "depth": 0.49401707756694924,
+            "previousDepth": 0.3826149817779045
+          },
+          "causedByEventIds": [
+            "evt-37"
+          ]
+        },
+        {
+          "id": "evt-1536",
+          "tick": 150,
+          "type": "POWER_NODE_FAILED",
+          "payload": {
+            "nodeId": "PWR"
+          },
+          "causedByEventIds": [
+            "evt-1535"
+          ]
+        },
+        {
+          "id": "evt-1538",
+          "tick": 150,
+          "type": "COMMUNICATION_DEGRADED",
+          "payload": {
+            "nodeId": "RAD"
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        },
+        {
+          "id": "evt-1539",
+          "tick": 150,
+          "type": "INCIDENT_CREATED",
+          "payload": {
+            "incidentId": "INC-15",
+            "type": "COMMUNICATION_FAILURE",
+            "nodeId": "N10"
+          },
+          "causedByEventIds": [
+            "evt-1538"
+          ]
+        },
+        {
+          "id": "evt-1544",
+          "tick": 150,
+          "type": "NETWORK_NODE_STATUS_CHANGED",
+          "payload": {
+            "networkNodeId": "NET-RAD",
+            "status": "DEGRADED",
+            "backupFuel": 119
+          },
+          "causedByEventIds": [
+            "evt-1536",
+            "evt-1539"
+          ]
+        },
+        {
+          "id": "evt-2402",
+          "tick": 269,
+          "type": "NETWORK_NODE_STATUS_CHANGED",
+          "payload": {
+            "networkNodeId": "NET-RAD",
+            "status": "DOWN",
+            "backupFuel": 0
+          },
+          "causedByEventIds": [
+            "evt-1544",
+            "evt-1536",
+            "evt-1539"
+          ]
+        },
+        {
+          "id": "evt-12504",
+          "tick": 720,
+          "type": "REPORT_CREATED",
+          "payload": {
+            "reportId": "RPT-2097",
+            "subjectId": "H-A"
+          },
+          "causedByEventIds": [
+            "evt-1536"
+          ]
+        },
+        {
+          "id": "evt-12505",
+          "tick": 720,
+          "type": "MESSAGE_QUEUED",
+          "payload": {
+            "messageId": "MSG-2109",
+            "kind": "REPORT",
+            "referenceId": "RPT-2097",
+            "source": "NET-H-A",
+            "destination": "NET-DC"
+          },
+          "causedByEventIds": [
+            "evt-12504"
+          ]
+        },
+        {
+          "id": "evt-12682",
+          "tick": 720,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-2109",
+            "edgeId": "LINK-12",
+            "from": "NET-H-A",
+            "to": "NET-EMS",
+            "arrivalTick": 738,
+            "backupRoute": true
+          },
+          "causedByEventIds": [
+            "evt-12505",
+            "evt-2402"
+          ]
+        },
+        {
+          "id": "evt-13033",
+          "tick": 738,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-2109",
+            "nodeId": "NET-EMS"
+          },
+          "causedByEventIds": [
+            "evt-12682"
+          ]
+        },
+        {
+          "id": "evt-21226",
+          "tick": 1142,
+          "type": "MESSAGE_HOP_SENT",
+          "payload": {
+            "messageId": "MSG-2109",
+            "edgeId": "LINK-7",
+            "from": "NET-EMS",
+            "to": "NET-DC",
+            "arrivalTick": 1158,
+            "backupRoute": true
+          },
+          "causedByEventIds": [
+            "evt-13033",
+            "evt-2402"
+          ]
+        },
+        {
+          "id": "evt-21416",
+          "tick": 1158,
+          "type": "MESSAGE_HOP_RECEIVED",
+          "payload": {
+            "messageId": "MSG-2109",
+            "nodeId": "NET-DC"
+          },
+          "causedByEventIds": [
+            "evt-21226"
+          ]
+        },
+        {
+          "id": "evt-21419",
+          "tick": 1158,
+          "type": "MESSAGE_DELIVERED",
+          "payload": {
+            "messageId": "MSG-2109",
+            "kind": "REPORT",
+            "referenceId": "RPT-2097",
+            "latency": 438,
+            "queueDelay": 404
+          },
+          "causedByEventIds": [
+            "evt-21416"
+          ]
+        },
+        {
+          "id": "evt-21423",
+          "tick": 1158,
+          "type": "REPORT_RECEIVED",
+          "payload": {
+            "reportId": "RPT-2097",
+            "latency": 438
+          },
+          "causedByEventIds": [
+            "evt-12504",
+            "evt-21419"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "causeId": "evt-37",
+          "effectId": "evt-1535"
+        },
+        {
+          "causeId": "evt-1535",
+          "effectId": "evt-1536"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-1538"
+        },
+        {
+          "causeId": "evt-1538",
+          "effectId": "evt-1539"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-1544"
+        },
+        {
+          "causeId": "evt-1539",
+          "effectId": "evt-1544"
+        },
+        {
+          "causeId": "evt-1544",
+          "effectId": "evt-2402"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-2402"
+        },
+        {
+          "causeId": "evt-1539",
+          "effectId": "evt-2402"
+        },
+        {
+          "causeId": "evt-1536",
+          "effectId": "evt-12504"
+        },
+        {
+          "causeId": "evt-12504",
+          "effectId": "evt-12505"
+        },
+        {
+          "causeId": "evt-12505",
+          "effectId": "evt-12682"
+        },
+        {
+          "causeId": "evt-2402",
+          "effectId": "evt-12682"
+        },
+        {
+          "causeId": "evt-12682",
+          "effectId": "evt-13033"
+        },
+        {
+          "causeId": "evt-13033",
+          "effectId": "evt-21226"
+        },
+        {
+          "causeId": "evt-2402",
+          "effectId": "evt-21226"
+        },
+        {
+          "causeId": "evt-21226",
+          "effectId": "evt-21416"
+        },
+        {
+          "causeId": "evt-21416",
+          "effectId": "evt-21419"
+        },
+        {
+          "causeId": "evt-12504",
+          "effectId": "evt-21423"
+        },
+        {
+          "causeId": "evt-21419",
+          "effectId": "evt-21423"
+        }
+      ],
+      "truncated": false,
+      "omittedEventIds": [],
+      "limits": {
+        "maxDepth": 20,
+        "maxNodes": 250
+      }
+    }
+  ]
+}

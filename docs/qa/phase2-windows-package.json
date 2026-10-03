@@ -1,0 +1,14 @@
+{
+  "portablePath": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\AEGIS-0.2.0-Windows-x64.exe",
+  "portableBytes": 100341256,
+  "portableSha256": "B871150D72DCE2003AF8FD6DF06EBDF7114CA5FF17BC73DE67F094426201E5A6",
+  "runtimeBytes": 245726720,
+  "runtimeSha256": "98DE381C8E4F821FBEE55B80371F1EF356CA69D72AF80EEBBB2D1BFDFDC81FA1",
+  "asarBytes": 13536425,
+  "product": "Project AEGIS",
+  "productVersion": "0.2.0.0",
+  "fileVersion": "0.2.0",
+  "company": "CHEN, KUEI-HENG",
+  "signature": "NotSigned",
+  "phase1PortableBytes": 510653100
+}

@@ -8,6 +8,7 @@ import { flood, FLOOD_SHOWCASE_SEED } from "../../packages/scenarios/src/flood";
 import { load } from "../../packages/persistence/src/index";
 
 import { launch } from "./launch";
+import { CausalIndex } from "../../packages/after-action/src/causal";
 const portable = process.argv.includes("--portable");
 const output = resolve(
   portable ? "test-results/phase2-portable" : "test-results/phase2",
@@ -69,13 +70,13 @@ try {
   await expect(page.locator(".unit-row").first()).toContainText("未知");
   await expect(page.locator(".operation-banner")).toContainText("電力：未知");
   checks.initialFog = "unknown units/power; no initial truth";
+  await page.getByLabel("疏散區域").selectOption("F-A");
+  await page.getByRole("button", { name: "發布疏散", exact: true }).click();
+  await expect(page.locator(".queue")).toContainText("疏散區域");
   await page.getByRole("button", { name: "推進 5分", exact: true }).click();
   await expect(page.getByTestId("sim-clock")).toHaveText("14:05:00", {
     timeout: 30000,
   });
-  await page.getByLabel("疏散區域").selectOption("F-A");
-  await page.getByRole("button", { name: "發布疏散", exact: true }).click();
-  await expect(page.locator(".queue")).toContainText("疏散區域");
   await page.getByRole("button", { name: "推進 5分", exact: true }).click();
   await expect(page.getByTestId("sim-clock")).toHaveText("14:10:00", {
     timeout: 30000,
@@ -94,6 +95,7 @@ try {
     { width: 700, height: 900 },
   ]) {
     await page.setViewportSize(size);
+    await page.bringToFront();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth,
@@ -122,6 +124,25 @@ try {
   expect(
     live.simulation.state.commands.some((c) => c.type === "EVACUATE_ZONE"),
   ).toBe(true);
+  const evacuationCommand = live.simulation.state.commands.find(
+    (c) => c.type === "EVACUATE_ZONE",
+  )!;
+  expect(evacuationCommand.executionStatus).toBe("COMPLETED");
+  const graph = new CausalIndex(live.simulation.state.events);
+  const sheltered = live.simulation.state.events.filter(
+    (e) =>
+      e.type === "CIVILIANS_SHELTERED" &&
+      graph
+        .trace(e.id, 20, 250)
+        .nodes.some((n) => n.type === "EVACUATION_ORDERED"),
+  );
+  expect(sheltered.length).toBeGreaterThan(0);
+  checks.evacuation = {
+    commandId: evacuationCommand.id,
+    executionStatus: evacuationCommand.executionStatus,
+    shelteredPeople: sheltered.reduce((n, e) => n + Number(e.payload.count), 0),
+    eventIds: sheltered.map((e) => e.id),
+  };
   mark("live save validated");
   await dialogPaths(originalPath, branchPath);
   await page.getByRole("button", { name: "載入", exact: true }).click();

@@ -3,6 +3,7 @@ dist/
 release/
 coverage/
 test-results/
+.ci-investigation/
 .env*
 *.aegis
 *.log

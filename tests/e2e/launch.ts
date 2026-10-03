@@ -42,14 +42,32 @@ export async function launch(
     ),
   );
   delete env.ELECTRON_RUN_AS_NODE;
-  if (!portable)
-    return _electron.launch({
+  const graphicsArgs =
+    process.env.CI || process.env.AEGIS_SOFTWARE_RENDERING
+      ? [
+          "--use-gl=angle",
+          "--use-angle=swiftshader",
+          "--disable-renderer-backgrounding",
+        ]
+      : [];
+  if (!portable) {
+    const application = await _electron.launch({
       ...(executable
-        ? { executablePath: resolve(executable), args: [] }
-        : { args: [resolve("apps/desktop/dist/main.cjs")] }),
+        ? { executablePath: resolve(executable), args: graphicsArgs }
+        : { args: [resolve("apps/desktop/dist/main.cjs"), ...graphicsArgs] }),
       env,
       timeout: 30000,
     });
+    await application.firstWindow();
+    await application.evaluate(({ BrowserWindow }) => {
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.webContents.setBackgroundThrottling(false);
+        window.show();
+        window.focus();
+      }
+    });
+    return application;
+  }
   if (!executable)
     throw new Error("Portable test requires its wrapper executable");
   const browserPort = await port(),
@@ -59,6 +77,7 @@ export async function launch(
     [
       `--remote-debugging-port=${browserPort}`,
       `--inspect=127.0.0.1:${nodePort}`,
+      ...graphicsArgs,
     ],
     { env, windowsHide: true, stdio: "ignore" },
   );
@@ -161,6 +180,13 @@ export async function launch(
       )) as ElectronApplication["evaluate"];
     const pages = browser.contexts()[0].pages();
     const page = pages[0] ?? (await browser.contexts()[0].waitForEvent("page"));
+    await evaluate(({ BrowserWindow }) => {
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.webContents.setBackgroundThrottling(false);
+        window.show();
+        window.focus();
+      }
+    });
     return { firstWindow: async () => page, evaluate, close };
   } catch (error) {
     await close();

@@ -1,0 +1,10 @@
+{
+  "tick": 1800,
+  "incidents": 54,
+  "cohorts": 188,
+  "events": 29264,
+  "ms": 2254.4498000000003,
+  "ticksPerSecond": 798.4209717155821,
+  "hash": "41521a84d03d6c8e",
+  "passed": true
+}

@@ -8,6 +8,28 @@
     },
     "initialFog": "unknown units/power; no initial truth",
     "hospitalInspector": "received census/queue/ICU/handover/power with age/source",
+    "evacuation": {
+      "commandId": "CMD-1",
+      "executionStatus": "COMPLETED",
+      "shelteredPeople": 324,
+      "eventIds": [
+        "evt-423",
+        "evt-424",
+        "evt-425",
+        "evt-574",
+        "evt-575",
+        "evt-576",
+        "evt-615",
+        "evt-616",
+        "evt-617",
+        "evt-618",
+        "evt-619",
+        "evt-1581",
+        "evt-1959",
+        "evt-1998",
+        "evt-2389"
+      ]
+    },
     "branch": {
       "originalHash": "4eb523d46aa39a2a",
       "alternativeHash": "2a2b76b4e6376144",
