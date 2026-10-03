@@ -52,6 +52,7 @@ const page = await app.firstWindow(),
   checks: Record<string, unknown> = {};
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (e) => {
+  if (e.text().startsWith("AEGIS-QA ")) console.log(e.text());
   if (e.type() === "error") errors.push(e.text());
   if (e.type() === "warning") warnings.push(e.text());
 });
@@ -70,6 +71,54 @@ const dialogPaths = async (loadPath: string, savePath = livePath) =>
     { loadPath, savePath },
   );
 try {
+  checks.runtime = await app.evaluate(({ app, BrowserWindow }) => ({
+    versions: process.versions,
+    gpu: app.getGPUFeatureStatus(),
+    windows: BrowserWindow.getAllWindows().map((window) => ({
+      visible: window.isVisible(),
+      minimized: window.isMinimized(),
+      backgroundThrottling: window.webContents.getBackgroundThrottling(),
+    })),
+  }));
+  console.log("AEGIS-QA runtime", JSON.stringify(checks.runtime));
+  await page.evaluate(() => {
+    const NativeWorker = window.Worker;
+    window.Worker = class extends NativeWorker {
+      private requests = new Map<number, { action: string; start: number }>();
+      constructor(url: string | URL, options?: WorkerOptions) {
+        super(url, options);
+        this.addEventListener("message", (event) => {
+          const request = this.requests.get(event.data.id);
+          if (!request) return;
+          console.log(
+            "AEGIS-QA response",
+            JSON.stringify({
+              action: request.action,
+              elapsedMs: performance.now() - request.start,
+              error: event.data.error,
+            }),
+          );
+          this.requests.delete(event.data.id);
+        });
+      }
+      postMessage(
+        message: { id: number; action: string },
+        options?: StructuredSerializeOptions | Transferable[],
+      ) {
+        this.requests.set(message.id, {
+          action: message.action,
+          start: performance.now(),
+        });
+        console.log(
+          "AEGIS-QA request",
+          message.action,
+          new Date().toISOString(),
+        );
+        if (Array.isArray(options)) super.postMessage(message, options);
+        else super.postMessage(message, options);
+      }
+    };
+  });
   await page.setViewportSize({ width: 1600, height: 900 });
   await expect(
     page.getByRole("heading", { name: "啟動應變中心" }),
@@ -109,6 +158,7 @@ try {
     { width: 1664, height: 941 },
     { width: 700, height: 900 },
   ]) {
+    console.log("AEGIS-QA viewport", size.width, new Date().toISOString());
     await page.setViewportSize(size);
     expect(
       await page.evaluate(
@@ -139,6 +189,7 @@ try {
     live.simulation.state.commands.some((c) => c.type === "EVACUATE_ZONE"),
   ).toBe(true);
   await dialogPaths(originalPath, branchPath);
+  console.log("AEGIS-QA load completed save", new Date().toISOString());
   await page.getByRole("button", { name: "載入", exact: true }).click();
   await expect(page.getByRole("heading", { name: "行動檢討報告" })).toBeVisible(
     { timeout: 45000 },
