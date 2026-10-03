@@ -14,7 +14,12 @@ import {
   incidentCallouts,
   operationalAppearance,
 } from "./map/knowledge";
-import { cameraPosition, invalidator, nearSegment } from "./map/camera";
+import {
+  cameraPosition,
+  invalidator,
+  nearSegment,
+  screenToGround,
+} from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
   UNITS: "單位",
@@ -38,6 +43,11 @@ export function SituationMap({ view, identity }: MapProps) {
       content: Container;
       architecture?: ReturnType<typeof drawArchitecture>;
       staticHost: Container;
+      routes: {
+        a: { x: number; y: number };
+        b: { x: number; y: number };
+        description: string;
+      }[];
       publicCity: CommandCenterView["city"];
       identity: Identity;
       invalidation: ReturnType<typeof invalidator>;
@@ -113,6 +123,7 @@ export function SituationMap({ view, identity }: MapProps) {
         scene,
         content,
         staticHost,
+        routes: [],
         publicCity: view.city,
         identity,
         invalidation: invalidator(
@@ -155,6 +166,21 @@ export function SituationMap({ view, identity }: MapProps) {
         engine.current.pan.y += e.clientY - last.y;
         last = { x: e.clientX, y: e.clientY };
         transform();
+      } else if (engine.current && element.contains(e.target as Node)) {
+        const map = engine.current,
+          box = element.getBoundingClientRect();
+        const point = screenToGround(
+          { x: e.clientX - box.left, y: e.clientY - box.top },
+          { x: map.scene.x, y: map.scene.y },
+          map.base * map.zoom,
+        );
+        const route = map.routes.find(
+          (r) =>
+            nearSegment(point, r.a, r.b) &&
+            Math.hypot(point.x - r.a.x, point.y - r.a.y) > 15 &&
+            Math.hypot(point.x - r.b.x, point.y - r.b.y) > 15,
+        );
+        if (route) setHover(route.description);
       }
     };
     const up = () => {
@@ -192,6 +218,7 @@ export function SituationMap({ view, identity }: MapProps) {
     e.publicCity = view.city;
     e.identity = identity;
     refreshArchitecture(e, detailForScale(e.base * e.zoom));
+    e.routes = [];
     const floodLayer = layer(e.content, MAP_LAYERS.flood);
     const infrastructure = layer(e.content, MAP_LAYERS.infrastructure);
     const ground = layer(e.content, MAP_LAYERS.incidentGround);
@@ -564,15 +591,13 @@ export function SituationMap({ view, identity }: MapProps) {
                     my - uy * 4 - ux * 4,
                   ])
                   .fill(mapTheme.route);
-                const routeStart = { x: last.x, y: last.y };
-                route.hitArea = {
-                  contains: (x: number, y: number) =>
-                    nearSegment({ x, y }, routeStart, next, 7),
-                };
-                route.eventMode = "static";
-                const routeLabel = `${u.id} · 已回報路線 ${last.name} → ${next.name}`;
-                route.on("pointerover", () => setHover(routeLabel));
+                e.routes.push({
+                  a: { x: last.x, y: last.y },
+                  b: { x: next.x, y: next.y },
+                  description: `${u.id} · 已回報路線 ${last.name} → ${next.name}`,
+                });
               }
+              route.eventMode = "none";
               routeLayer.addChild(route);
               last = next;
             }
