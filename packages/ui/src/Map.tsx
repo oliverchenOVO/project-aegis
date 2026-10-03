@@ -43,6 +43,7 @@ export function SituationMap({ view }: MapProps) {
       (e.app.screen.width - 800 * e.base * e.zoom) / 2 + e.pan.x,
       (e.app.screen.height - 590 * e.base * e.zoom) / 2 + e.pan.y,
     );
+    e.app.render();
   };
   const zoom = (factor: number) => {
     const e = engine.current;
@@ -57,6 +58,9 @@ export function SituationMap({ view }: MapProps) {
     const element = host.current!;
     const init = async () => {
       await app.init({
+        // The map has no time-based animation. Render when its view or camera changes
+        // instead of competing with replay validation on software-rendering hosts.
+        autoStart: false,
         background: "#121a22",
         resizeTo: element,
         antialias: true,
@@ -477,6 +481,7 @@ export function SituationMap({ view }: MapProps) {
         }
       }
     }
+    e.app.render();
   }, [view, selected, layers, select, ready]);
   return (
     <section className="map-panel">

@@ -10,6 +10,11 @@ import { load } from "../../packages/persistence/src/index";
 import { launch } from "./launch";
 import { viewport, capture } from "./capture";
 import { CausalIndex } from "../../packages/after-action/src/causal";
+declare global {
+  interface Window {
+    aegisQaDrawCalls: () => number;
+  }
+}
 const portable = process.argv.includes("--portable");
 const output = resolve(
   portable ? "test-results/phase2-portable" : "test-results/phase2",
@@ -35,9 +40,14 @@ const app = await launch(process.argv[2], portable);
 const page = await app.firstWindow(),
   errors: string[] = [],
   warnings: string[] = [],
+  workerTimings: { action: string; elapsedMs: number; error?: string }[] = [],
   checks: Record<string, unknown> = {};
+checks.workerTimings = workerTimings;
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (e) => {
+  if (e.text().startsWith("AEGIS-QA ")) console.log(e.text());
+  if (e.text().startsWith("AEGIS-QA response "))
+    workerTimings.push(JSON.parse(e.text().slice("AEGIS-QA response ".length)));
   if (e.type() === "error") errors.push(e.text());
   if (e.type() === "warning") warnings.push(e.text());
 });
@@ -56,6 +66,69 @@ const dialogPaths = async (loadPath: string, savePath = livePath) =>
     { loadPath, savePath },
   );
 try {
+  checks.runtime = await app.evaluate(({ app, BrowserWindow }) => ({
+    versions: process.versions,
+    gpu: app.getGPUFeatureStatus(),
+    windows: BrowserWindow.getAllWindows().map((window) => ({
+      visible: window.isVisible(),
+      minimized: window.isMinimized(),
+      backgroundThrottling: window.webContents.getBackgroundThrottling(),
+    })),
+  }));
+  console.log("AEGIS-QA runtime", JSON.stringify(checks.runtime));
+  await page.evaluate(() => {
+    let drawCalls = 0;
+    window.aegisQaDrawCalls = () => drawCalls;
+    for (const context of [WebGLRenderingContext, WebGL2RenderingContext]) {
+      const prototype = context.prototype;
+      const drawElements = prototype.drawElements;
+      prototype.drawElements = function (...args) {
+        drawCalls++;
+        return drawElements.apply(this, args);
+      };
+      const drawArrays = prototype.drawArrays;
+      prototype.drawArrays = function (...args) {
+        drawCalls++;
+        return drawArrays.apply(this, args);
+      };
+    }
+    const NativeWorker = window.Worker;
+    window.Worker = class extends NativeWorker {
+      private requests = new Map<number, { action: string; start: number }>();
+      constructor(url: string | URL, options?: WorkerOptions) {
+        super(url, options);
+        this.addEventListener("message", (event) => {
+          const request = this.requests.get(event.data.id);
+          if (!request) return;
+          console.log(
+            "AEGIS-QA response",
+            JSON.stringify({
+              action: request.action,
+              elapsedMs: performance.now() - request.start,
+              error: event.data.error,
+            }),
+          );
+          this.requests.delete(event.data.id);
+        });
+      }
+      postMessage(
+        message: { id: number; action: string },
+        options?: StructuredSerializeOptions | Transferable[],
+      ) {
+        this.requests.set(message.id, {
+          action: message.action,
+          start: performance.now(),
+        });
+        console.log(
+          "AEGIS-QA request",
+          message.action,
+          new Date().toISOString(),
+        );
+        if (Array.isArray(options)) super.postMessage(message, options);
+        else super.postMessage(message, options);
+      }
+    };
+  });
   await viewport(app, page, { width: 1600, height: 900 });
   await expect(
     page.getByRole("heading", { name: "啟動應變中心" }),
@@ -71,6 +144,38 @@ try {
   await expect(page.locator(".unit-row").first()).toContainText("未知");
   await expect(page.locator(".operation-banner")).toContainText("電力：未知");
   checks.initialFog = "unknown units/power; no initial truth";
+  const idleDraws = await page.evaluate(async () => {
+    const samples: number[] = [];
+    for (let frame = 0; frame < 8; frame++) {
+      await new Promise(requestAnimationFrame);
+      samples.push(window.aegisQaDrawCalls());
+    }
+    return samples.slice(2);
+  });
+  expect(
+    idleDraws[0],
+    "map must actually draw its initial content",
+  ).toBeGreaterThan(0);
+  expect(
+    new Set(idleDraws).size,
+    "paused static map must not keep drawing",
+  ).toBe(1);
+  const beforeZoom = await page.locator("canvas").screenshot();
+  await page.getByRole("button", { name: "放大地圖", exact: true }).click();
+  const afterZoom = await page.locator("canvas").screenshot();
+  expect(
+    afterZoom.equals(beforeZoom),
+    "camera change must redraw the map",
+  ).toBe(false);
+  await page.getByRole("button", { name: "重設地圖", exact: true }).click();
+  await page.getByRole("button", { name: "淹水", exact: true }).click();
+  const afterLayer = await page.locator("canvas").screenshot();
+  expect(
+    afterLayer.equals(beforeZoom),
+    "layer change must redraw the map",
+  ).toBe(false);
+  await page.getByRole("button", { name: "淹水", exact: true }).click();
+  checks.mapRendering = { idleDraws, zoomRedrawn: true, layerRedrawn: true };
   await page.getByLabel("疏散區域").selectOption("F-A");
   await page.getByRole("button", { name: "發布疏散", exact: true }).click();
   await expect(page.locator(".queue")).toContainText("疏散區域");
