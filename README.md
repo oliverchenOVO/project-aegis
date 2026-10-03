@@ -22,7 +22,7 @@ pnpm benchmark
 pnpm build
 pnpm desktop
 pnpm package:win
-pnpm smoke "release/win-unpacked/Project AEGIS.exe"
+pnpm smoke "release/windows-runtime/Project AEGIS.exe"
 ```
 
 UI dev port is 5173. If occupied, `pnpm exec vite --host 127.0.0.1 --port 5187`. The packaged app opens local production assets and isolates the renderer from Node. Simulation runs in a separate worker and only exposes received views.

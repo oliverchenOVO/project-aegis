@@ -32,12 +32,12 @@ try {
     },
   });
   mkdirSync(output, { recursive: true });
-  mkdirSync(join(output, "win-unpacked"), { recursive: true });
-  cpSync(join(staging, "win-unpacked"), join(output, "win-unpacked"), {
+  mkdirSync(join(output, "windows-runtime"), { recursive: true });
+  cpSync(join(staging, "win-unpacked"), join(output, "windows-runtime"), {
     recursive: true,
     dereference: true,
   });
-  if (!existsSync(join(output, "win-unpacked/Project AEGIS.exe")))
+  if (!existsSync(join(output, "windows-runtime/Project AEGIS.exe")))
     throw new Error("Packaged executable copy failed");
   for (const file of readdirSync(staging).filter((file) =>
     /^AEGIS-.*\.exe$/.test(file),
@@ -54,5 +54,5 @@ try {
   )
     rmSync(actual, { recursive: true, force: true });
 }
-if (!existsSync(join(output, "win-unpacked/Project AEGIS.exe")))
+if (!existsSync(join(output, "windows-runtime/Project AEGIS.exe")))
   throw new Error("Packaged executable disappeared after staging cleanup");
