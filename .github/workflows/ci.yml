@@ -1,0 +1,51 @@
+name: AEGIS quality gates
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm benchmark
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: simulation-benchmark
+          path: docs/qa/benchmark.json
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm package:win
+      - run: pnpm smoke "release/win-unpacked/Project AEGIS.exe"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-smoke-evidence
+          path: test-results/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AEGIS-Windows-portable
+          path: release/AEGIS-*.exe

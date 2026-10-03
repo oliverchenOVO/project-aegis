@@ -1,4 +1,56 @@
-import type { CommandCenterView } from '../../domain/src/index';
-import { clock } from '../../shared/src/index';
-import { statusNames } from './labels';
-export function CommandQueue({ view }: { view: CommandCenterView }) { return <section className="queue"><div className="panel-title"><h2>指令佇列</h2><span className="muted">{view.commands.length} 道命令</span></div><div className="queue-scroll">{view.commands.length ? <table><thead><tr><th>發送時間</th><th>命令 / 目標</th><th>傳遞狀態</th><th>執行</th></tr></thead><tbody>{view.commands.slice(-30).reverse().map(c => <tr key={c.id}><td>{clock(c.issueTick)}</td><td>{statusNames[c.type]} {c.target}{c.incidentId && ` → ${c.incidentId}`}</td><td className={c.deliveryStatus === 'FAILED' ? 'orange' : 'blue'} title={c.failure}>{statusNames[c.deliveryStatus]}{c.acknowledgementTick !== undefined && ` (+${c.acknowledgementTick - c.issueTick}s)`}</td><td>{c.failure ?? statusNames[c.executionStatus]}</td></tr>)}</tbody></table> : <div className="empty compact">尚未發布命令。派遣不會立即執行，單位必須先收到並確認指令。</div>}</div></section>; }
+import type { CommandCenterView } from "../../domain/src/index";
+import { clock } from "../../shared/src/index";
+import { statusNames } from "./labels";
+export function CommandQueue({ view }: { view: CommandCenterView }) {
+  return (
+    <section className="queue">
+      <div className="panel-title">
+        <h2>指令佇列</h2>
+        <span className="muted">{view.commands.length} 道命令</span>
+      </div>
+      <div className="queue-scroll">
+        {view.commands.length ? (
+          <table>
+            <thead>
+              <tr>
+                <th>發送時間</th>
+                <th>命令 / 目標</th>
+                <th>傳遞狀態</th>
+                <th>執行</th>
+              </tr>
+            </thead>
+            <tbody>
+              {view.commands
+                .slice(-30)
+                .reverse()
+                .map((c) => (
+                  <tr key={c.id}>
+                    <td>{clock(c.issueTick)}</td>
+                    <td>
+                      {statusNames[c.type]} {c.target}
+                      {c.incidentId && ` → ${c.incidentId}`}
+                    </td>
+                    <td
+                      className={
+                        c.deliveryStatus === "FAILED" ? "orange" : "blue"
+                      }
+                      title={c.failure}
+                    >
+                      {statusNames[c.deliveryStatus]}
+                      {c.acknowledgementTick !== undefined &&
+                        ` (+${c.acknowledgementTick - c.issueTick}s)`}
+                    </td>
+                    <td>{c.failure ?? statusNames[c.executionStatus]}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="empty compact">
+            尚未發布命令。派遣不會立即執行，單位必須先收到並確認指令。
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

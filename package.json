@@ -1,5 +1,8 @@
 {
-  "name": "project-aegis", "version": "0.1.0", "private": true, "type": "module",
+  "name": "project-aegis",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -10,21 +13,57 @@
     "sim:run": "tsx scripts/sim-run.ts",
     "benchmark": "tsx benchmarks/run.ts",
     "desktop": "electron apps/desktop/dist/main.cjs",
-    "package:win": "pnpm build && electron-builder --win portable --x64",
-    "smoke": "tsx tests/e2e/desktop-smoke.ts"
+    "package:win": "pnpm build && node scripts/package-windows.mjs",
+    "smoke": "tsx tests/e2e/desktop-smoke.ts",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "react": "19.3.0", "react-dom": "19.3.0", "pixi.js": "8.22.0", "zustand": "^5.0.11", "zod": "^4.3.6", "fflate": "^0.8.2", "lucide-react": "^0.577.0"
+    "fflate": "^0.8.2",
+    "lucide-react": "^0.577.0",
+    "pixi.js": "8.22.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "typescript": "^6.0.0", "vite": "8.3.2", "vitest": "5.0.3", "@vitejs/plugin-react": "latest", "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3", "@types/node": "^24.0.0", "tsx": "^4.21.0", "electron": "44.5.1", "electron-builder": "^26.0.12", "esbuild": "latest", "@playwright/test": "latest", "eslint": "^9.39.0", "typescript-eslint": "latest"
+    "@playwright/test": "latest",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "latest",
+    "electron": "44.5.1",
+    "electron-builder": "^26.0.12",
+    "esbuild": "latest",
+    "eslint": "^9.39.0",
+    "prettier": "3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "latest",
+    "vite": "8.3.2",
+    "vitest": "5.0.3"
   },
   "build": {
-    "appId": "com.aegis.command", "productName": "Project AEGIS",
-    "directories": { "output": "release" },
-    "files": ["apps/desktop/dist/**/*", "dist/**/*", "package.json"],
-    "extraMetadata": { "main": "apps/desktop/dist/main.cjs" },
-    "asar": true, "win": { "target": "portable", "signAndEditExecutable": false },
+    "appId": "com.aegis.command",
+    "productName": "Project AEGIS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "apps/desktop/dist/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "apps/desktop/dist/main.cjs"
+    },
+    "asar": true,
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false
+    },
     "artifactName": "AEGIS-${version}-Windows-${arch}.${ext}"
-  }
+  },
+  "description": "Deterministic emergency command simulation with information fog and replay",
+  "author": "CHEN, KUEI-HENG"
 }
