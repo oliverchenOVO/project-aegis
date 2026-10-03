@@ -83,6 +83,13 @@ try {
     await expect
       .poll(() => page.evaluate(() => window.mapInteractionView?.tick))
       .toBe(0);
+    const unknown = await page.evaluate(() => window.mapInteractionView!);
+    expect(unknown.beliefs).toEqual([]);
+    expect(unknown.units.every((u) => !u.belief?.claim.nodeId)).toBe(true);
+    await click(520, 290);
+    await expect(page.locator(".intel-panel")).toContainText("PWR：狀態未知");
+    await click(410, 175);
+    await expect(page.locator(".intel-panel")).toContainText("RAD：狀態未知");
     await click(630, 60);
     await expect(page.locator(".intel-panel")).toContainText("H-B：狀態未知");
     await expect(page.locator(".unit-row").first()).toContainText("未知");
@@ -194,8 +201,15 @@ try {
       await button.click();
     }
     // Close LOD retains exact ground positions and interactive medical anchors.
-    for (let k = 0; k < 3; k++)
+    for (let k = 0; k < 4; k++)
       await page.getByRole("button", { name: "放大地圖", exact: true }).click();
+    await page.locator(".unit-row").filter({ hasText: "ENG-02" }).click();
+    await click(
+      unitNode.x - 16 + (index % 4) * 11,
+      unitNode.y + 28 + Math.floor(index / 4) * 11,
+      1.2 ** 4,
+    );
+    await expect(page.locator(".unit-row.selected")).toContainText(unitId);
     await capture(app, page, resolve(output, `${scenario}-close.png`));
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     const before = await page.locator("canvas").screenshot(),

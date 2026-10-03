@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Application, Container, Graphics, Text, Polygon } from "pixi.js";
+import { Application, Container, Graphics, Text } from "pixi.js";
 import "pixi.js/unsafe-eval";
 import { ZoomIn, ZoomOut, LocateFixed } from "lucide-react";
 import type { CommandCenterView } from "../../domain/src/index";
@@ -14,7 +14,7 @@ import {
   incidentCallouts,
   operationalAppearance,
 } from "./map/knowledge";
-import { cameraPosition, invalidator } from "./map/camera";
+import { cameraPosition, invalidator, nearSegment } from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
   UNITS: "單位",
@@ -240,7 +240,7 @@ export function SituationMap({ view, identity }: MapProps) {
           "×",
           (a.x + b.x) / 2 - 6,
           (a.y + b.y) / 2 - 11,
-          0xf8a374,
+          mapTheme.roadWarning,
           22,
           "bold",
         );
@@ -263,7 +263,9 @@ export function SituationMap({ view, identity }: MapProps) {
               ...floodAppearance(depth),
             })
             .stroke({
-              color: belief?.stale ? 0xc9b47b : 0x648aa4,
+              color: belief?.stale
+                ? mapTheme.uncertainty
+                : mapTheme.floodBoundary,
               width: 1,
               alpha: 0.5,
             });
@@ -282,7 +284,7 @@ export function SituationMap({ view, identity }: MapProps) {
           `${zone.id} ${depth === undefined ? "未知" : `約 ${depth.toFixed(1)}m`}${belief?.stale ? " *" : ""}`,
           left + 8,
           top + 4,
-          0x9ec7de,
+          mapTheme.floodLabel,
           11,
         );
       }
@@ -290,21 +292,21 @@ export function SituationMap({ view, identity }: MapProps) {
       for (const shelter of view.city.shelters ?? []) {
         const n = nodes.get(shelter.nodeId)!;
         g.poly([n.x - 6, n.y + 22, n.x, n.y + 12, n.x + 6, n.y + 22]).fill(
-          0x89ad92,
+          mapTheme.shelter,
         );
-        label(shelter.id, n.x + 8, n.y + 12, 0x89ad92, 9);
+        label(shelter.id, n.x + 8, n.y + 12, mapTheme.shelter, 9);
       }
       for (const b of view.beliefs.filter((b) => b.kind === "CIVILIANS")) {
         const n = nodes.get(b.claim.nodeId ?? "");
         if (!n) continue;
         const risk = (b.claim.estimatedCritical ?? 0) > 0;
         g.circle(n.x + 22, n.y + 22, 11).fill({
-          color: risk ? 0xce9867 : 0x90ad8d,
+          color: risk ? mapTheme.civilianRisk : mapTheme.civilian,
           alpha: b.stale ? 0.3 : 0.6,
         });
         const marker = new Graphics()
           .circle(n.x + 22, n.y + 22, 14)
-          .fill({ color: 0xffffff, alpha: 0.001 });
+          .fill({ color: mapTheme.hit, alpha: 0.001 });
         marker.eventMode = "static";
         marker.cursor = "pointer";
         marker.on("pointertap", () => select(b.subjectId));
@@ -353,12 +355,12 @@ export function SituationMap({ view, identity }: MapProps) {
         marker.position.set(n.x, n.y);
         const icon = new Graphics()
           .roundRect(-14, -14, 28, 28, 3)
-          .fill(0x263944)
-          .stroke({ color: 0xd98686, width: 1.3 })
+          .fill(mapTheme.hospitalPlate)
+          .stroke({ color: mapTheme.hospitalEdge, width: 1.3 })
           .rect(-3, -9, 6, 18)
-          .fill(0xe9aaaa)
+          .fill(mapTheme.hospital)
           .rect(-9, -3, 18, 6)
-          .fill(0xe9aaaa);
+          .fill(mapTheme.hospital);
         marker.addChild(icon);
         marker.eventMode = "static";
         marker.cursor = "pointer";
@@ -378,7 +380,7 @@ export function SituationMap({ view, identity }: MapProps) {
             (selected === h.id ? " ◂" : ""),
           n.x + 19,
           n.y - 10,
-          0xe5b4b4,
+          mapTheme.hospitalLabel,
           12,
           "bold",
         );
@@ -399,7 +401,7 @@ export function SituationMap({ view, identity }: MapProps) {
           ? state.color
           : (color[f.type] ?? mapTheme.label);
       g.roundRect(n.x - 10, n.y - 10, 20, 20, 3)
-        .fill(0x1b2731)
+        .fill(mapTheme.facilityPlate)
         .stroke({ color: c, width: 1.5 });
       label(
         f.type === "POWER" ? "P" : f.type === "COMMS" ? "R" : f.type[0],
@@ -409,13 +411,13 @@ export function SituationMap({ view, identity }: MapProps) {
         12,
         "bold",
       );
-      label(f.name, n.x - 32, n.y + 16, 0x8da2b2, 10);
+      label(f.name, n.x - 32, n.y + 16, mapTheme.facilityLabel, 10);
       if (state.warning)
         label("!", n.x + 11, n.y - 12, mapTheme.blocked, 14, "bold");
       if (f.type === "POWER" || f.type === "COMMS") {
         const hit = new Graphics()
           .circle(n.x, n.y, 17)
-          .fill({ color: 0xffffff, alpha: 0.001 });
+          .fill({ color: mapTheme.hit, alpha: 0.001 });
         hit.eventMode = "static";
         hit.cursor = "pointer";
         hit.on("pointertap", () => select(f.id));
@@ -432,7 +434,8 @@ export function SituationMap({ view, identity }: MapProps) {
       for (const b of view.beliefs.filter((b) => b.kind === "INCIDENT")) {
         const n = nodes.get(b.claim.nodeId!)!;
         if (!n) continue;
-        const c = b.claim.value === "已解除" ? 0x7fa18b : 0xe58b54;
+        const c =
+          b.claim.value === "已解除" ? mapTheme.resolved : mapTheme.incident;
         const marker = new Container();
         const callout = calloutPositions.get(b.subjectId)!;
         marker.position.set(callout.x, callout.y);
@@ -469,9 +472,9 @@ export function SituationMap({ view, identity }: MapProps) {
         marker.addChild(
           new Graphics()
             .roundRect(-13, -13, 93, 30, 3)
-            .fill({ color: 0x151d25, alpha: 0.95 })
+            .fill({ color: mapTheme.incidentPlate, alpha: 0.95 })
             .stroke({
-              color: selected === b.subjectId ? 0xf5c090 : c,
+              color: selected === b.subjectId ? mapTheme.selectedIncident : c,
               width: selected === b.subjectId ? 2 : 1,
             })
             .poly([-5, 7, 3, -7, 11, 7])
@@ -498,7 +501,7 @@ export function SituationMap({ view, identity }: MapProps) {
         );
         callouts.addChild(marker);
         if (layers.includes("INTELLIGENCE") && b.stale)
-          label("過時", n.x + 43, n.y - 40, 0xdac17b, 10);
+          label("過時", n.x + 43, n.y - 40, mapTheme.staleLabel, 10);
       }
     if (layers.includes("UNITS")) {
       const groups = positionedUnits(view);
@@ -531,7 +534,7 @@ export function SituationMap({ view, identity }: MapProps) {
           );
           unitsLayer.addChild(marker);
           if (selected === u.id) {
-            label(u.id, x + 9, y - 7, 0xc2def3, 12, "bold");
+            label(u.id, x + 9, y - 7, mapTheme.unitLabel, 12, "bold");
             let last = n;
             for (const id of u.belief!.claim.route ?? []) {
               const next = nodes.get(id)!;
@@ -561,16 +564,11 @@ export function SituationMap({ view, identity }: MapProps) {
                     my - uy * 4 - ux * 4,
                   ])
                   .fill(mapTheme.route);
-                route.hitArea = new Polygon([
-                  last.x - uy * 7,
-                  last.y + ux * 7,
-                  next.x - uy * 7,
-                  next.y + ux * 7,
-                  next.x + uy * 7,
-                  next.y - ux * 7,
-                  last.x + uy * 7,
-                  last.y - ux * 7,
-                ]);
+                const routeStart = { x: last.x, y: last.y };
+                route.hitArea = {
+                  contains: (x: number, y: number) =>
+                    nearSegment({ x, y }, routeStart, next, 7),
+                };
                 route.eventMode = "static";
                 const routeLabel = `${u.id} · 已回報路線 ${last.name} → ${next.name}`;
                 route.on("pointerover", () => setHover(routeLabel));

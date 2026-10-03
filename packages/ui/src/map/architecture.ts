@@ -208,7 +208,11 @@ export function drawArchitecture(
     const n = nodes.get(nodeId);
     if (!n) return;
     const roof =
-      kind === "HOSPITAL" ? 0x8fa2ad : kind === "FIRE" ? 0x7e817e : t.roof;
+      kind === "HOSPITAL"
+        ? t.hospitalRoof
+        : kind === "FIRE"
+          ? t.fireRoof
+          : t.roof;
     const b: Mass = {
       id,
       x: n.x + 24,
@@ -236,7 +240,7 @@ export function drawArchitecture(
             w: 21,
             d: 18,
             heightClass: "LOW",
-            roof: 0x798f99,
+            roof: t.hospitalWing,
           },
           detail,
         );
@@ -339,7 +343,7 @@ export function drawArchitecture(
     w: 43,
     d: 30,
     heightClass: "LANDMARK",
-    roof: 0x8799a3,
+    roof: t.civicRoof,
     district: "D",
   };
   shadow(shadows, civic);
@@ -362,7 +366,7 @@ export function drawArchitecture(
   mapLabel(labels, "市政中心", 628, 484, t.label, 10);
   for (const d of city.districts)
     mapLabel(labels, d.name, d.x, d.y + 30, t.label, 16);
-  mapLabel(labels, "臨 江", 370, 310, 0x7da2b8, 12);
+  mapLabel(labels, "臨 江", 370, 310, t.waterLabel, 12);
   // The first measured geometry-only scene issued 23 draw calls at T0.
   // Flatten public static geometry once per layout/LOD, not per report or camera pan.
   root.cacheAsTexture({ resolution: 2, antialias: true });

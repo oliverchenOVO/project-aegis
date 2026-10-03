@@ -22,7 +22,10 @@ export function positionedUnits(view: CommandCenterView) {
 }
 export function floodAppearance(estimatedDepth: number | undefined) {
   return {
-    color: estimatedDepth === undefined ? 0x586779 : 0x428eb8,
+    color:
+      estimatedDepth === undefined
+        ? mapTheme.floodUnknown
+        : mapTheme.floodKnown,
     alpha:
       estimatedDepth === undefined
         ? 0.035
