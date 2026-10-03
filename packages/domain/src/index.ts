@@ -83,6 +83,8 @@ export const PatientSchema = z.object({
   state: z.enum(["WAITING", "IN_TRANSIT", "ADMITTED", "RECOVERED", "DEAD"]),
   health: z.number().min(0).max(100),
   critical: z.boolean(),
+  count: z.number().int().positive().optional(),
+  civilianCohortId: id.optional(),
   unitId: id.optional(),
   hospitalId: id.optional(),
   cause: id,
@@ -102,6 +104,12 @@ export const HospitalSchema = z.object({
   overloadReported: z.boolean(),
 });
 export const EventTypes = [
+  "COHORT_SPLIT",
+  "CIVILIANS_EXPOSED",
+  "EVACUATION_ORDERED",
+  "EVACUATION_STARTED",
+  "CIVILIANS_STRANDED",
+  "CIVILIANS_SHELTERED",
   "RAIN_STARTED",
   "RAIN_ENDED",
   "FLOOD_ZONE_RISE",
@@ -206,6 +214,7 @@ export const CommandInputSchema = z
       "RECALL_UNIT",
       "REQUEST_STATUS",
       "SET_INCIDENT_PRIORITY",
+      "EVACUATE_ZONE",
     ]),
     target: id,
     incidentId: id.optional(),
@@ -229,6 +238,44 @@ export const ScheduledSchema = z.object({
   target: id,
   cause: id,
 });
+export const CivilianCohortSchema = z.object({
+  id,
+  originId: id,
+  population: z.number().int().positive(),
+  location: id,
+  zoneId: id,
+  mobility: z.number().min(0.1).max(1),
+  vulnerability: z.number().min(0).max(1),
+  state: z.enum([
+    "SHELTERED",
+    "NORMAL",
+    "EVACUATING",
+    "STRANDED",
+    "INJURED",
+    "CRITICAL",
+    "TRANSPORT_PENDING",
+    "TRANSPORTED",
+    "DEAD",
+  ]),
+  healthState: z.enum(["NORMAL", "INJURED", "CRITICAL", "DEAD"]),
+  evacuationState: z.enum([
+    "NONE",
+    "ORDERED",
+    "MOVING",
+    "STRANDED",
+    "SHELTERED",
+    "TRANSPORTED",
+  ]),
+  shelterTarget: id.optional(),
+  exposure: positive,
+  injuryStage: z.number().int().min(0).max(3),
+  route: z.array(id),
+  edgeProgress: positive,
+  cause: id.optional(),
+  evacuationCause: id.optional(),
+  baselineHospital: id.optional(),
+});
+export type CivilianCohort = z.infer<typeof CivilianCohortSchema>;
 export const ScenarioSchema = z.object({
   id,
   version: id,
@@ -267,6 +314,20 @@ export const ScenarioSchema = z.object({
   reportLoss: z.number().min(0).max(1),
   degradedReportLoss: z.number().min(0).max(1),
   hazardKind: z.enum(["EARTHQUAKE", "FLOOD"]).optional(),
+  civilians: z
+    .object({
+      cohortCount: z.number().int().min(100).max(1000),
+      populationRange: z.tuple([
+        z.number().int().positive(),
+        z.number().int().positive(),
+      ]),
+      shelters: z
+        .array(
+          z.object({ id, nodeId: id, capacity: z.number().int().positive() }),
+        )
+        .min(1),
+    })
+    .optional(),
   flood: z
     .object({
       zones: z
@@ -281,6 +342,7 @@ export const ScenarioSchema = z.object({
             outflow: positive,
             drainageCapacity: positive,
             adjacency: z.array(id),
+            cause: id.optional(),
           }),
         )
         .min(4),
@@ -317,6 +379,10 @@ export const WorldSchema = z.object({
   commsCause: id.optional(),
   completed: z.boolean(),
   completionReason: z.string().optional(),
+  cohorts: z.array(CivilianCohortSchema).optional(),
+  populationSources: z
+    .record(z.string(), z.number().int().positive())
+    .optional(),
   flood: z
     .object({
       zones: ScenarioSchema.shape.flood.unwrap().shape.zones,
@@ -331,6 +397,10 @@ export const WorldSchema = z.object({
     report: tick,
     command: tick,
     incident: tick,
+    cohort: tick.optional(),
+    splits: tick.optional(),
+    eventTick: tick.optional(),
+    eventsThisTick: tick.optional(),
   }),
 });
 export type WorldState = z.infer<typeof WorldSchema>;

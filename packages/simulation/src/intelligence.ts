@@ -265,6 +265,13 @@ export function observe(
     );
 }
 export function transmit(w: WorldState, s: Scenario): void {
+  if (
+    w.reports.filter((r) => r.status === "CREATED" || r.status === "IN_TRANSIT")
+      .length +
+      w.schedule.length >
+    20000
+  )
+    throw new Error("Queued event explosion guard");
   for (const r of w.reports) {
     if (r.status === "CREATED") {
       const rng = new SeededRandom(w.seed, w.rng, `comms:report:${r.sourceId}`);

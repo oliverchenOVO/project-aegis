@@ -9,6 +9,7 @@ import { emit } from "./events";
 import { SeededRandom } from "./random";
 import { route, edge, cost, passable } from "./routing";
 import { observe, unitReport } from "./intelligence";
+import { evacuateZone } from "./civilians";
 export function issue(w: WorldState, input: CommandInput): PlayerCommand {
   const parsed = CommandInputSchema.parse(input);
   if (w.completed) throw new Error("情境已結束");
@@ -16,7 +17,10 @@ export function issue(w: WorldState, input: CommandInput): PlayerCommand {
     [...w.units, ...w.incidents, ...w.hospitals].some(
       (e) => e.id === parsed.target,
     ) || ["PWR", "RAD"].includes(parsed.target);
-  if (!exists) throw new Error("指令目標不存在");
+  const evacuationTarget =
+    parsed.type === "EVACUATE_ZONE" &&
+    w.cohorts?.some((c) => c.zoneId === parsed.target);
+  if (!exists && !evacuationTarget) throw new Error("指令目標不存在");
   if (parsed.incidentId && !w.incidents.some((i) => i.id === parsed.incidentId))
     throw new Error("事件不存在");
   if (
@@ -79,6 +83,17 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
     ]);
     const u = w.units.find((u) => u.id === c.target),
       i = w.incidents.find((i) => i.id === c.incidentId);
+    if (c.type === "EVACUATE_ZONE") {
+      if (!w.cohorts?.some((cohort) => cohort.zoneId === c.target)) {
+        fail(w, c, "疏散區域不存在");
+        continue;
+      }
+      acknowledge(w, c);
+      evacuateZone(w, s, c.target, c.cause);
+      c.executionStatus = "COMPLETED";
+      emit(w, "COMMAND_COMPLETED", { commandId: c.id }, [c.cause]);
+      continue;
+    }
     if (c.type === "REQUEST_STATUS") {
       observe(w, s, c.target);
       acknowledge(w, c);

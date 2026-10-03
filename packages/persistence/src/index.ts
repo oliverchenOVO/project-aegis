@@ -9,7 +9,6 @@ import {
 } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
 import {
-  ReplaySchema,
   verifyReplay,
   validateReplay,
   type ReplayRecord,
@@ -31,7 +30,7 @@ const ManifestSchema = z.object({
   simulationBuild: z.literal(SIM_VERSION),
   snapshotHash: z.string(),
   eventHash: z.string(),
-  replay: ReplaySchema,
+  replay: z.unknown(),
   contentManifest: z.record(z.string(), z.string()),
   migrations: z.array(MigrationMetadataSchema),
 });
@@ -57,7 +56,7 @@ export function save(
   history: MigrationMetadata[] = [],
 ): Uint8Array {
   const state = sim.snapshot();
-  validateReplay(record, sim.scenario);
+  const validated = validateReplay(record, sim.scenario);
   if (
     record.endTick !== state.tick ||
     record.simulationVersion !== state.version
@@ -68,7 +67,7 @@ export function save(
     "snapshot.json": strToU8(JSON.stringify(state)),
     "commands.ndjson": strToU8(ndjson(state.commands)),
     "events.ndjson": strToU8(ndjson(state.events)),
-    "checkpoints.json": strToU8(JSON.stringify(checkpointIndex(record))),
+    "checkpoints.json": strToU8(JSON.stringify(checkpointIndex(validated))),
   };
   const manifest = ManifestSchema.parse({
     saveFormatVersion: 2,
@@ -77,7 +76,7 @@ export function save(
     simulationBuild: SIM_VERSION,
     snapshotHash: hash(state),
     eventHash: hash(state.events),
-    replay: record,
+    replay: validated,
     contentManifest: Object.fromEntries(
       Object.entries(files).map(([name, bytes]) => [
         name,
@@ -102,7 +101,7 @@ export function load(bytes: Uint8Array): {
     const files = unzipSync(bytes, {
       filter: (entry) => {
         total += entry.originalSize;
-        if (entry.originalSize > 20_000_000 || total > 50_000_000)
+        if (entry.originalSize > 64_000_000 || total > 192_000_000)
           throw new Error("解壓縮大小超出限制");
         return [
           "manifest.json",

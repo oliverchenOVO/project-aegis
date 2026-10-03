@@ -10,6 +10,13 @@ import {
 } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
 import { updateHazards } from "./hazards";
+import {
+  initializeCivilians,
+  civilianEffects,
+  synchronizeCivilians,
+  assertPopulation,
+} from "./civilians";
+import { createIncident } from "./disasters";
 import { infrastructure, medical } from "./medical";
 import { responders } from "./units";
 import { observe, transmit, projectView, unitReport } from "./intelligence";
@@ -35,6 +42,8 @@ export class Simulation {
     if (!seed.trim() || seed.length > 100)
       throw new Error("Seed 必須為 1–100 字元");
     if (simulationVersion === "0.1.0") {
+      if (scenario.hazardKind === "FLOOD" || scenario.civilians)
+        throw new Error("Legacy engine cannot run new scenario features");
       this.#legacy = new LegacySimulation(
         LegacyScenarioSchema.parse(scenario),
         seed,
@@ -75,6 +84,7 @@ export class Simulation {
       completed: false,
       counters: { event: 0, report: 0, command: 0, incident: 0 },
     };
+    initializeCivilians(this.state, scenario);
     for (const u of this.state.units)
       unitReport(this.state, scenario, u.id, true);
   }
@@ -105,9 +115,11 @@ export class Simulation {
       const w = this.state;
       w.tick++;
       updateHazards(w, this.scenario);
+      civilianEffects(w, this.scenario, createIncident);
       infrastructure(w);
       medical(w);
       responders(w, this.scenario);
+      synchronizeCivilians(w);
       observe(w, this.scenario);
       transmit(w, this.scenario);
       deliverCommands(w, this.scenario);
@@ -121,11 +133,15 @@ export class Simulation {
         !w.patients.some(
           (p) => p.state === "WAITING" || p.state === "IN_TRANSIT",
         );
-      const fatalities = w.events.filter(
-        (e) => e.type === "PATIENT_DIED",
-      ).length;
+      const fatalities = w.events
+        .filter((e) => e.type === "PATIENT_DIED")
+        .reduce(
+          (n, e) =>
+            n + (typeof e.payload.count === "number" ? e.payload.count : 1),
+          0,
+        );
       const catastrophic =
-        this.scenario.hazardKind !== "FLOOD" && fatalities >= 60;
+        !w.cohorts && this.scenario.hazardKind !== "FLOOD" && fatalities >= 60;
       if (stabilized || w.tick >= this.scenario.maxTicks || catastrophic) {
         w.completed = true;
         w.completionReason = stabilized
@@ -151,8 +167,14 @@ export class Simulation {
       seed: w.seed,
       duration: w.tick,
       reason: w.completionReason!,
-      fatalities: w.events.filter((e) => e.type === "PATIENT_DIED").length,
-      injuries: w.patients.length,
+      fatalities: w.events
+        .filter((e) => e.type === "PATIENT_DIED")
+        .reduce(
+          (n, e) =>
+            n + (typeof e.payload.count === "number" ? e.payload.count : 1),
+          0,
+        ),
+      injuries: w.patients.reduce((n, p) => n + (p.count ?? 1), 0),
       resolved: w.incidents.filter((i) => i.status === "RESOLVED").length,
       hospitalOverload: w.events.filter(
         (e) => e.type === "HOSPITAL_OVER_CAPACITY",
@@ -221,6 +243,7 @@ export class Simulation {
   }
 }
 export function assertInvariants(w: WorldState, s: Scenario): void {
+  assertPopulation(w);
   const nodes = new Set(s.nodes.map((n) => n.id)),
     incidents = new Set(w.incidents.map((i) => i.id)),
     events = new Set(w.events.map((e) => e.id));
@@ -234,6 +257,7 @@ export function assertInvariants(w: WorldState, s: Scenario): void {
     w.events,
     w.reports,
     w.commands,
+    ...(w.cohorts ? [w.cohorts] : []),
   ])
     if (new Set(list.map((e) => e.id)).size !== list.length)
       fail("duplicate IDs");

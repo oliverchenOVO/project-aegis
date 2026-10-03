@@ -1,5 +1,6 @@
 import type { WorldState } from "../../domain/src/index";
 import { emit } from "./events";
+import { baselineFatality } from "./civilians";
 export function infrastructure(w: WorldState): void {
   for (const h of w.hospitals) {
     if (!h.power && h.generator === "OPERATIONAL") {
@@ -39,7 +40,13 @@ export function infrastructure(w: WorldState): void {
       h.criticalPatients--;
       h.baselinePatients--;
       h.currentPatients--;
-      emit(w, "PATIENT_DIED", { hospitalId: h.id, baseline: true }, [h.cause]);
+      const cause = emit(
+        w,
+        "PATIENT_DIED",
+        { hospitalId: h.id, baseline: true, count: 1 },
+        [h.cause],
+      );
+      baselineFatality(w, h.id, cause);
     }
   }
   if (!w.power && w.tick % 240 === 0 && w.comms === "DEGRADED") {
@@ -86,12 +93,12 @@ export function medical(w: WorldState): void {
       const unit = w.units.find((u) => u.id === p.unitId);
       if (unit) unit.patients = unit.patients.filter((id) => id !== p.id);
       const h = w.hospitals.find((h) => h.id === p.hospitalId);
-      p.cause = emit(w, "PATIENT_DIED", { patientId: p.id, incidentId: i.id }, [
-        p.cause,
-        i.cause,
-        h?.cause,
-        unit?.missionCause,
-      ]);
+      p.cause = emit(
+        w,
+        "PATIENT_DIED",
+        { patientId: p.id, incidentId: i.id, count: p.count ?? 1 },
+        [p.cause, i.cause, h?.cause, unit?.missionCause],
+      );
     }
   }
 }

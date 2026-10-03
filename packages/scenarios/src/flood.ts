@@ -46,6 +46,15 @@ export const flood: Scenario = ScenarioSchema.parse({
   radioFailureTick: 0,
   aftershockTick: 0,
   observationInterval: 120,
+  civilians: {
+    cohortCount: 100,
+    populationRange: [12, 35],
+    shelters: [
+      { id: "SH-C", nodeId: "N21", capacity: 1000 },
+      { id: "SH-A", nodeId: "N0", capacity: 800 },
+      { id: "SH-D", nodeId: "N34", capacity: 1000 },
+    ],
+  },
   roads: earthquake.roads.map((r) => ({
     ...r,
     floodElevation:

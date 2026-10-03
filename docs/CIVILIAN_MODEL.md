@@ -1,0 +1,11 @@
+# Deterministic civilian cohorts
+
+Flood and systemic earthquake v2 initialize 100 city cohorts plus hospital-baseline population cohorts. A seeded source population ledger is immutable. Cohorts track count, location, mobility, vulnerability, health, evacuation lifecycle, exposure, routes, shelter target and direct event causes. Earthquake v1 content remains unchanged; released engine v0.1 timelines do not acquire new cohorts.
+
+Splitting subtracts from a live parent, assigns a monotonically increasing child ID and retains the original source ID. Empty parents are removed; source ledger entries remain. Every original population total must exactly equal the sum of its descendants, including healthy, evacuated, injured, transported, hospitalized and dead people. Each patient cohort has exactly one civilian population cohort with matching count. Hospital-baseline deaths split their original population as well.
+
+Flood exposure accumulates from local depth and vulnerability. Three explicit dose thresholds produce deterministic partial injury waves; injured people become patient cohorts, so medical/transport outcomes change the civilian lifecycle. This macro dose model does not simulate individual citizens or clinical psychology. Uninjured people can perceive local threat and attempt seeded-policy evacuation; early player orders improve the chance of reaching shelters before roads close.
+
+`EVACUATE_ZONE` uses the same transmission, acknowledgment and execution pipeline as other commands. Compliance is seeded; mobility, available roads, shelter capacity and current location determine travel. Failed routes create stranded cohorts; successful arrival creates actual sheltered population. UI receives no cohort truth or exact exposure without reports.
+
+Invariants reject duplicate cohort IDs, missing population sources, nonpositive counts, impossible health/lifecycle combinations, duplicate patient population links and any source total mismatch. Guards fail explicitly for excessive splits, events per tick, queued events/messages or total events; they never truncate gameplay silently. Tests cover randomized splitting, flood injury/death, evacuation consequences, earthquake v2 linkage and deliberate guard failures.

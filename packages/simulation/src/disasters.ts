@@ -1,6 +1,7 @@
 import type { WorldState, Scenario, Incident } from "../../domain/src/index";
 import { emit } from "./events";
 import { SeededRandom } from "./random";
+import { attachPatientPopulation } from "./civilians";
 export function createIncident(
   w: WorldState,
   type: Incident["type"],
@@ -47,9 +48,12 @@ export function createIncident(
       state: "WAITING" as const,
       health: 70 + (i % 25),
       critical: i % 3 === 0,
+      count: 1,
+      civilianCohortId: undefined as string | undefined,
       cause: event,
     };
     w.patients.push(p);
+    attachPatientPopulation(w, nodeId, p);
     incident.affectedEntities.push(p.id);
   }
   if (type === "FIRE") emit(w, "FIRE_STARTED", { incidentId: id }, [event]);

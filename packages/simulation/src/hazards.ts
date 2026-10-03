@@ -109,6 +109,7 @@ const floodSystem: HazardSystem = {
             .map((u) => u.missionCause),
         ],
       );
+      zone.cause = cause;
       for (const road of w.roads.filter((r) => zone.roadIds.includes(r.id))) {
         road.waterDepth = Math.max(
           0,
