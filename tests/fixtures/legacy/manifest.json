@@ -1,0 +1,18 @@
+{
+  "sourceTag": "v0.1.0",
+  "sourceCommit": "90ce27b500b5e3d66772f9f1da06fb8d14f640e0",
+  "fixtures": [
+    {
+      "name": "tests/fixtures/legacy/legacy-save-basic-v1.aegis",
+      "tick": 60,
+      "stateHash": "1ff69df065556950",
+      "sha256": "d63f041887de778ed464826957eb18660288356044c0279a88561d738fc7867a"
+    },
+    {
+      "name": "tests/fixtures/legacy/legacy-save-midincident-v1.aegis",
+      "tick": 600,
+      "stateHash": "df7be778dec70fd4",
+      "sha256": "020352ab51dd1b49a313a4227c85b5af4d4e990cf8bd25d162a8f14d811d0a38"
+    }
+  ]
+}
