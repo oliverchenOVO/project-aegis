@@ -1,0 +1,16 @@
+{
+  "executable": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\AEGIS-0.1.0-Windows-x64.exe",
+  "launchedPortableWrapper": true,
+  "rendererTitle": "Project AEGIS — AI 災難指揮中心",
+  "simTick": "14:07:00",
+  "checks": [
+    "portable extraction",
+    "actual menu",
+    "scenario",
+    "map",
+    "dispatch",
+    "command acknowledgment"
+  ],
+  "errors": [],
+  "passed": true
+}

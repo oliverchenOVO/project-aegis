@@ -1,0 +1,24 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "viewports": ["1920×1080", "1600×900", "1366×768", "1664×941", "700×900"],
+  "checks": [
+    "launch/menu",
+    "scenario",
+    "intel",
+    "dispatch",
+    "command ack",
+    "unit route",
+    "map zoom",
+    "responsive overflow",
+    "save/load",
+    "corrupt save",
+    "natural completion",
+    "AAR",
+    "verified replay",
+    "seek",
+    "real-time replay playback/pause"
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}
