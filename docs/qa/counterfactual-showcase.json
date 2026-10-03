@@ -1,0 +1,1061 @@
+{
+  "seedsCompleted": 3,
+  "rows": [
+    {
+      "seed": "AEGIS-FLOOD-2026-001",
+      "originalMs": 8064.7873,
+      "verificationMs": 5645.5617,
+      "branchMs": 3823.365099999999,
+      "rescueIncident": "INC-10",
+      "rescueIncidentType": "FLOOD",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-03",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-04",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10"
+          }
+        }
+      ],
+      "comparison": {
+        "lineage": {
+          "branchId": "BR-bea7c2a4903add42",
+          "parentReplayId": "RPL-1c85597194c0d8ef",
+          "parentHash": "d9f555c3af00214f",
+          "forkTick": 30,
+          "baseHash": "a57046f0f40800fa",
+          "simulationVersion": "0.2.0",
+          "scenarioVersion": "1.3.0",
+          "requestedEndTick": 2400,
+          "alternativeCommands": [
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-01",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-02",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-03",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-04",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-05",
+                "incidentId": "INC-10"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-06",
+                "incidentId": "INC-10"
+              }
+            }
+          ],
+          "unappliedCommands": []
+        },
+        "originalHash": "d9f555c3af00214f",
+        "alternativeHash": "53f19ef5350beb19",
+        "originalDuration": 2400,
+        "alternativeDuration": 2400,
+        "original": {
+          "fatalities": 901,
+          "criticalCases": 971,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 0,
+          "respondedIncidents": 0,
+          "averageEMSResponseTime": 0,
+          "respondedEMSIncidents": 0,
+          "averageCommandDelay": 22.5,
+          "acknowledgedCommands": 6,
+          "recovered": 0,
+          "sheltered": 262,
+          "unitUtilization": 0.07777777777777778
+        },
+        "alternative": {
+          "fatalities": 897,
+          "criticalCases": 971,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 249,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 47.666666666666664,
+          "acknowledgedCommands": 6,
+          "recovered": 4,
+          "sheltered": 262,
+          "unitUtilization": 0.07655092592592593
+        },
+        "delta": {
+          "fatalities": -4,
+          "criticalCases": 0,
+          "unresolvedCritical": 0,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 0,
+          "powerDowntime": 0,
+          "communicationDowntime": 0,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 249,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 25.166666666666664,
+          "acknowledgedCommands": 0,
+          "recovered": 4,
+          "sheltered": 0,
+          "unitUtilization": -0.001226851851851854
+        },
+        "changedOutcomes": [
+          {
+            "originId": "CIV-59",
+            "originalDeaths": 8,
+            "alternativeDeaths": 4,
+            "deathDelta": -4,
+            "originalEventIds": [
+              "evt-15702",
+              "evt-15703",
+              "evt-18432",
+              "evt-18433"
+            ],
+            "alternativeEventIds": [
+              "evt-25977",
+              "evt-26633"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "rescueIncident": {
+          "id": "INC-10",
+          "type": "FLOOD",
+          "nodeId": "N23",
+          "severity": 25.208793977580385,
+          "status": "ACTIVE",
+          "creationTick": 120,
+          "cause": "evt-764",
+          "required": [
+            "FIRE",
+            "EMS",
+            "POLICE",
+            "UTILITY"
+          ],
+          "affectedEntities": [
+            "PAT-25",
+            "PAT-26"
+          ],
+          "hazard": 25.208793977580385,
+          "priority": 2,
+          "work": 0
+        },
+        "patientsAtRescue": [
+          {
+            "id": "PAT-25",
+            "state": "WAITING",
+            "health": 43.407756997080305,
+            "count": 2
+          },
+          {
+            "id": "PAT-26",
+            "state": "WAITING",
+            "health": 43.407756997080305,
+            "count": 2
+          }
+        ],
+        "reservedUnits": [
+          {
+            "id": "AMB-05",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "DISABLED",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.10400000000000004,
+            "communicationStatus": "DEGRADED",
+            "route": [
+              "N22",
+              "N23"
+            ],
+            "edgeProgress": 61,
+            "eta": 131,
+            "patients": [],
+            "assignment": "INC-10",
+            "missionCause": "evt-3575",
+            "blockedSince": 810
+          },
+          {
+            "id": "AMB-06",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "AVAILABLE",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.11200000000000004,
+            "communicationStatus": "DEGRADED",
+            "route": [],
+            "edgeProgress": 0,
+            "eta": 0,
+            "patients": [],
+            "missionCause": "evt-3758"
+          }
+        ],
+        "reservedCommands": [
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10",
+            "id": "CMD-5",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 368,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3583",
+            "networkMessageId": "MSG-303",
+            "receivedTick": 368,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-492",
+            "knownExecutionTick": 369,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 386
+          },
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10",
+            "id": "CMD-6",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 379,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3766",
+            "networkMessageId": "MSG-304",
+            "receivedTick": 379,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-497",
+            "knownExecutionTick": 380,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 514
+          }
+        ],
+        "corridorAtRescue": [
+          {
+            "id": "R39",
+            "from": "N21",
+            "to": "N22",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          },
+          {
+            "id": "R41",
+            "from": "N22",
+            "to": "N23",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          }
+        ],
+        "transported": 4
+      },
+      "branchMismatch": 0,
+      "parentMutation": 0,
+      "replayMismatch": 0,
+      "saveFailure": 0
+    },
+    {
+      "seed": "counterfactual-flood-1",
+      "originalMs": 11686.2474,
+      "verificationMs": 5376.658399999993,
+      "branchMs": 3832.779699999999,
+      "rescueIncident": "INC-24",
+      "rescueIncidentType": "FLOOD",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-03",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-04",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-24"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-24"
+          }
+        }
+      ],
+      "comparison": {
+        "lineage": {
+          "branchId": "BR-65c64cbb69250fd7",
+          "parentReplayId": "RPL-c51b252ead299dc2",
+          "parentHash": "2b4c56b85d3fbcca",
+          "forkTick": 30,
+          "baseHash": "dd03e3cadac893b0",
+          "simulationVersion": "0.2.0",
+          "scenarioVersion": "1.3.0",
+          "requestedEndTick": 2400,
+          "alternativeCommands": [
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-01",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-02",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-03",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-04",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-05",
+                "incidentId": "INC-24"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-06",
+                "incidentId": "INC-24"
+              }
+            }
+          ],
+          "unappliedCommands": []
+        },
+        "originalHash": "2b4c56b85d3fbcca",
+        "alternativeHash": "557f6cbc89fc5a7e",
+        "originalDuration": 2400,
+        "alternativeDuration": 2400,
+        "original": {
+          "fatalities": 888,
+          "criticalCases": 952,
+          "unresolvedCritical": 64,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 0,
+          "respondedIncidents": 0,
+          "averageEMSResponseTime": 0,
+          "respondedEMSIncidents": 0,
+          "averageCommandDelay": 22.5,
+          "acknowledgedCommands": 6,
+          "recovered": 0,
+          "sheltered": 258,
+          "unitUtilization": 0.08611111111111111
+        },
+        "alternative": {
+          "fatalities": 884,
+          "criticalCases": 952,
+          "unresolvedCritical": 64,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 241,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 241,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 74.33333333333333,
+          "acknowledgedCommands": 6,
+          "recovered": 4,
+          "sheltered": 258,
+          "unitUtilization": 0.11856481481481482
+        },
+        "delta": {
+          "fatalities": -4,
+          "criticalCases": 0,
+          "unresolvedCritical": 0,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 0,
+          "powerDowntime": 0,
+          "communicationDowntime": 0,
+          "averageResponseTime": 241,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 241,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 51.83333333333333,
+          "acknowledgedCommands": 0,
+          "recovered": 4,
+          "sheltered": 0,
+          "unitUtilization": 0.03245370370370371
+        },
+        "changedOutcomes": [
+          {
+            "originId": "CIV-59",
+            "originalDeaths": 5,
+            "alternativeDeaths": 1,
+            "deathDelta": -4,
+            "originalEventIds": [
+              "evt-15451",
+              "evt-15452",
+              "evt-15453"
+            ],
+            "alternativeEventIds": [
+              "evt-23664"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "rescueIncident": {
+          "id": "INC-24",
+          "type": "FLOOD",
+          "nodeId": "N23",
+          "severity": 31.33137579271138,
+          "status": "ACTIVE",
+          "creationTick": 150,
+          "cause": "evt-1404",
+          "required": [
+            "FIRE",
+            "EMS",
+            "POLICE",
+            "UTILITY"
+          ],
+          "affectedEntities": [
+            "PAT-44",
+            "PAT-45",
+            "PAT-46"
+          ],
+          "hazard": 31.33137579271138,
+          "priority": 2,
+          "work": 0
+        },
+        "patientsAtRescue": [
+          {
+            "id": "PAT-44",
+            "state": "WAITING",
+            "health": 45.646364892471745,
+            "count": 2
+          },
+          {
+            "id": "PAT-45",
+            "state": "WAITING",
+            "health": 45.646364892471745,
+            "count": 2
+          },
+          {
+            "id": "PAT-46",
+            "state": "WAITING",
+            "health": 45.646364892471745,
+            "count": 1
+          }
+        ],
+        "reservedUnits": [
+          {
+            "id": "AMB-05",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "DISABLED",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.12000000000000005,
+            "communicationStatus": "DEGRADED",
+            "route": [
+              "N22",
+              "N23"
+            ],
+            "edgeProgress": 77,
+            "eta": 115,
+            "patients": [],
+            "missionCause": "evt-3856",
+            "blockedSince": 840
+          },
+          {
+            "id": "AMB-06",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N23",
+            "homeId": "N23",
+            "state": "OPERATING",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 14.22399999999932,
+            "communicationStatus": "DEGRADED",
+            "route": [],
+            "edgeProgress": 0,
+            "eta": 0,
+            "patients": [],
+            "assignment": "INC-24",
+            "missionCause": "evt-3882"
+          }
+        ],
+        "reservedCommands": [
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-24",
+            "id": "CMD-5",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 390,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3864",
+            "networkMessageId": "MSG-292",
+            "receivedTick": 390,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-489",
+            "knownExecutionTick": 391,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 528
+          },
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-24",
+            "id": "CMD-6",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 391,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3890",
+            "networkMessageId": "MSG-293",
+            "receivedTick": 391,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-493",
+            "knownExecutionTick": 392,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 532
+          }
+        ],
+        "corridorAtRescue": [
+          {
+            "id": "R39",
+            "from": "N21",
+            "to": "N22",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          },
+          {
+            "id": "R41",
+            "from": "N22",
+            "to": "N23",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          }
+        ],
+        "transported": 3
+      },
+      "branchMismatch": 0,
+      "parentMutation": 0,
+      "replayMismatch": 0,
+      "saveFailure": 0
+    },
+    {
+      "seed": "counterfactual-flood-2",
+      "originalMs": 8551.46269999999,
+      "verificationMs": 7798.955300000001,
+      "branchMs": 3952.5713000000105,
+      "rescueIncident": "INC-10",
+      "rescueIncidentType": "FLOOD",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-03",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-04",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10"
+          }
+        }
+      ],
+      "comparison": {
+        "lineage": {
+          "branchId": "BR-9dfdeb0d39a6a53f",
+          "parentReplayId": "RPL-80374c87747c916f",
+          "parentHash": "a7e5bb020a510caa",
+          "forkTick": 30,
+          "baseHash": "ad6fee038872b975",
+          "simulationVersion": "0.2.0",
+          "scenarioVersion": "1.3.0",
+          "requestedEndTick": 2400,
+          "alternativeCommands": [
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-01",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-02",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-03",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 30,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-04",
+                "incidentId": "INC-1"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-05",
+                "incidentId": "INC-10"
+              }
+            },
+            {
+              "tick": 350,
+              "input": {
+                "type": "DISPATCH_UNIT",
+                "target": "AMB-06",
+                "incidentId": "INC-10"
+              }
+            }
+          ],
+          "unappliedCommands": []
+        },
+        "originalHash": "a7e5bb020a510caa",
+        "alternativeHash": "edb350c2e4c59606",
+        "originalDuration": 2400,
+        "alternativeDuration": 2400,
+        "original": {
+          "fatalities": 936,
+          "criticalCases": 995,
+          "unresolvedCritical": 59,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 0,
+          "respondedIncidents": 0,
+          "averageEMSResponseTime": 0,
+          "respondedEMSIncidents": 0,
+          "averageCommandDelay": 22,
+          "acknowledgedCommands": 5,
+          "recovered": 0,
+          "sheltered": 294,
+          "unitUtilization": 0.06483796296296296
+        },
+        "alternative": {
+          "fatalities": 933,
+          "criticalCases": 995,
+          "unresolvedCritical": 59,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 273,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 273,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 85.2,
+          "acknowledgedCommands": 5,
+          "recovered": 3,
+          "sheltered": 294,
+          "unitUtilization": 0.07469907407407407
+        },
+        "delta": {
+          "fatalities": -3,
+          "criticalCases": 0,
+          "unresolvedCritical": 0,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 0,
+          "powerDowntime": 0,
+          "communicationDowntime": 0,
+          "averageResponseTime": 273,
+          "respondedIncidents": 1,
+          "averageEMSResponseTime": 273,
+          "respondedEMSIncidents": 1,
+          "averageCommandDelay": 63.2,
+          "acknowledgedCommands": 0,
+          "recovered": 3,
+          "sheltered": 0,
+          "unitUtilization": 0.009861111111111112
+        },
+        "changedOutcomes": [
+          {
+            "originId": "CIV-59",
+            "originalDeaths": 7,
+            "alternativeDeaths": 4,
+            "deathDelta": -3,
+            "originalEventIds": [
+              "evt-15421",
+              "evt-15422",
+              "evt-18061",
+              "evt-20390"
+            ],
+            "alternativeEventIds": [
+              "evt-26981",
+              "evt-30558",
+              "evt-36001"
+            ]
+          }
+        ]
+      },
+      "diagnostics": {
+        "rescueIncident": {
+          "id": "INC-10",
+          "type": "FLOOD",
+          "nodeId": "N23",
+          "severity": 27.209858005170513,
+          "status": "ACTIVE",
+          "creationTick": 120,
+          "cause": "evt-723",
+          "required": [
+            "FIRE",
+            "EMS",
+            "POLICE",
+            "UTILITY"
+          ],
+          "affectedEntities": [
+            "PAT-42",
+            "PAT-43"
+          ],
+          "hazard": 27.209858005170513,
+          "priority": 2,
+          "work": 0
+        },
+        "patientsAtRescue": [
+          {
+            "id": "PAT-42",
+            "state": "WAITING",
+            "health": 45.78299320712847,
+            "count": 2
+          },
+          {
+            "id": "PAT-43",
+            "state": "WAITING",
+            "health": 45.78299320712847,
+            "count": 1
+          }
+        ],
+        "reservedUnits": [
+          {
+            "id": "AMB-05",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N22",
+            "homeId": "N23",
+            "state": "DISABLED",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.10400000000000004,
+            "communicationStatus": "DEGRADED",
+            "route": [
+              "N21"
+            ],
+            "edgeProgress": 95,
+            "eta": 0,
+            "patients": [],
+            "assignment": "INC-10",
+            "missionCause": "evt-3990",
+            "blockedSince": 780,
+            "destinationHospital": "H-A"
+          },
+          {
+            "id": "AMB-06",
+            "agency": "EMS",
+            "type": "救護車",
+            "nodeId": "N21",
+            "homeId": "N23",
+            "state": "AVAILABLE",
+            "capabilities": [
+              "EMS"
+            ],
+            "personnel": 2,
+            "equipment": 100,
+            "fatigue": 0.08000000000000002,
+            "communicationStatus": "DEGRADED",
+            "route": [],
+            "edgeProgress": 0,
+            "eta": 0,
+            "patients": [],
+            "missionCause": "evt-4018"
+          }
+        ],
+        "reservedCommands": [
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10",
+            "id": "CMD-5",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 392,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-3998",
+            "networkMessageId": "MSG-301",
+            "receivedTick": 392,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-498",
+            "knownExecutionTick": 393,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 528
+          },
+          {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10",
+            "id": "CMD-6",
+            "issueTick": 350,
+            "actor": "PLAYER",
+            "deliveryTick": 393,
+            "deliveryStatus": "ACKNOWLEDGED",
+            "executionStatus": "COMPLETED",
+            "cause": "evt-4026",
+            "networkMessageId": "MSG-302",
+            "receivedTick": 393,
+            "executionAcknowledged": true,
+            "acknowledgementMessageId": "MSG-502",
+            "knownExecutionTick": 394,
+            "knownExecutionStatus": "COMPLETED",
+            "acknowledgementTick": 532
+          }
+        ],
+        "corridorAtRescue": [
+          {
+            "id": "R39",
+            "from": "N21",
+            "to": "N22",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          },
+          {
+            "id": "R41",
+            "from": "N22",
+            "to": "N23",
+            "travelTicks": 48,
+            "state": "NORMAL",
+            "waterDepth": 0,
+            "floodElevation": 2.5
+          }
+        ],
+        "transported": 4
+      },
+      "branchMismatch": 0,
+      "parentMutation": 0,
+      "replayMismatch": 0,
+      "saveFailure": 0
+    }
+  ]
+}

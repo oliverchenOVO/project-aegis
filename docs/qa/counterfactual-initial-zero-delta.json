@@ -1,0 +1,136 @@
+{
+  "seedsCompleted": 1,
+  "rows": [
+    {
+      "seed": "AEGIS-FLOOD-2026-001",
+      "originalMs": 6149.121999999999,
+      "verificationMs": 4386.734399999999,
+      "branchMs": 3262.3384000000005,
+      "rescueIncident": "INC-10",
+      "rescueIncidentType": "FLOOD",
+      "commands": [
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-01",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-02",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-03",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 30,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-04",
+            "incidentId": "INC-1"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-05",
+            "incidentId": "INC-10"
+          }
+        },
+        {
+          "tick": 350,
+          "input": {
+            "type": "DISPATCH_UNIT",
+            "target": "AMB-06",
+            "incidentId": "INC-10"
+          }
+        }
+      ],
+      "comparison": {
+        "lineage": {
+          "branchId": "BR-a762bfa4aab454a4",
+          "parentReplayId": "RPL-e944f924f14aa45a",
+          "parentHash": "83201e226f584b40",
+          "forkTick": 30,
+          "baseHash": "ce346c835e495aa7",
+          "simulationVersion": "0.2.0",
+          "scenarioVersion": "1.2.0",
+          "requestedEndTick": 2400,
+          "unappliedCommands": []
+        },
+        "originalHash": "83201e226f584b40",
+        "alternativeHash": "afd53b7b6d7836e7",
+        "originalDuration": 2400,
+        "alternativeDuration": 2400,
+        "original": {
+          "fatalities": 909,
+          "criticalCases": 979,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 0,
+          "respondedIncidents": 0,
+          "averageCommandDelay": 22.5,
+          "acknowledgedCommands": 6,
+          "recovered": 0,
+          "sheltered": 230,
+          "unitUtilization": 0.07777777777777778
+        },
+        "alternative": {
+          "fatalities": 909,
+          "criticalCases": 979,
+          "unresolvedCritical": 70,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 15367,
+          "powerDowntime": 2250,
+          "communicationDowntime": 13117,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageCommandDelay": 47.666666666666664,
+          "acknowledgedCommands": 6,
+          "recovered": 0,
+          "sheltered": 230,
+          "unitUtilization": 0.06659722222222222
+        },
+        "delta": {
+          "fatalities": 0,
+          "criticalCases": 0,
+          "unresolvedCritical": 0,
+          "resolvedIncidents": 0,
+          "hospitalOverloadTicks": 0,
+          "infrastructureDowntime": 0,
+          "powerDowntime": 0,
+          "communicationDowntime": 0,
+          "averageResponseTime": 249,
+          "respondedIncidents": 1,
+          "averageCommandDelay": 25.166666666666664,
+          "acknowledgedCommands": 0,
+          "recovered": 0,
+          "sheltered": 0,
+          "unitUtilization": -0.011180555555555555
+        },
+        "changedOutcomes": []
+      },
+      "branchMismatch": 0,
+      "parentMutation": 0,
+      "replayMismatch": 0,
+      "saveFailure": 0
+    }
+  ]
+}

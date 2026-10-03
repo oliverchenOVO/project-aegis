@@ -2,22 +2,28 @@ import type {
   CommandInput,
   CommandCenterView,
   AAR,
+  Scenario,
 } from "../../domain/src/index";
 import { Simulation } from "../../simulation/src/index";
 import { earthquake } from "../../scenarios/src/earthquake";
 import {
   ReplayRecorder,
-  replay,
   VerifiedTimeline,
+  type ReplayBranch,
 } from "../../replay/src/index";
 import { save, load } from "../../persistence/src/index";
 import type { MigrationMetadata } from "../../persistence/src/index";
+import {
+  compareBranch,
+  type BranchComparison,
+} from "../../counterfactual/src/index";
 export interface SessionUpdate {
   view: CommandCenterView;
   mode: "LIVE" | "REPLAY";
   replayEnd: number;
   replayVerified: boolean;
   aar?: AAR;
+  counterfactual?: BranchComparison;
 }
 export class Session {
   #sim: Simulation;
@@ -28,8 +34,13 @@ export class Session {
   #verified = false;
   #timeline?: VerifiedTimeline;
   #migrations: MigrationMetadata[] = [];
-  constructor(seed: string) {
-    this.#sim = new Simulation(earthquake, seed);
+  #branches = new Map<
+    string,
+    { branch: ReplayBranch; comparison: BranchComparison }
+  >();
+  #comparison?: BranchComparison;
+  constructor(seed: string, scenario: Scenario = earthquake) {
+    this.#sim = new Simulation(scenario, seed);
     this.#recorder = new ReplayRecorder(this.#sim);
   }
   update(): SessionUpdate {
@@ -39,6 +50,9 @@ export class Session {
       replayEnd: this.#recorder.record.endTick,
       replayVerified: this.#verified,
       aar: this.#sim.state.completed ? this.#sim.aar() : undefined,
+      counterfactual: this.#comparison
+        ? structuredClone(this.#comparison)
+        : undefined,
     };
   }
   command(input: CommandInput): SessionUpdate {
@@ -95,21 +109,22 @@ export class Session {
     this.#mode = "LIVE";
     this.#verified = false;
     this.#timeline = undefined;
+    this.#branches.clear();
+    this.#comparison = undefined;
     return this.update();
   }
   seek(tick: number): SessionUpdate {
     if (this.#mode === "LIVE" && !this.#sim.state.completed)
       throw new Error("請先完成情境");
     if (this.#mode === "LIVE") {
-      const verified = replay(this.#sim.scenario, this.#recorder.record);
-      if (verified.hash() !== this.#sim.hash())
-        throw new Error("Replay final hash mismatch");
-      this.#verified = true;
-      this.#original = this.#sim;
-      this.#timeline = new VerifiedTimeline(
+      this.#timeline ??= new VerifiedTimeline(
         this.#sim.scenario,
         this.#recorder.record,
       );
+      if (this.#timeline.finalHash !== this.#sim.hash())
+        throw new Error("Replay final hash mismatch");
+      this.#verified = true;
+      this.#original = this.#sim;
     }
     this.#sim = this.#timeline!.seek(tick);
     this.#mode = "REPLAY";
@@ -126,5 +141,27 @@ export class Session {
       this.#mode = "LIVE";
     }
     return this.update();
+  }
+  fork(forkTick: number, alternatives: unknown): SessionUpdate {
+    const original = this.#original ?? this.#sim;
+    if (!original.state.completed)
+      throw new Error("請先完成情境再建立反事實分支");
+    this.#timeline ??= new VerifiedTimeline(
+      original.scenario,
+      this.#recorder.record,
+    );
+    if (this.#timeline.finalHash !== original.hash())
+      throw new Error("Counterfactual parent mismatch");
+    const branch = this.#timeline.fork(forkTick, alternatives),
+      comparison = compareBranch(original.state, original.scenario, branch);
+    this.#branches.set(branch.lineage.branchId, { branch, comparison });
+    this.#comparison = comparison;
+    this.#verified = true;
+    return this.update();
+  }
+  exportBranch(branchId: string): Uint8Array {
+    const stored = this.#branches.get(branchId);
+    if (!stored) throw new Error("分支不存在");
+    return save(stored.branch.simulation, stored.branch.record);
   }
 }

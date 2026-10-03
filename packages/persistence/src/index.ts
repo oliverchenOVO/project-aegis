@@ -86,7 +86,8 @@ export function save(
     migrations: history,
   });
   files["manifest.json"] = strToU8(JSON.stringify(manifest));
-  return zipSync(files, { level: 6 });
+  // DOS ZIP timestamps are container metadata, never simulation time. Fix them for reproducible saves.
+  return zipSync(files, { level: 6, mtime: new Date(1980, 0, 1) });
 }
 export function load(bytes: Uint8Array): {
   simulation: Simulation;
