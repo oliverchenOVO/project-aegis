@@ -1,0 +1,11 @@
+{
+  "seedsRequested": 100,
+  "seedsCompleted": 100,
+  "crashes": 0,
+  "invariantFailures": 0,
+  "replayMismatches": 0,
+  "averageTicksPerSecond": 6547.932521227226,
+  "p95RuntimeMs": 536.5301999999938,
+  "maximumEventCount": 4008,
+  "failures": []
+}
