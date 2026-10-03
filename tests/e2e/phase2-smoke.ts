@@ -8,6 +8,7 @@ import { flood, FLOOD_SHOWCASE_SEED } from "../../packages/scenarios/src/flood";
 import { load } from "../../packages/persistence/src/index";
 
 import { launch } from "./launch";
+import { viewport, capture } from "./capture";
 import { CausalIndex } from "../../packages/after-action/src/causal";
 const portable = process.argv.includes("--portable");
 const output = resolve(
@@ -55,7 +56,7 @@ const dialogPaths = async (loadPath: string, savePath = livePath) =>
     { loadPath, savePath },
   );
 try {
-  await page.setViewportSize({ width: 1600, height: 900 });
+  await viewport(app, page, { width: 1600, height: 900 });
   await expect(
     page.getByRole("heading", { name: "啟動應變中心" }),
   ).toBeVisible();
@@ -63,7 +64,7 @@ try {
   checks.identity = { url: page.url(), title: await page.title() };
   await page.getByLabel("災害場景").selectOption("flood");
   await expect(page.locator("#seed")).toHaveValue(FLOOD_SHOWCASE_SEED);
-  await page.screenshot({ path: resolve(output, "menu-flood.png") });
+  await capture(app, page, resolve(output, "menu-flood.png"));
   await page.getByRole("button", { name: "開始新情境", exact: true }).click();
   await expect(page.locator("canvas")).toBeVisible({ timeout: 15000 });
   await expect(page.locator(".scenario-title")).toHaveText(flood.name);
@@ -94,7 +95,7 @@ try {
     { width: 1664, height: 941 },
     { width: 700, height: 900 },
   ]) {
-    await page.setViewportSize(size);
+    await viewport(app, page, size);
     await page.bringToFront();
     expect(
       await page.evaluate(
@@ -109,12 +110,9 @@ try {
         ),
         `vertical overflow ${size.width}`,
       ).toBe(false);
-    await page.screenshot({
-      path: resolve(output, `flood-${size.width}.png`),
-      fullPage: size.width === 700,
-    });
+    await capture(app, page, resolve(output, `flood-${size.width}.png`));
   }
-  await page.setViewportSize({ width: 1600, height: 900 });
+  await viewport(app, page, { width: 1600, height: 900 });
   await dialogPaths(livePath);
   await page.getByRole("button", { name: "儲存", exact: true }).click();
   await expect(page.locator(".controlbar")).toContainText("已儲存", {
@@ -151,7 +149,7 @@ try {
   );
   await expect(page.getByRole("heading", { name: "關鍵因果鏈" })).toBeVisible();
   mark("completed save loaded and AAR rendered");
-  await page.screenshot({ path: resolve(output, "aar2.png") });
+  await capture(app, page, resolve(output, "aar2.png"));
   await page
     .getByRole("button", { name: "從 CMD-1 分岔", exact: true })
     .click();
@@ -196,7 +194,7 @@ try {
     "PATIENT_RECOVERED",
   );
   mark("alternative simulated and compared");
-  await page.screenshot({ path: resolve(output, "counterfactual.png") });
+  await capture(app, page, resolve(output, "counterfactual.png"));
   await page.getByRole("button", { name: "儲存分支存檔", exact: true }).click();
   await expect
     .poll(
@@ -232,7 +230,7 @@ try {
   await expect(
     page.getByRole("button", { name: "發布疏散", exact: true }),
   ).toBeDisabled();
-  await page.screenshot({ path: resolve(output, "replay.png") });
+  await capture(app, page, resolve(output, "replay.png"));
   checks.replay = "verified checkpoint seek to350; commands disabled";
   await page.getByRole("button", { name: "返回主選單", exact: true }).click();
   await page
@@ -267,6 +265,10 @@ try {
       {
         executable: process.argv[2] ?? "development Electron",
         browser: "Browser plugin not available; Playwright Electron used",
+        graphics:
+          process.env.CI || process.env.AEGIS_SOFTWARE_RENDERING
+            ? "SwiftShader CPU graphics for test environment"
+            : "ordinary desktop graphics",
         checks,
         errors,
         warnings,

@@ -19,7 +19,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm test --reporter=default --reporter=json --outputFile.json=test-results/final-tests.json
       - run: pnpm benchmark
       - run: pnpm exec tsx benchmarks/phase2.ts 3 test-results/phase2-ci-benchmark.json
       - run: pnpm build
@@ -32,6 +32,11 @@ jobs:
         with:
           name: systemic-benchmark
           path: test-results/phase2-ci-benchmark.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-test-results
+          path: test-results/final-tests.json
   windows:
     runs-on: windows-latest
     steps:

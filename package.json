@@ -59,6 +59,9 @@
       "main": "apps/desktop/dist/main.cjs"
     },
     "asar": true,
+    "portable": {
+      "unpackDirName": true
+    },
     "win": {
       "target": "portable",
       "icon": "assets/aegis.ico",

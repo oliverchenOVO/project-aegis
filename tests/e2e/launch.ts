@@ -79,8 +79,12 @@ export async function launch(
       `--inspect=127.0.0.1:${nodePort}`,
       ...graphicsArgs,
     ],
-    { env, windowsHide: true, stdio: "ignore" },
+    { env, windowsHide: true, stdio: ["ignore", "ignore", "pipe"] },
   );
+  let startupLog = "";
+  processHandle.stderr?.on("data", (bytes) => {
+    startupLog = (startupLog + String(bytes)).slice(-4000);
+  });
   let browserPid: number | undefined;
   let socket: WebSocket | undefined;
   let browser: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
@@ -98,8 +102,20 @@ export async function launch(
         /* Already closed. */
       }
     }
-    if (processHandle.pid && processHandle.exitCode === null)
-      processHandle.kill();
+    if (processHandle.exitCode === null) {
+      await new Promise<void>((done) => {
+        const timer = setTimeout(() => {
+          processHandle.removeListener("exit", finish);
+          done();
+        }, 5000);
+        const finish = () => {
+          clearTimeout(timer);
+          done();
+        };
+        processHandle.once("exit", finish);
+      });
+      if (processHandle.exitCode === null) processHandle.kill();
+    }
   };
   try {
     await endpoint(browserPort, "/json/version");
@@ -190,6 +206,8 @@ export async function launch(
     return { firstWindow: async () => page, evaluate, close };
   } catch (error) {
     await close();
-    throw error;
+    throw new Error(
+      `${String(error)}; portable exit=${processHandle.exitCode}; ${startupLog}`,
+    );
   }
 }
