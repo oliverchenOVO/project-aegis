@@ -338,7 +338,7 @@ export function drawArchitecture(
   }
   const civic: Mass = {
     id: "visual-city-hall",
-    x: 636,
+    x: 656,
     y: 447,
     w: 43,
     d: 30,
@@ -363,12 +363,15 @@ export function drawArchitecture(
     landmarks
       .rect(civic.x + 4 + k * 8, civic.y + civic.d - 10, 3, 10)
       .fill(t.edge);
-  mapLabel(labels, "市政中心", 628, 484, t.label, 10);
+  mapLabel(labels, "市政中心", 648, 484, t.label, 10);
   for (const d of city.districts)
     mapLabel(labels, d.name, d.x, d.y + 30, t.label, 16);
   mapLabel(labels, "臨 江", 370, 310, t.waterLabel, 12);
   // The first measured geometry-only scene issued 23 draw calls at T0.
   // Flatten public static geometry once per layout/LOD, not per report or camera pan.
-  root.cacheAsTexture({ resolution: 2, antialias: true });
+  root.cacheAsTexture({
+    resolution: detail === "NEAR" ? 2 : detail === "MEDIUM" ? 1.25 : 1,
+    antialias: false,
+  });
   return { root, key: layout.key, detail };
 }

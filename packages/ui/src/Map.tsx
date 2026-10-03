@@ -7,6 +7,7 @@ import { useUI, type Layer } from "./store";
 import { color, incidentNames } from "./labels";
 import { drawArchitecture, layer, mapLabel } from "./map/architecture";
 import { cityKey, type Identity } from "./map/city";
+import { CityGeometryCache } from "./map/cache";
 import { detailForScale, MAP_LAYERS, mapTheme, type Detail } from "./map/theme";
 import {
   positionedUnits,
@@ -42,6 +43,7 @@ export function SituationMap({ view, identity }: MapProps) {
       scene: Container;
       content: Container;
       architecture?: ReturnType<typeof drawArchitecture>;
+      geometryCache: CityGeometryCache<ReturnType<typeof drawArchitecture>>;
       staticHost: Container;
       routes: {
         a: { x: number; y: number };
@@ -67,9 +69,13 @@ export function SituationMap({ view, identity }: MapProps) {
   ) => {
     const key = cityKey(e.publicCity, e.identity);
     if (e.architecture?.key === key && e.architecture.detail === detail) return;
-    e.architecture?.root.destroy({ children: true });
-    e.architecture = drawArchitecture(e.publicCity, e.identity, detail);
-    e.staticHost.addChild(e.architecture.root);
+    if (e.architecture) e.architecture.root.visible = false;
+    e.architecture = e.geometryCache.get(key, detail, () => {
+      const value = drawArchitecture(e.publicCity, e.identity, detail);
+      e.staticHost.addChild(value.root);
+      return value;
+    });
+    e.architecture.root.visible = true;
   };
   const transform = () => {
     const e = engine.current;
@@ -123,6 +129,9 @@ export function SituationMap({ view, identity }: MapProps) {
         scene,
         content,
         staticHost,
+        geometryCache: new CityGeometryCache((value) =>
+          value.root.destroy({ children: true }),
+        ),
         routes: [],
         publicCity: view.city,
         identity,
@@ -203,6 +212,7 @@ export function SituationMap({ view, identity }: MapProps) {
       element.removeEventListener("wheel", wheel);
       if (engine.current?.app === app) {
         engine.current.invalidation.dispose();
+        engine.current.geometryCache.clear();
         engine.current = null;
         app.destroy(true, { children: true });
       }

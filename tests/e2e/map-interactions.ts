@@ -48,7 +48,7 @@ const step = async (name = "推進 1分") => {
     .poll(() => page.evaluate(() => window.mapInteractionView!.tick), {
       timeout: 30000,
     })
-    .toBe(tick + (name === "推進 1分" ? 60 : 10));
+    .toBe(tick + (name === "推進 5分" ? 300 : name === "推進 1分" ? 60 : 10));
 };
 try {
   await page.evaluate(() => {
@@ -225,6 +225,49 @@ try {
     const after = await page.locator("canvas").screenshot();
     expect(after.equals(before)).toBe(false);
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
+    if (scenario === "flood") {
+      await step("推進 5分");
+      await step("推進 5分");
+      const heavy = await page.evaluate(() => window.mapInteractionView!);
+      const places = [...incidentCallouts(heavy).values()];
+      let covered: { id: string; x: number; y: number } | undefined;
+      for (const u of heavy.units) {
+        const n = heavy.city.nodes.find((n) => n.id === u.belief?.claim.nodeId);
+        if (!n) continue;
+        const group = heavy.units.filter(
+            (v) => v.belief?.claim.nodeId === n.id,
+          ),
+          i = group.findIndex((v) => v.id === u.id);
+        const x = n.x - 16 + (i % 4) * 11,
+          y = n.y + 28 + Math.floor(i / 4) * 11;
+        if (
+          places.some(
+            (p) =>
+              x >= p.x - 13 && x <= p.x + 80 && y >= p.y - 13 && y <= p.y + 17,
+          )
+        ) {
+          covered = { id: u.id, x, y };
+          break;
+        }
+      }
+      expect(
+        covered,
+        "a received vehicle inside a dense incident plate must stay selectable",
+      ).toBeDefined();
+      const other = heavy.units.find((u) => u.id !== covered!.id)!;
+      await page.locator(".unit-row").filter({ hasText: other.id }).click();
+      await click(covered!.x, covered!.y);
+      await expect(page.locator(".unit-row.selected")).toContainText(
+        covered!.id,
+      );
+      await capture(app, page, resolve(output, "flood-heavy-vehicle.png"));
+      checks.push({
+        scenario,
+        heavyUnitClick: covered!.id,
+        tick: heavy.tick,
+        incidentCount: places.length,
+      });
+    }
     checks.push({
       scenario,
       unitClick: unitId,

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { CityGeometryCache } from "../../packages/ui/src/map/cache";
 import { Session } from "../../packages/application/src/session";
 import { flood } from "../../packages/scenarios/src/flood";
 import {
@@ -100,6 +101,7 @@ describe("renderer cartography and knowledge contract", () => {
     for (const id of ["routes", "units", "callouts", "selection"] as const)
       expect(MAP_LAYERS[id]).toBeGreaterThan(MAP_LAYERS.landmarks);
     expect(MAP_LAYERS.units).toBeGreaterThan(MAP_LAYERS.routes);
+    expect(MAP_LAYERS.units).toBeGreaterThan(MAP_LAYERS.callouts);
     expect(MAP_LAYERS.flood).toBeLessThan(MAP_LAYERS.routes);
   });
   it("inverse camera and route hit radius survive zoom, pan and all desktop sizes", () => {
@@ -182,6 +184,19 @@ describe("renderer cartography and knowledge contract", () => {
       warning: false,
       known: true,
     });
+  });
+  it("static geometry reuses warmed LODs and evicts every old scenario resource", () => {
+    const destroy = vi.fn(),
+      build = vi.fn(() => ({ object: Symbol() })),
+      cache = new CityGeometryCache(destroy);
+    const far = cache.get("public-city-v1", "FAR", build);
+    cache.get("public-city-v1", "MEDIUM", build);
+    expect(cache.get("public-city-v1", "FAR", build)).toBe(far);
+    expect(build).toHaveBeenCalledTimes(2);
+    cache.get("public-city-v2", "FAR", build);
+    expect(destroy).toHaveBeenCalledTimes(2);
+    cache.clear();
+    expect(destroy).toHaveBeenCalledTimes(3);
   });
   it("LOD boundaries are independent of incoming disaster reports", () => {
     expect([0.65, 1, 2].map(detailForScale)).toEqual(["FAR", "MEDIUM", "NEAR"]);

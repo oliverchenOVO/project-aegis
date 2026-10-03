@@ -67,7 +67,7 @@ export const MAP_LAYERS = {
   infrastructure: 100,
   incidentGround: 110,
   routes: 120,
-  units: 130,
+  units: 145,
   callouts: 140,
   labels: 150,
   selection: 160,

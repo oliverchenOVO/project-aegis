@@ -112,6 +112,17 @@ try {
     await expect(page.locator(".unit-row").first()).toContainText("未知");
     await expect(page.locator(".operation-banner")).toContainText("電力：未知");
     await capture(app, page, resolve(output, `${scenario}-early.png`));
+    const webglRenderer = await page.evaluate(() => {
+      const canvas = document.querySelector("canvas")!;
+      const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+      if (!gl) return "unavailable";
+      const extension = gl.getExtension("WEBGL_debug_renderer_info");
+      return String(
+        gl.getParameter(
+          extension ? extension.UNMASKED_RENDERER_WEBGL : gl.RENDERER,
+        ),
+      );
+    });
     const idle = await page.evaluate(async () => {
       const counts: number[] = [];
       for (let n = 0; n < 8; n++) {
@@ -188,6 +199,7 @@ try {
     await capture(app, page, resolve(output, `${scenario}-late.png`));
     rows.push({
       scenario,
+      webglRenderer,
       firstMapRenderMs,
       idleDraws: idle,
       idleAdditionalDraws: idle.at(-1)! - idle[0],
