@@ -116,11 +116,19 @@ export function medical(w: WorldState): void {
   }
 }
 function clinicalMedical(w: WorldState): void {
+  const incidents = new Map(w.incidents.map((i) => [i.id, i])),
+    hospitals = new Map(w.hospitals.map((h) => [h.id, h])),
+    units = new Map(w.units.map((u) => [u.id, u]));
+  const fieldCare = new Set(
+    w.units
+      .filter((u) => u.agency === "EMS" && u.state === "OPERATING")
+      .map((u) => u.assignment),
+  );
   for (const p of w.patients) {
     if (p.state === "DEAD" || p.state === "RECOVERED") continue;
-    const incident = w.incidents.find((i) => i.id === p.incidentId)!;
-    const hospital = w.hospitals.find((h) => h.id === p.hospitalId);
-    const unit = w.units.find((u) => u.id === p.unitId);
+    const incident = incidents.get(p.incidentId)!;
+    const hospital = p.hospitalId ? hospitals.get(p.hospitalId) : undefined;
+    const unit = p.unitId ? units.get(p.unitId) : undefined;
     p.triage ??= p.critical ? "IMMEDIATE" : "DELAYED";
     p.outcome ??= "UNRESOLVED";
     p.transportNeed ??= p.state === "WAITING";
@@ -132,12 +140,7 @@ function clinicalMedical(w: WorldState): void {
       (!powered || (p.state === "QUEUED" && hospital.status === "DIVERTING"))
         ? hospital.statusCause
         : undefined;
-    const care = w.units.some(
-      (u) =>
-        u.assignment === incident.id &&
-        u.state === "OPERATING" &&
-        u.agency === "EMS",
-    );
+    const care = fieldCare.has(incident.id);
     if (p.state === "WAITING") {
       p.treatmentState = care ? "FIELD" : "UNTREATED";
       p.health = Math.max(

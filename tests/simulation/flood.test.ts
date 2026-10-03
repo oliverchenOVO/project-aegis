@@ -1,4 +1,4 @@
-import { it, expect } from "vitest";
+import { it, expect, describe, beforeAll, afterAll } from "vitest";
 import {
   Simulation,
   assertInvariants,
@@ -13,45 +13,75 @@ import {
 import { save, load } from "../../packages/persistence/src/index";
 import { route, passable } from "../../packages/simulation/src/routing";
 import { hash } from "../../packages/shared/src/index";
-it.each(["flood-one", "flood-two", "AEGIS-FLOOD-2026-001"])(
-  "flood shared systems, causality and replay are deterministic: %s",
+describe.each(["flood-one", "flood-two", "AEGIS-FLOOD-2026-001"])(
+  "flood complete timeline: %s",
   (seed) => {
-    const sim = new Simulation(flood, seed),
-      recorder = new ReplayRecorder(sim);
-    while (!sim.state.completed) {
-      if (sim.state.tick === 30)
-        recorder.command(sim, {
-          type: "DISPATCH_UNIT",
-          target: "AMB-01",
-          incidentId: "INC-1",
-        });
-      sim.step();
-      recorder.checkpoint(sim);
-      if (sim.state.tick % 30 === 0) assertInvariants(sim.state, flood);
-    }
-    const reconstructed = replay(flood, recorder.record);
-    expect(reconstructed.hash()).toBe(sim.hash());
-    expect(reconstructed.aar()).toEqual(sim.aar());
-    expect(sim.state.tick).toBe(flood.maxTicks);
-    expect(sim.state.events.some((e) => e.type === "RAIN_ENDED")).toBe(true);
-    expect(sim.state.incidents.length).toBeGreaterThanOrEqual(50);
-    expect(
-      new VerifiedTimeline(flood, recorder.record).seek(1500).state.tick,
-    ).toBe(1500);
-    const restored = load(save(sim, recorder.record));
-    expect(restored.simulation.hash()).toBe(sim.hash());
-    const power = sim.state.events.find((e) => e.type === "POWER_NODE_FAILED")!,
-      cause = sim.state.events.find((e) => e.id === power.causedByEventIds[0])!;
-    expect(cause.type).toBe("FLOOD_ZONE_RISE");
-    const comms = sim.state.events.find(
-      (e) => e.type === "COMMUNICATION_DEGRADED",
-    )!;
-    expect(comms.causedByEventIds).toContain(power.id);
-    expect(
-      sim.state.events.some(
-        (e) => e.type === "UNIT_REROUTED" && e.payload.unitId === "AMB-01",
-      ),
-    ).toBe(true);
+    let completed: { sim: Simulation; recorder: ReplayRecorder } | undefined,
+      saved: Uint8Array | undefined;
+    beforeAll(() => {
+      const sim = new Simulation(flood, seed),
+        recorder = new ReplayRecorder(sim);
+      while (!sim.state.completed) {
+        if (sim.state.tick === 30)
+          recorder.command(sim, {
+            type: "DISPATCH_UNIT",
+            target: "AMB-01",
+            incidentId: "INC-1",
+          });
+        sim.step();
+        recorder.checkpoint(sim);
+        if (sim.state.tick % 30 === 0) assertInvariants(sim.state, flood);
+      }
+      completed = { sim, recorder };
+    }, 30000);
+    afterAll(() => {
+      completed = undefined;
+      saved = undefined;
+    });
+    it("shared hazards, actual power/communication causes and vehicle rerouting", () => {
+      const { sim } = completed!;
+      expect(sim.state.tick).toBe(flood.maxTicks);
+      expect(sim.state.events.some((e) => e.type === "RAIN_ENDED")).toBe(true);
+      expect(sim.state.incidents.length).toBeGreaterThanOrEqual(50);
+      const power = sim.state.events.find(
+          (e) => e.type === "POWER_NODE_FAILED",
+        )!,
+        cause = sim.state.events.find(
+          (e) => e.id === power.causedByEventIds[0],
+        )!;
+      expect(cause.type).toBe("FLOOD_ZONE_RISE");
+      const comms = sim.state.events.find(
+        (e) => e.type === "COMMUNICATION_DEGRADED",
+      )!;
+      expect(comms.causedByEventIds).toContain(power.id);
+      expect(
+        sim.state.events.some(
+          (e) => e.type === "UNIT_REROUTED" && e.payload.unitId === "AMB-01",
+        ),
+      ).toBe(true);
+    });
+    it("cold replay exactly reproduces final state and AAR", () => {
+      const { sim, recorder } = completed!,
+        reconstructed = replay(flood, recorder.record);
+      expect(reconstructed.hash()).toBe(sim.hash());
+      expect(reconstructed.aar()).toEqual(sim.aar());
+    });
+    it("a verified checkpoint timeline reaches the exact requested cursor", () => {
+      const { recorder } = completed!;
+      expect(
+        new VerifiedTimeline(flood, recorder.record).seek(1500).state.tick,
+      ).toBe(1500);
+    });
+    it("encodes a full portable save with its replay and checkpoint index", () => {
+      const { sim, recorder } = completed!;
+      saved = save(sim, recorder.record);
+      expect(saved.length).toBeGreaterThan(20);
+    });
+    it("reopens the encoded save with independent replay verification", () => {
+      const { sim } = completed!,
+        restored = load(saved!);
+      expect(restored.simulation.hash()).toBe(sim.hash());
+    });
   },
 );
 it("flood fields and infrastructure truth never leak into received knowledge", () => {

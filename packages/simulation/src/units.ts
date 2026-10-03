@@ -8,6 +8,7 @@ import {
   splitPatient,
   clinicalEnabled,
 } from "./hospital";
+import { queueAcknowledgement } from "./network";
 function resumeMission(w: WorldState, u: Unit): void {
   const incident = w.incidents.find((i) => i.id === u.assignment);
   if (
@@ -234,6 +235,8 @@ function completeOrder(w: WorldState, u: Unit): void {
     (c) => c.target === u.id && c.executionStatus === "EXECUTING",
   )) {
     c.executionStatus = "COMPLETED";
-    emit(w, "COMMAND_COMPLETED", { commandId: c.id }, [c.cause]);
+    const cause = emit(w, "COMMAND_COMPLETED", { commandId: c.id }, [c.cause]);
+    if (w.network) c.cause = cause;
+    queueAcknowledgement(w, c, "COMPLETED");
   }
 }

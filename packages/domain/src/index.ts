@@ -166,6 +166,12 @@ export const EventTypes = [
   "AMBULANCE_HANDOVER_STARTED",
   "AMBULANCE_HANDOVER_COMPLETED",
   "COHORT_SPLIT",
+  "NETWORK_NODE_STATUS_CHANGED",
+  "MESSAGE_QUEUED",
+  "MESSAGE_HOP_SENT",
+  "MESSAGE_HOP_RECEIVED",
+  "MESSAGE_LOST",
+  "MESSAGE_DELIVERED",
   "CIVILIANS_EXPOSED",
   "EVACUATION_ORDERED",
   "EVACUATION_STARTED",
@@ -251,6 +257,15 @@ export const ReportSchema = z.object({
     eta: positive.optional(),
     comms: UnitSchema.shape.communicationStatus.optional(),
     estimatedDepth: positive.optional(),
+    estimatedPopulation: z.number().int().nonnegative().optional(),
+    estimatedInjured: z.number().int().nonnegative().optional(),
+    estimatedCritical: z.number().int().nonnegative().optional(),
+    hospitalStatus: HospitalSchema.shape.status.optional(),
+    currentPatients: z.number().int().nonnegative().optional(),
+    emergencyQueue: z.number().int().nonnegative().optional(),
+    icuOccupied: z.number().int().nonnegative().optional(),
+    ambulanceHandover: z.number().int().nonnegative().optional(),
+    powered: z.boolean().optional(),
   }),
   observedTick: tick,
   transmittedTick: tick.optional(),
@@ -266,6 +281,7 @@ export const ReportSchema = z.object({
     receivedValue: z.string().optional(),
   }),
   createdEventId: id,
+  networkMessageId: id.optional(),
 });
 export const CommandInputSchema = z
   .object({
@@ -290,6 +306,15 @@ export const CommandSchema = CommandInputSchema.extend({
   deliveryStatus: z.enum(["SENT", "RECEIVED", "ACKNOWLEDGED", "FAILED"]),
   executionStatus: z.enum(["PENDING", "EXECUTING", "COMPLETED", "FAILED"]),
   acknowledgementTick: tick.optional(),
+  receivedTick: tick.optional(),
+  networkMessageId: id.optional(),
+  acknowledgementMessageId: id.optional(),
+  executionAcknowledged: z.boolean().optional(),
+  knownExecutionStatus: z
+    .enum(["PENDING", "EXECUTING", "COMPLETED", "FAILED"])
+    .optional(),
+  knownExecutionTick: tick.optional(),
+  knownFailure: z.string().optional(),
   failure: z.string().optional(),
   cause: id,
 });
@@ -337,7 +362,69 @@ export const CivilianCohortSchema = z.object({
   baselineHospital: id.optional(),
 });
 export type CivilianCohort = z.infer<typeof CivilianCohortSchema>;
+export const CommunicationNodeSchema = z.object({
+  id,
+  nodeId: id,
+  role: z.enum(["DISPATCH", "REPEATER", "CELL", "HOSPITAL", "AGENCY", "ZONE"]),
+  powerDependency: z.enum(["INDEPENDENT", "GRID", "HOSPITAL"]),
+  hospitalId: id.optional(),
+  backupCapacity: positive,
+  backupFuel: positive,
+  floodLimit: positive.optional(),
+  status: z.enum(["NORMAL", "DEGRADED", "DOWN"]),
+  cause: id.optional(),
+});
+export const CommunicationEdgeSchema = z.object({
+  id,
+  from: id,
+  to: id,
+  latency: z.number().int().positive(),
+  reliability: z.number().min(0).max(1),
+  capacity: z.number().int().positive(),
+});
+export const IntelligenceSourceSchema = z.object({
+  id,
+  endpoint: id,
+  nodeId: id,
+  capabilities: z.array(ReportSchema.shape.subjectKind),
+  incidentTypes: z.array(IncidentTypeSchema).optional(),
+  reliability: z.number().min(0).max(1),
+  confidence: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
+});
+export const CommunicationConfigSchema = z.object({
+  nodes: z.array(CommunicationNodeSchema),
+  edges: z.array(CommunicationEdgeSchema),
+  sources: z.array(IntelligenceSourceSchema),
+  dispatchNode: id,
+  maxMessageAge: z.number().int().positive(),
+});
+export const NetworkMessageSchema = z.object({
+  id,
+  kind: z.enum(["REPORT", "COMMAND", "ACK"]),
+  referenceId: id,
+  source: id,
+  destination: id,
+  currentNode: id,
+  status: z.enum(["QUEUED", "IN_TRANSIT", "DELIVERED", "LOST"]),
+  queuedTick: tick,
+  transmittedTick: tick.optional(),
+  arrivalTick: tick.optional(),
+  deliveredTick: tick.optional(),
+  hopEdge: id.optional(),
+  hopDestination: id.optional(),
+  visited: z.array(id),
+  cause: id,
+  queueDelay: tick,
+  reportedExecution: z
+    .enum(["PENDING", "EXECUTING", "COMPLETED", "FAILED"])
+    .optional(),
+  reportedFailure: z.string().optional(),
+  consumed: z.boolean().optional(),
+});
+export type NetworkMessage = z.infer<typeof NetworkMessageSchema>;
+export type CommunicationConfig = z.infer<typeof CommunicationConfigSchema>;
 export const ScenarioSchema = z.object({
+  communications: CommunicationConfigSchema.optional(),
   id,
   version: id,
   name: id,
@@ -419,6 +506,11 @@ export const ScenarioSchema = z.object({
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 export const WorldSchema = z.object({
+  network: CommunicationConfigSchema.extend({
+    messages: z.array(NetworkMessageSchema),
+    messageSequence: tick,
+    peakQueued: tick,
+  }).optional(),
   version: SimulationVersionSchema,
   scenarioId: id,
   scenarioVersion: id,

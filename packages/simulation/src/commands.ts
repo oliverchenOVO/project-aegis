@@ -10,6 +10,12 @@ import { SeededRandom } from "./random";
 import { route, edge, cost, passable } from "./routing";
 import { observe, unitReport } from "./intelligence";
 import { evacuateZone } from "./civilians";
+import {
+  enqueueMessage,
+  targetEndpoint,
+  queueAcknowledgement,
+  assertNetworkCapacity,
+} from "./network";
 export function issue(w: WorldState, input: CommandInput): PlayerCommand {
   const parsed = CommandInputSchema.parse(input);
   if (w.completed) throw new Error("情境已結束");
@@ -34,8 +40,10 @@ export function issue(w: WorldState, input: CommandInput): PlayerCommand {
   )
     throw new Error("請選擇事件優先序");
   const rng = new SeededRandom(w.seed, w.rng, "comms:commands");
-  const delay =
-    w.comms === "NORMAL"
+  assertNetworkCapacity(w);
+  const delay = w.network
+    ? 0
+    : w.comms === "NORMAL"
       ? rng.integer(4, 14)
       : w.comms === "DEGRADED"
         ? rng.integer(20, 65)
@@ -63,13 +71,69 @@ export function issue(w: WorldState, input: CommandInput): PlayerCommand {
     cause,
   };
   w.commands.push(command);
+  if (w.network)
+    command.networkMessageId = enqueueMessage(
+      w,
+      "COMMAND",
+      id,
+      w.network.dispatchNode,
+      targetEndpoint(w, parsed.target),
+      cause,
+    ).id;
   return command;
 }
 export function deliverCommands(w: WorldState, s: Scenario): void {
+  const messages = w.network
+    ? new Map(w.network.messages.map((m) => [m.id, m]))
+    : undefined;
+  if (w.network)
+    for (const message of w.network.messages) {
+      if (
+        message.kind !== "ACK" ||
+        message.status !== "DELIVERED" ||
+        message.consumed
+      )
+        continue;
+      message.consumed = true;
+      const c = w.commands.find((c) => c.id === message.referenceId)!;
+      if ((c.knownExecutionTick ?? -1) > message.queuedTick) continue;
+      c.knownExecutionTick = message.queuedTick;
+      c.knownExecutionStatus = message.reportedExecution;
+      c.knownFailure = message.reportedFailure;
+      c.deliveryStatus =
+        message.reportedExecution === "FAILED" ? "FAILED" : "ACKNOWLEDGED";
+      c.acknowledgementTick ??= w.tick;
+      emit(
+        w,
+        "COMMAND_ACKNOWLEDGED",
+        {
+          commandId: c.id,
+          delay: w.tick - c.issueTick,
+          executionStatus: message.reportedExecution!,
+        },
+        [message.cause],
+      );
+    }
   for (const c of w.commands.filter(
-    (c) => c.deliveryStatus === "SENT" && c.deliveryTick <= w.tick,
+    (c) =>
+      c.deliveryStatus === "SENT" &&
+      (w.network
+        ? messages!.get(c.networkMessageId!)!.status !== "QUEUED" &&
+          messages!.get(c.networkMessageId!)!.status !== "IN_TRANSIT"
+        : c.deliveryTick <= w.tick),
   )) {
+    if (w.network) {
+      const message = messages!.get(c.networkMessageId!)!;
+      if (message.status === "LOST") {
+        fail(w, c, "網路傳送失敗", message.cause);
+        continue;
+      }
+      c.deliveryTick = message.deliveredTick!;
+      c.receivedTick = w.tick;
+      c.cause = message.cause;
+    }
     if (
+      !w.network &&
       w.comms === "OFFLINE" &&
       new SeededRandom(w.seed, w.rng, `comms:delivery:${c.id}`).chance(0.35)
     ) {
@@ -155,12 +219,16 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
     )) {
       earlier.executionStatus = "FAILED";
       earlier.failure = "已由更新任務取代";
-      emit(
+      const superseded = emit(
         w,
         "COMMAND_FAILED",
         { commandId: earlier.id, reason: earlier.failure },
         [earlier.cause, c.cause],
       );
+      if (w.network) {
+        earlier.cause = superseded;
+        queueAcknowledgement(w, earlier, "FAILED", earlier.failure);
+      }
     }
     u.assignment = c.type === "RECALL_UNIT" ? undefined : i!.id;
     u.missionCause = c.cause;
@@ -180,6 +248,19 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
   }
 }
 function acknowledge(w: WorldState, c: PlayerCommand): void {
+  if (w.network) {
+    c.executionAcknowledged = true;
+    queueAcknowledgement(
+      w,
+      c,
+      ["REQUEST_STATUS", "SET_INCIDENT_PRIORITY", "EVACUATE_ZONE"].includes(
+        c.type,
+      )
+        ? "COMPLETED"
+        : "EXECUTING",
+    );
+    return;
+  }
   c.deliveryStatus = "ACKNOWLEDGED";
   c.acknowledgementTick = w.tick;
   c.cause = emit(
@@ -195,8 +276,16 @@ function fail(
   reason: string,
   cause?: string,
 ): void {
-  c.deliveryStatus = "FAILED";
+  c.deliveryStatus =
+    w.network && c.receivedTick !== undefined ? "RECEIVED" : "FAILED";
   c.executionStatus = "FAILED";
   c.failure = reason;
-  emit(w, "COMMAND_FAILED", { commandId: c.id, reason }, [c.cause, cause]);
+  const failureCause = emit(w, "COMMAND_FAILED", { commandId: c.id, reason }, [
+    c.cause,
+    cause,
+  ]);
+  if (w.network && c.receivedTick !== undefined) {
+    c.cause = failureCause;
+    queueAcknowledgement(w, c, "FAILED", reason);
+  }
 }

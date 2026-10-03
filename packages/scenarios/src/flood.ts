@@ -1,5 +1,6 @@
 import { ScenarioSchema, type Scenario } from "../../domain/src/index";
 import { earthquake } from "./earthquake";
+import { communicationConfig } from "./communications";
 const groups = [
   {
     id: "F-A",
@@ -34,10 +35,10 @@ const groups = [
     adjacency: ["F-B", "F-C"],
   },
 ];
-export const flood: Scenario = ScenarioSchema.parse({
+const floodContent: Scenario = ScenarioSchema.parse({
   ...structuredClone(earthquake),
   id: "flood-urban-v1",
-  version: "1.1.0",
+  version: "1.2.0",
   name: "臨江市・都市暴洪",
   hazardKind: "FLOOD",
   maxTicks: 2400,
@@ -101,5 +102,9 @@ export const flood: Scenario = ScenarioSchema.parse({
     overloadTicks: 0,
     powerEmergencyTicks: 0,
   })),
+});
+export const flood: Scenario = ScenarioSchema.parse({
+  ...floodContent,
+  communications: communicationConfig(floodContent),
 });
 export const FLOOD_SHOWCASE_SEED = "AEGIS-FLOOD-2026-001";

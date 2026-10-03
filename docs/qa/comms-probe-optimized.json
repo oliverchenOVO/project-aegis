@@ -1,0 +1,19 @@
+{
+  "seedsRequested": 1,
+  "seedsCompleted": 1,
+  "crashes": 0,
+  "invariantFailures": 0,
+  "replayMismatches": 0,
+  "saveFailures": 0,
+  "averageTicksPerSecond": 559.0757266907061,
+  "p95RuntimeMs": 4292.7995,
+  "maximumEventCount": 34559,
+  "outcomes": [
+    {
+      "fatalities": 971,
+      "resolved": 1,
+      "incidents": 99
+    }
+  ],
+  "failures": []
+}

@@ -8,12 +8,26 @@ import type {
 } from "../../domain/src/index";
 import { emit } from "./events";
 import { SeededRandom } from "./random";
+import {
+  enqueueMessage,
+  sourcePermitted,
+  advanceNetwork,
+  assertNetworkCapacity,
+} from "./network";
 function floodDescription(depth: number): string {
   return depth < 0.25
     ? "低度積水"
     : depth < 0.7
       ? "道路積水風險"
       : "深度淹水・可能阻斷";
+}
+function hospitalDescription(h: WorldState["hospitals"][number]): string {
+  const power = h.power
+    ? "市電正常"
+    : h.generator === "OPERATIONAL"
+      ? "備用發電機運轉中"
+      : "停電・發電機失效";
+  return h.edCapacity === undefined ? power : `${h.status}・${power}`;
 }
 export function report(
   w: WorldState,
@@ -26,15 +40,24 @@ export function report(
   cause?: string,
   immediate = false,
 ): void {
+  if (!sourcePermitted(w, sourceId, kind, claim, subjectId)) return;
+  assertNetworkCapacity(w);
+  const source = w.network?.sources.find((source) => source.id === sourceId);
   const rng = new SeededRandom(w.seed, w.rng, `intel:${sourceId}`);
   const interval = w.comms === "NORMAL" ? s.reportDelay : s.degradedReportDelay;
-  const delay = immediate
+  const delay = w.network
     ? 0
-    : rng.integer(interval[0], interval[1]) + (w.comms === "OFFLINE" ? 150 : 0);
+    : immediate
+      ? 0
+      : rng.integer(interval[0], interval[1]) +
+        (w.comms === "OFFLINE" ? 150 : 0);
   const unreliable = sourceId.startsWith("CIV");
-  const confidence = unreliable
-    ? 0.45 + rng.next() * 0.2
-    : 0.78 + rng.next() * 0.18;
+  const confidence = source
+    ? source.confidence[0] +
+      rng.next() * (source.confidence[1] - source.confidence[0])
+    : unreliable
+      ? 0.45 + rng.next() * 0.2
+      : 0.78 + rng.next() * 0.18;
   const id = `RPT-${++w.counters.report}`;
   const createdEventId = emit(
     w,
@@ -51,14 +74,23 @@ export function report(
     observedTick: w.tick,
     deliveryTick: w.tick + delay,
     expiry: w.tick + 150,
-    sourceReliability: unreliable ? 0.6 : 0.94,
+    sourceReliability: source?.reliability ?? (unreliable ? 0.6 : 0.94),
     observationConfidence: confidence,
     status: "CREATED",
     truthRef: { value: trueValue, cause },
     createdEventId,
   };
   w.reports.push(r);
-  if (immediate) {
+  if (w.network) {
+    r.networkMessageId = enqueueMessage(
+      w,
+      "REPORT",
+      r.id,
+      source!.endpoint,
+      w.network.dispatchNode,
+      createdEventId,
+    ).id;
+  } else if (immediate) {
     r.status = "RECEIVED";
     r.transmittedTick = w.tick;
     r.receivedTick = w.tick;
@@ -204,18 +236,42 @@ export function observe(
   for (const h of w.hospitals.filter(
     (h) => !forceSubject || h.id === forceSubject,
   )) {
-    const value = h.power
-      ? "市電正常"
-      : h.generator === "OPERATIONAL"
-        ? "備用發電機運轉中"
-        : "停電・發電機失效";
+    const value = hospitalDescription(h);
     report(
       w,
       s,
       h.id,
       h.id,
       "HOSPITAL",
-      { value, nodeId: h.nodeId },
+      {
+        value,
+        nodeId: h.nodeId,
+        ...(h.edCapacity !== undefined
+          ? {
+              hospitalStatus: h.status,
+              currentPatients: h.currentPatients,
+              emergencyQueue: (h.patientQueue ?? []).reduce(
+                (n, id) =>
+                  n + (w.patients.find((p) => p.id === id)?.count ?? 1),
+                0,
+              ),
+              icuOccupied:
+                h.criticalPatients +
+                w.patients
+                  .filter(
+                    (p) =>
+                      p.hospitalId === h.id &&
+                      p.state === "ADMITTED" &&
+                      p.critical,
+                  )
+                  .reduce((n, p) => n + (p.count ?? 1), 0),
+              ambulanceHandover: w.units.filter(
+                (u) => u.state === "HANDOVER" && u.destinationHospital === h.id,
+              ).length,
+              powered: h.power || h.generator === "OPERATIONAL",
+            }
+          : {}),
+      },
       value,
       h.cause,
     );
@@ -244,12 +300,59 @@ export function observe(
       "RAD",
       "COMMS",
       {
-        value: w.comms,
+        value:
+          w.network?.nodes.find((n) => n.id === "NET-RAD")?.status ?? w.comms,
         nodeId: s.facilities.find((f) => f.type === "COMMS")!.nodeId,
       },
-      w.comms,
+      w.network?.nodes.find((n) => n.id === "NET-RAD")?.status ?? w.comms,
       w.commsCause,
     );
+  if (w.network)
+    for (const zone of s.flood?.zones.map((z) => ({
+      id: z.id,
+      nodeIds: z.nodeIds,
+    })) ??
+      s.districts.map((d) => ({
+        id: d.id,
+        nodeIds: s.nodes.filter((n) => n.district === d.id).map((n) => n.id),
+      }))) {
+      if (forceSubject && forceSubject !== zone.id) continue;
+      const people = w.cohorts!.filter((c) =>
+          zone.nodeIds.includes(c.location),
+        ),
+        population = people.reduce((n, c) => n + c.population, 0),
+        rng = new SeededRandom(
+          w.seed,
+          w.rng,
+          `observation:civilians:${zone.id}`,
+        ),
+        factor = () => 1 + rng.integer(-8, 8) / 100;
+      const estimate = Math.round(population * factor());
+      report(
+        w,
+        s,
+        `CIV-${zone.id}`,
+        `POP-${zone.id}`,
+        "CIVILIANS",
+        {
+          value: `現地人口 ${estimate}`,
+          nodeId: zone.nodeIds[0],
+          estimatedPopulation: estimate,
+          estimatedInjured: Math.round(
+            people
+              .filter((c) => c.healthState === "INJURED")
+              .reduce((n, c) => n + c.population, 0) * factor(),
+          ),
+          estimatedCritical: Math.round(
+            people
+              .filter((c) => c.healthState === "CRITICAL")
+              .reduce((n, c) => n + c.population, 0) * factor(),
+          ),
+        },
+        `現地人口 ${population}`,
+        people.find((c) => c.cause)?.cause,
+      );
+    }
   for (const r of w.roads.filter((r) =>
     forceSubject ? r.id === forceSubject : !!r.cause,
   ))
@@ -265,6 +368,45 @@ export function observe(
     );
 }
 export function transmit(w: WorldState, s: Scenario): void {
+  if (w.network) {
+    advanceNetwork(w);
+    const messages = new Map(w.network.messages.map((m) => [m.id, m]));
+    for (const r of w.reports) {
+      if (
+        r.status === "RECEIVED" ||
+        r.status === "LOST" ||
+        r.status === "EXPIRED"
+      )
+        continue;
+      const m = messages.get(r.networkMessageId!)!;
+      if (m.transmittedTick !== undefined && r.transmittedTick === undefined) {
+        r.transmittedTick = m.transmittedTick;
+        r.status = "IN_TRANSIT";
+        emit(w, "REPORT_TRANSMITTED", { reportId: r.id }, [
+          r.createdEventId,
+          m.cause,
+        ]);
+      }
+      if (m.status === "LOST") {
+        r.status =
+          m.queuedTick + w.network.maxMessageAge < w.tick ? "EXPIRED" : "LOST";
+        emit(w, "REPORT_LOST", { reportId: r.id }, [r.createdEventId, m.cause]);
+      }
+      if (m.status === "DELIVERED") {
+        r.status = "RECEIVED";
+        r.deliveryTick = m.deliveredTick!;
+        r.receivedTick = m.deliveredTick!;
+        r.truthRef.receivedValue = factAtReceipt(w, r);
+        emit(
+          w,
+          "REPORT_RECEIVED",
+          { reportId: r.id, latency: w.tick - r.observedTick },
+          [r.createdEventId, m.cause],
+        );
+      }
+    }
+    return;
+  }
   if (
     w.reports.filter((r) => r.status === "CREATED" || r.status === "IN_TRANSIT")
       .length +
@@ -321,14 +463,25 @@ function factAtReceipt(w: WorldState, r: IntelReport): string {
     return w.units.find((u) => u.id === r.subjectId)!.state;
   if (r.subjectKind === "HOSPITAL") {
     const h = w.hospitals.find((h) => h.id === r.subjectId)!;
-    return h.power
-      ? "市電正常"
-      : h.generator === "OPERATIONAL"
-        ? "備用發電機運轉中"
-        : "停電・發電機失效";
+    return hospitalDescription(h);
   }
   if (r.subjectKind === "POWER") return w.power ? "電網供電正常" : "變電站停機";
-  if (r.subjectKind === "COMMS") return w.comms;
+  if (r.subjectKind === "COMMS")
+    return w.network?.nodes.find((n) => n.id === "NET-RAD")?.status ?? w.comms;
+  if (r.subjectKind === "CIVILIANS") {
+    const zoneId = r.subjectId.replace(/^POP-/, ""),
+      zone = w.flood?.zones.find((z) => z.id === zoneId),
+      nodeIds =
+        zone?.nodeIds ??
+        w
+          .network!.sources.filter(
+            (source) =>
+              source.id.startsWith("CIV-N") &&
+              source.endpoint === `NET-Z-${zoneId}`,
+          )
+          .map((source) => source.nodeId);
+    return `現地人口 ${w.cohorts!.filter((c) => nodeIds.includes(c.location)).reduce((n, c) => n + c.population, 0)}`;
+  }
   if (r.subjectKind === "ROAD")
     return w.roads.find((road) => road.id === r.subjectId)!.state;
   const i = w.incidents.find((i) => i.id === r.subjectId)!;
@@ -435,10 +588,27 @@ export function projectView(w: WorldState, s: Scenario): CommandCenterView {
       type: c.type,
       target: c.target,
       incidentId: c.incidentId,
-      deliveryStatus: c.deliveryStatus,
-      executionStatus: c.executionStatus,
+      deliveryStatus:
+        w.network && !c.acknowledgementTick
+          ? w.tick - c.issueTick > w.network.maxMessageAge * 2
+            ? "FAILED"
+            : "SENT"
+          : w.network
+            ? c.knownExecutionStatus === "FAILED"
+              ? "FAILED"
+              : "ACKNOWLEDGED"
+            : c.deliveryStatus,
+      executionStatus: w.network
+        ? (c.knownExecutionStatus ?? "PENDING")
+        : c.executionStatus,
       acknowledgementTick: c.acknowledgementTick,
-      failure: c.failure,
+      failure: w.network
+        ? (c.knownFailure ??
+          (w.tick - c.issueTick > w.network.maxMessageAge * 2 &&
+          !c.acknowledgementTick
+            ? "指令逾時未獲確認"
+            : undefined))
+        : c.failure,
     })),
     city: {
       ...(s.flood

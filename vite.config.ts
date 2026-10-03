@@ -5,5 +5,5 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5173, strictPort: true },
   build: { chunkSizeWarningLimit: 1200 },
-  test: { include: ["tests/**/*.test.ts"], testTimeout: 30000 },
+  test: { include: ["tests/**/*.test.ts"], testTimeout: 30000, maxWorkers: 2 },
 });

@@ -7,6 +7,7 @@ import {
   type CommandInput,
   type AAR,
   type CommandCenterView,
+  type PlayerCommand,
 } from "../../domain/src/index";
 import { hash } from "../../shared/src/index";
 import { updateHazards } from "./hazards";
@@ -19,6 +20,11 @@ import {
 import { createIncident } from "./disasters";
 import { infrastructure, medical } from "./medical";
 import { refreshHospitalCensus } from "./hospital";
+import {
+  initializeNetwork,
+  updateNetworkPower,
+  cleanupNetwork,
+} from "./network";
 import { responders } from "./units";
 import { observe, transmit, projectView, unitReport } from "./intelligence";
 import { issue, deliverCommands } from "./commands";
@@ -43,7 +49,11 @@ export class Simulation {
     if (!seed.trim() || seed.length > 100)
       throw new Error("Seed 必須為 1–100 字元");
     if (simulationVersion === "0.1.0") {
-      if (scenario.hazardKind === "FLOOD" || scenario.civilians)
+      if (
+        scenario.hazardKind === "FLOOD" ||
+        scenario.civilians ||
+        scenario.communications
+      )
         throw new Error("Legacy engine cannot run new scenario features");
       this.#legacy = new LegacySimulation(
         LegacyScenarioSchema.parse(scenario),
@@ -86,10 +96,11 @@ export class Simulation {
       counters: { event: 0, report: 0, command: 0, incident: 0 },
     };
     initializeCivilians(this.state, scenario);
+    initializeNetwork(this.state, scenario);
     for (const u of this.state.units)
       unitReport(this.state, scenario, u.id, true);
   }
-  issue(input: CommandInput) {
+  issue(input: CommandInput): PlayerCommand {
     if (this.#legacy)
       return this.#legacy.issue(LegacyCommandSchema.parse(input));
     return issue(this.state, input);
@@ -118,6 +129,7 @@ export class Simulation {
       updateHazards(w, this.scenario);
       civilianEffects(w, this.scenario, createIncident);
       infrastructure(w);
+      updateNetworkPower(w);
       medical(w);
       responders(w, this.scenario);
       refreshHospitalCensus(w);
@@ -125,6 +137,7 @@ export class Simulation {
       observe(w, this.scenario);
       transmit(w, this.scenario);
       deliverCommands(w, this.scenario);
+      cleanupNetwork(w);
       const stabilized =
         (!w.flood ||
           (w.flood.rainEnded &&
@@ -138,13 +151,15 @@ export class Simulation {
             p.state === "IN_TRANSIT" ||
             p.state === "QUEUED",
         );
-      const fatalities = w.events
-        .filter((e) => e.type === "PATIENT_DIED")
-        .reduce(
-          (n, e) =>
-            n + (typeof e.payload.count === "number" ? e.payload.count : 1),
-          0,
-        );
+      const fatalities = w.cohorts
+        ? 0
+        : w.events
+            .filter((e) => e.type === "PATIENT_DIED")
+            .reduce(
+              (n, e) =>
+                n + (typeof e.payload.count === "number" ? e.payload.count : 1),
+              0,
+            );
       const catastrophic =
         !w.cohorts && this.scenario.hazardKind !== "FLOOD" && fatalities >= 60;
       if (stabilized || w.tick >= this.scenario.maxTicks || catastrophic) {
@@ -414,5 +429,92 @@ export function assertInvariants(w: WorldState, s: Scenario): void {
         zone.roadIds.some((id) => !w.roads.some((r) => r.id === id))
       )
         fail("invalid flood geometry or depth");
+  }
+  if (w.network) {
+    const network = w.network,
+      nodeIds = new Set(network.nodes.map((n) => n.id)),
+      messageIds = new Set(network.messages.map((m) => m.id));
+    const sourceById = new Map(
+      network.sources.map((source) => [source.id, source]),
+    );
+    if (
+      nodeIds.size !== network.nodes.length ||
+      messageIds.size !== network.messages.length ||
+      new Set(network.sources.map((s) => s.id)).size !==
+        network.sources.length ||
+      new Set(network.edges.map((e) => e.id)).size !== network.edges.length
+    )
+      fail("duplicate communication IDs");
+    if (
+      !nodeIds.has(network.dispatchNode) ||
+      network.sources.some(
+        (s) => !nodeIds.has(s.endpoint) || !nodes.has(s.nodeId),
+      ) ||
+      network.edges.some((e) => !nodeIds.has(e.from) || !nodeIds.has(e.to))
+    )
+      fail("unknown communication endpoint");
+    if (
+      network.nodes.some(
+        (n) =>
+          !nodes.has(n.nodeId) ||
+          n.backupFuel < 0 ||
+          n.backupFuel > n.backupCapacity,
+      )
+    )
+      fail("invalid communication power");
+    if (network.messages.length + w.schedule.length > 20000)
+      fail("network queue guard");
+    for (const m of network.messages) {
+      if (
+        !nodeIds.has(m.source) ||
+        !nodeIds.has(m.destination) ||
+        !nodeIds.has(m.currentNode) ||
+        new Set(m.visited).size !== m.visited.length ||
+        !events.has(m.cause) ||
+        m.queuedTick > w.tick ||
+        (m.transmittedTick !== undefined && m.transmittedTick < m.queuedTick)
+      )
+        fail("invalid message chronology or route");
+      if (
+        m.status === "IN_TRANSIT" &&
+        (!m.hopEdge ||
+          !m.hopDestination ||
+          !network.edges.some(
+            (e) =>
+              e.id === m.hopEdge &&
+              [e.from, e.to].includes(m.currentNode) &&
+              [e.from, e.to].includes(m.hopDestination!),
+          ) ||
+          m.arrivalTick === undefined ||
+          m.arrivalTick <= w.tick)
+      )
+        fail("invalid pending network hop");
+      if (
+        (m.kind === "REPORT" &&
+          !w.reports.some((r) => r.id === m.referenceId)) ||
+        (m.kind !== "REPORT" && !w.commands.some((c) => c.id === m.referenceId))
+      )
+        fail("unknown message reference");
+    }
+    for (const r of w.reports) {
+      if (!sourceById.get(r.sourceId)?.capabilities.includes(r.subjectKind))
+        fail("source capability violation");
+      if (
+        (r.transmittedTick !== undefined &&
+          r.transmittedTick < r.observedTick) ||
+        (r.receivedTick !== undefined &&
+          (r.transmittedTick === undefined ||
+            r.receivedTick < r.transmittedTick))
+      )
+        fail("report arrival precedes transmission");
+    }
+    for (const c of w.commands)
+      if (
+        (c.receivedTick !== undefined && c.receivedTick < c.issueTick) ||
+        (c.acknowledgementTick !== undefined &&
+          (c.receivedTick === undefined ||
+            c.acknowledgementTick < c.receivedTick))
+      )
+        fail("acknowledgement precedes delivery");
   }
 }

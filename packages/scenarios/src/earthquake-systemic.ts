@@ -1,8 +1,9 @@
 import { ScenarioSchema, type Scenario } from "../../domain/src/index";
 import { earthquake } from "./earthquake";
-export const earthquakeSystemic: Scenario = ScenarioSchema.parse({
+import { communicationConfig } from "./communications";
+const systemicContent: Scenario = ScenarioSchema.parse({
   ...structuredClone(earthquake),
-  version: "2.1.0",
+  version: "2.2.0",
   hospitals: earthquake.hospitals.map((h) => ({
     ...h,
     edCapacity: 10,
@@ -25,5 +26,9 @@ export const earthquakeSystemic: Scenario = ScenarioSchema.parse({
       { id: "SH-D", nodeId: "N34", capacity: 1000 },
     ],
   },
+});
+export const earthquakeSystemic: Scenario = ScenarioSchema.parse({
+  ...systemicContent,
+  communications: communicationConfig(systemicContent),
 });
 // Earthquake v1 remains unchanged in earthquake.ts and the frozen v0.1 compatibility engine.
