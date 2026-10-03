@@ -5,7 +5,11 @@ import type {
 } from "../../domain/src/index";
 import { Simulation } from "../../simulation/src/index";
 import { earthquake } from "../../scenarios/src/earthquake";
-import { ReplayRecorder, replay } from "../../replay/src/index";
+import {
+  ReplayRecorder,
+  replay,
+  VerifiedTimeline,
+} from "../../replay/src/index";
 import { save, load } from "../../persistence/src/index";
 export interface SessionUpdate {
   view: CommandCenterView;
@@ -21,6 +25,7 @@ export class Session {
   #mode: "LIVE" | "REPLAY" = "LIVE";
   #cursor = 0;
   #verified = false;
+  #timeline?: VerifiedTimeline;
   constructor(seed: string) {
     this.#sim = new Simulation(earthquake, seed);
     this.#recorder = new ReplayRecorder(this.#sim);
@@ -82,6 +87,7 @@ export class Session {
     this.#original = undefined;
     this.#mode = "LIVE";
     this.#verified = false;
+    this.#timeline = undefined;
     return this.update();
   }
   seek(tick: number): SessionUpdate {
@@ -93,8 +99,12 @@ export class Session {
         throw new Error("Replay final hash mismatch");
       this.#verified = true;
       this.#original = this.#sim;
+      this.#timeline = new VerifiedTimeline(
+        this.#sim.scenario,
+        this.#recorder.record,
+      );
     }
-    this.#sim = replay(this.#sim.scenario, this.#recorder.record, tick);
+    this.#sim = this.#timeline!.seek(tick);
     this.#mode = "REPLAY";
     this.#cursor = this.#recorder.record.commands.findIndex(
       (c) => c.tick > tick,
