@@ -1,0 +1,19 @@
+{
+  "version": "0.2.1",
+  "sourceCommit": "2df13101515513dc96c3f0e63d0e392f722080f8",
+  "portable": {
+    "path": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\AEGIS-0.2.1-Windows-x64.exe",
+    "bytes": 100366977,
+    "sha256": "7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81"
+  },
+  "runtime": {
+    "path": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\windows-runtime\\Project AEGIS.exe",
+    "bytes": 245726720,
+    "sha256": "7C93F80DAF66658B467281E3FD61C9A7D0A0676312E90E483DD641C6E551AB03",
+    "fileVersion": "0.2.1",
+    "productVersion": "0.2.1.0",
+    "signature": "NotSigned"
+  },
+  "asarBytes": 19972765,
+  "stableV020Sha256": "696D9453D6E69B1A1DD6DF907576C0338A1EF1331CA4F0E2215A48CBB3135EC7"
+}

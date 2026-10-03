@@ -1,0 +1,58 @@
+[
+  {
+    "name": "map-final-packaged-desktop",
+    "started": "2026-10-04T05:10:58.0874518+08:00",
+    "ended": "2026-10-04T05:11:14.6143943+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-final-packaged-software",
+    "started": "2026-10-04T05:11:14.6296464+08:00",
+    "ended": "2026-10-04T05:11:36.2316425+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-final-portable-desktop",
+    "started": "2026-10-04T05:11:36.2477319+08:00",
+    "ended": "2026-10-04T05:12:04.2741612+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-final-portable-software",
+    "started": "2026-10-04T05:12:04.2819297+08:00",
+    "ended": "2026-10-04T05:12:42.5861661+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-click-final-packaged-desktop",
+    "started": "2026-10-04T05:12:42.5931807+08:00",
+    "ended": "2026-10-04T05:12:57.8171652+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-click-final-packaged-software",
+    "started": "2026-10-04T05:12:57.8241199+08:00",
+    "ended": "2026-10-04T05:13:29.9865773+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-click-final-portable-desktop",
+    "started": "2026-10-04T05:13:29.9919173+08:00",
+    "ended": "2026-10-04T05:14:01.2845733+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "map-click-final-portable-software",
+    "started": "2026-10-04T05:14:01.2922437+08:00",
+    "ended": "2026-10-04T05:14:50.3951059+08:00",
+    "exitCode": 0,
+    "passed": true
+  }
+]

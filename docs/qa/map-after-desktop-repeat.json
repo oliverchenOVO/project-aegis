@@ -1,0 +1,164 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron",
+  "graphics": "ordinary desktop flags",
+  "launchMs": 1291.4711,
+  "runtime": {
+    "version": "0.2.1",
+    "gpuFeatures": {
+      "2d_canvas": "disabled_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "disabled_off",
+      "webgpu": "disabled_off",
+      "webnn": "disabled_off"
+    }
+  },
+  "rows": [
+    {
+      "scenario": "earthquake",
+      "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Ti Laptop GPU (0x000024A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "firstMapRenderMs": 551.1291999999999,
+      "idleDraws": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "idleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          114.89649999999983,
+          59.54950000000008,
+          60.72820000000047,
+          54.331600000000435,
+          60.63750000000073,
+          54.643700000000536,
+          54.32560000000012,
+          54.472499999999854
+        ],
+        "p50Ms": 59.54950000000008,
+        "p95Ms": 114.89649999999983
+      },
+      "layerToggle": {
+        "samples": [
+          54.04200000000037,
+          67.02400000000034,
+          54.223000000000866,
+          54.902000000000044,
+          54.48540000000048,
+          60.84889999999996,
+          55.197800000000825,
+          53.302200000000084
+        ],
+        "p50Ms": 54.902000000000044,
+        "p95Ms": 67.02400000000034
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 490.4490000000005,
+        "effectiveFramesPerSecond": 48.93475162555123
+      },
+      "stepAndRender": {
+        "samples": [
+          214.84029999999984,
+          253.27400000000034,
+          235.27900000000045,
+          481.1219999999994
+        ],
+        "p50Ms": 253.27400000000034,
+        "p95Ms": 481.1219999999994
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          82.3999999910593,
+          61.70000000298023,
+          53.79999999701977,
+          264.09999999403954
+        ],
+        "p50Ms": 82.3999999910593,
+        "p95Ms": 264.09999999403954
+      }
+    },
+    {
+      "scenario": "flood",
+      "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Ti Laptop GPU (0x000024A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "firstMapRenderMs": 151.54680000000008,
+      "idleDraws": [
+        230,
+        230,
+        230,
+        230,
+        230,
+        230
+      ],
+      "idleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          78.36490000000049,
+          54.3729000000003,
+          48.565999999998894,
+          42.26749999999993,
+          42.03679999999986,
+          54.646600000000035,
+          42.52980000000025,
+          48.480900000000474
+        ],
+        "p50Ms": 48.565999999998894,
+        "p95Ms": 78.36490000000049
+      },
+      "layerToggle": {
+        "samples": [
+          54.32340000000113,
+          60.47099999999955,
+          48.27100000000064,
+          66.76920000000064,
+          49.01680000000124,
+          60.046400000001086,
+          48.385699999998906,
+          68.18319999999949
+        ],
+        "p50Ms": 60.046400000001086,
+        "p95Ms": 68.18319999999949
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 533.4359000000004,
+        "effectiveFramesPerSecond": 44.991347601464355
+      },
+      "stepAndRender": {
+        "samples": [
+          213.92079999999987,
+          454.84790000000066,
+          471.21119999999974,
+          469.53420000000006
+        ],
+        "p50Ms": 469.53420000000006,
+        "p95Ms": 471.21119999999974
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          81.3999999910593,
+          204.1000000089407,
+          130.90000000596046,
+          71.79999999701977
+        ],
+        "p50Ms": 130.90000000596046,
+        "p95Ms": 204.1000000089407
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

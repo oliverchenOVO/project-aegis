@@ -1,0 +1,164 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron",
+  "graphics": "SwiftShader",
+  "launchMs": 834.1327,
+  "runtime": {
+    "version": "0.2.1",
+    "gpuFeatures": {
+      "2d_canvas": "disabled_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "disabled_off",
+      "webgpu": "disabled_off",
+      "webnn": "disabled_off"
+    }
+  },
+  "rows": [
+    {
+      "scenario": "earthquake",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 1290.4370000000004,
+      "idleDraws": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "idleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          162.9097999999999,
+          84.62960000000021,
+          105.05029999999988,
+          65.38570000000072,
+          93.28050000000076,
+          94.33979999999974,
+          121.34479999999985,
+          97.46550000000025
+        ],
+        "p50Ms": 97.46550000000025,
+        "p95Ms": 162.9097999999999
+      },
+      "layerToggle": {
+        "samples": [
+          103.42059999999947,
+          205.96119999999974,
+          135.29290000000037,
+          185.4416999999994,
+          125.70429999999942,
+          117.65909999999985,
+          114.96409999999923,
+          117.51249999999982
+        ],
+        "p50Ms": 125.70429999999942,
+        "p95Ms": 205.96119999999974
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 1166.7325,
+        "effectiveFramesPerSecond": 20.57026782060155
+      },
+      "stepAndRender": {
+        "samples": [
+          564.5032000000001,
+          687.1957999999995,
+          512.5280999999995,
+          597.8227000000006
+        ],
+        "p50Ms": 597.8227000000006,
+        "p95Ms": 687.1957999999995
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          290.09999999403954,
+          318.6000000089407,
+          296.90000000596046,
+          299.3999999910593
+        ],
+        "p50Ms": 299.3999999910593,
+        "p95Ms": 318.6000000089407
+      }
+    },
+    {
+      "scenario": "flood",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 531.5428000000011,
+      "idleDraws": [
+        182,
+        182,
+        182,
+        182,
+        182,
+        182
+      ],
+      "idleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          126.12540000000081,
+          117.134399999999,
+          80.59920000000056,
+          154.64730000000054,
+          141.54529999999977,
+          227.8884999999991,
+          197.63000000000102,
+          125.14379999999983
+        ],
+        "p50Ms": 141.54529999999977,
+        "p95Ms": 227.8884999999991
+      },
+      "layerToggle": {
+        "samples": [
+          101.65319999999883,
+          139.66250000000036,
+          191.05019999999968,
+          130.2415000000001,
+          187.15509999999995,
+          137.6936999999998,
+          123.8195999999989,
+          135.84950000000026
+        ],
+        "p50Ms": 137.6936999999998,
+        "p95Ms": 191.05019999999968
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 1606.8306999999986,
+        "effectiveFramesPerSecond": 14.936234414739538
+      },
+      "stepAndRender": {
+        "samples": [
+          541.5319,
+          577.1211000000003,
+          1004.5077999999994,
+          1010.039499999999
+        ],
+        "p50Ms": 1004.5077999999994,
+        "p95Ms": 1010.039499999999
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          291.79999999701977,
+          169.70000000298023,
+          449.29999999701977,
+          425.59999999403954
+        ],
+        "p50Ms": 425.59999999403954,
+        "p95Ms": 449.29999999701977
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

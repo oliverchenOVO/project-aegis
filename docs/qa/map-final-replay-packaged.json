@@ -1,0 +1,227 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron used",
+  "graphics": "ordinary desktop graphics",
+  "checks": {
+    "workerTimings": [
+      {
+        "action": "start",
+        "elapsedMs": 113.70000000298023
+      },
+      {
+        "action": "command",
+        "elapsedMs": 2.8999999910593033
+      },
+      {
+        "action": "step",
+        "elapsedMs": 138.59999999403954
+      },
+      {
+        "action": "step",
+        "elapsedMs": 220.1000000089407
+      },
+      {
+        "action": "save",
+        "elapsedMs": 685.2000000029802
+      },
+      {
+        "action": "load",
+        "elapsedMs": 8645.5
+      },
+      {
+        "action": "fork",
+        "elapsedMs": 10158.40000000596
+      },
+      {
+        "action": "saveBranch",
+        "elapsedMs": 6106.399999991059
+      },
+      {
+        "action": "seek",
+        "elapsedMs": 294
+      },
+      {
+        "action": "seek",
+        "elapsedMs": 73.70000000298023
+      },
+      {
+        "action": "start",
+        "elapsedMs": 8.799999997019768
+      },
+      {
+        "action": "step",
+        "elapsedMs": 20.799999997019768
+      }
+    ],
+    "runtime": {
+      "versions": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "gpu": {
+        "2d_canvas": "disabled_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "webgl": "disabled_off",
+        "webgpu": "disabled_off",
+        "webnn": "disabled_off"
+      },
+      "windows": [
+        {
+          "visible": true,
+          "minimized": false,
+          "backgroundThrottling": false
+        }
+      ]
+    },
+    "identity": {
+      "url": "file:///F:/CodeX%E9%96%8B%E7%99%BC%E5%B0%8F%E6%9D%B1%E6%9D%B1/AI%20%E7%81%BD%E9%9B%A3%E6%8C%87%E6%8F%AE%E4%B8%AD%E5%BF%83/release/windows-runtime/resources/app.asar/dist/index.html",
+      "title": "Project AEGIS — AI 災難指揮中心"
+    },
+    "initialFog": "unknown units/power; no initial truth",
+    "mapRendering": {
+      "idleDraws": [
+        19,
+        19,
+        19,
+        19,
+        19,
+        19
+      ],
+      "zoomRedrawn": true,
+      "layerRedrawn": true
+    },
+    "hospitalInspector": "received census/queue/ICU/handover/power with age/source",
+    "evacuation": {
+      "commandId": "CMD-1",
+      "executionStatus": "COMPLETED",
+      "shelteredPeople": 324,
+      "eventIds": [
+        "evt-423",
+        "evt-424",
+        "evt-425",
+        "evt-574",
+        "evt-575",
+        "evt-576",
+        "evt-615",
+        "evt-616",
+        "evt-617",
+        "evt-618",
+        "evt-619",
+        "evt-1581",
+        "evt-1959",
+        "evt-1998",
+        "evt-2389"
+      ]
+    },
+    "branch": {
+      "originalHash": "4eb523d46aa39a2a",
+      "alternativeHash": "2a2b76b4e6376144",
+      "lineage": {
+        "branchId": "BR-1f3e58078923e8cb",
+        "parentReplayId": "RPL-d0fabde91bb53cc3",
+        "parentHash": "4eb523d46aa39a2a",
+        "forkTick": 30,
+        "baseHash": "bac3fa39053331e3",
+        "simulationVersion": "0.2.0",
+        "scenarioVersion": "1.4.0",
+        "requestedEndTick": 2400,
+        "alternativeCommands": [
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-01",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-02",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-03",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 30,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-04",
+              "incidentId": "INC-1"
+            }
+          },
+          {
+            "tick": 350,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-05",
+              "incidentId": "INC-10"
+            }
+          },
+          {
+            "tick": 350,
+            "input": {
+              "type": "DISPATCH_UNIT",
+              "target": "AMB-06",
+              "incidentId": "INC-10"
+            }
+          }
+        ],
+        "unappliedCommands": []
+      },
+      "fatalities": 897,
+      "parentRecordHash": "80cd871aec957320"
+    },
+    "replay": "verified checkpoint seek to350; commands disabled",
+    "earthquake": "systemic scenario selection/start/tick/render",
+    "overlays": 0
+  },
+  "errors": [],
+  "warnings": []
+}
