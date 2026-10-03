@@ -1,4 +1,15 @@
 import type { CommandCenterView } from "../../../domain/src/index";
+import { mapTheme } from "./theme";
+export function operationalAppearance(value: string | undefined) {
+  if (value === undefined)
+    return { color: mapTheme.label, warning: false, known: false };
+  const warning = ["DOWN", "OFFLINE", "DEGRADED", "變電站停機"].includes(value);
+  return {
+    color: warning ? mapTheme.blocked : mapTheme.comms,
+    warning,
+    known: true,
+  };
+}
 // A received location is mandatory. Unit roster membership alone cannot place a vehicle.
 export function positionedUnits(view: CommandCenterView) {
   const nodes = new Set(view.city.nodes.map((n) => n.id));

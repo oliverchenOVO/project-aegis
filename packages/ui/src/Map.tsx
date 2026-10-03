@@ -12,6 +12,7 @@ import {
   positionedUnits,
   floodAppearance,
   incidentCallouts,
+  operationalAppearance,
 } from "./map/knowledge";
 import { cameraPosition, invalidator } from "./map/camera";
 const layerNames: Record<Layer, string> = {
@@ -329,11 +330,7 @@ export function SituationMap({ view, identity }: MapProps) {
           x = n.x + 30 + (index % 2) * 15,
           y = n.y - 10;
         const marker = new Graphics().circle(x, y, 5).stroke({
-          color: b
-            ? b.claim.value === "DOWN"
-              ? 0xe89377
-              : 0x96bac9
-            : 0x647582,
+          color: operationalAppearance(b?.claim.value).color,
           width: 1.4,
         });
         marker.eventMode = "static";
@@ -393,7 +390,14 @@ export function SituationMap({ view, identity }: MapProps) {
       )
         continue;
       const n = nodes.get(f.nodeId)!;
-      const c = color[f.type] ?? 0x85a5bc;
+      const received = view.beliefs.find(
+        (b) => b.kind === f.type && b.subjectId === f.id,
+      );
+      const state = operationalAppearance(received?.claim.value);
+      const c =
+        f.type === "POWER" || f.type === "COMMS"
+          ? state.color
+          : (color[f.type] ?? mapTheme.label);
       g.roundRect(n.x - 10, n.y - 10, 20, 20, 3)
         .fill(0x1b2731)
         .stroke({ color: c, width: 1.5 });
@@ -406,6 +410,8 @@ export function SituationMap({ view, identity }: MapProps) {
         "bold",
       );
       label(f.name, n.x - 32, n.y + 16, 0x8da2b2, 10);
+      if (state.warning)
+        label("!", n.x + 11, n.y - 12, mapTheme.blocked, 14, "bold");
       if (f.type === "POWER" || f.type === "COMMS") {
         const hit = new Graphics()
           .circle(n.x, n.y, 17)
@@ -413,6 +419,11 @@ export function SituationMap({ view, identity }: MapProps) {
         hit.eventMode = "static";
         hit.cursor = "pointer";
         hit.on("pointertap", () => select(f.id));
+        hit.on("pointerover", () =>
+          setHover(
+            `${f.name} · ${received ? `回報 ${received.claim.value} · ${received.age}秒前` : "狀態未知"}`,
+          ),
+        );
         infrastructure.addChild(hit);
       }
     }

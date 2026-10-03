@@ -18,6 +18,7 @@ import {
   positionedUnits,
   floodAppearance,
   incidentCallouts,
+  operationalAppearance,
 } from "../../packages/ui/src/map/knowledge";
 import {
   MAP_LAYERS,
@@ -166,6 +167,21 @@ describe("renderer cartography and knowledge contract", () => {
       view.beliefs.filter((b) => b.kind === "INCIDENT" && b.claim.nodeId)
         .length,
     );
+  });
+  it("infrastructure failure colors require received knowledge", () => {
+    expect(operationalAppearance(undefined)).toMatchObject({
+      warning: false,
+      known: false,
+    });
+    for (const claim of ["DOWN", "OFFLINE", "DEGRADED", "變電站停機"])
+      expect(operationalAppearance(claim)).toMatchObject({
+        warning: true,
+        known: true,
+      });
+    expect(operationalAppearance("電網供電正常")).toMatchObject({
+      warning: false,
+      known: true,
+    });
   });
   it("LOD boundaries are independent of incoming disaster reports", () => {
     expect([0.65, 1, 2].map(detailForScale)).toEqual(["FAR", "MEDIUM", "NEAR"]);
