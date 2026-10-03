@@ -115,8 +115,8 @@ export function deliverCommands(w: WorldState, s: Scenario): void {
       fail(w, c, "單位忙碌，請使用改派");
       continue;
     }
-    if (u.patients.length > 0) {
-      fail(w, c, "單位正在運送傷患，無法中止");
+    if (u.patients.length > 0 || u.state === "HANDOVER") {
+      fail(w, c, "單位正在運送或交接傷患，無法中止", u.handoverCause);
       continue;
     }
     if (

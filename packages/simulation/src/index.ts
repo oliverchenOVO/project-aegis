@@ -18,6 +18,7 @@ import {
 } from "./civilians";
 import { createIncident } from "./disasters";
 import { infrastructure, medical } from "./medical";
+import { refreshHospitalCensus } from "./hospital";
 import { responders } from "./units";
 import { observe, transmit, projectView, unitReport } from "./intelligence";
 import { issue, deliverCommands } from "./commands";
@@ -119,6 +120,7 @@ export class Simulation {
       infrastructure(w);
       medical(w);
       responders(w, this.scenario);
+      refreshHospitalCensus(w);
       synchronizeCivilians(w);
       observe(w, this.scenario);
       transmit(w, this.scenario);
@@ -131,7 +133,10 @@ export class Simulation {
         w.schedule.length === 0 &&
         w.incidents.every((i) => i.status !== "ACTIVE") &&
         !w.patients.some(
-          (p) => p.state === "WAITING" || p.state === "IN_TRANSIT",
+          (p) =>
+            p.state === "WAITING" ||
+            p.state === "IN_TRANSIT" ||
+            p.state === "QUEUED",
         );
       const fatalities = w.events
         .filter((e) => e.type === "PATIENT_DIED")
@@ -283,6 +288,22 @@ export function assertInvariants(w: WorldState, s: Scenario): void {
       if (!p || p.unitId !== u.id || p.state !== "IN_TRANSIT")
         fail("invalid patient transport");
     }
+    if (
+      w.hospitals.some((h) => h.edCapacity !== undefined) &&
+      u.patients.reduce(
+        (n, id) => n + (w.patients.find((p) => p.id === id)?.count ?? 1),
+        0,
+      ) > 2
+    )
+      fail("ambulance population capacity");
+    if (
+      u.state === "HANDOVER" &&
+      (!u.destinationHospital ||
+        u.handoverUntil === undefined ||
+        w.hospitals.find((h) => h.id === u.destinationHospital)?.nodeId !==
+          u.nodeId)
+    )
+      fail("invalid ambulance handover");
   }
   for (const i of w.incidents)
     if (
@@ -293,10 +314,75 @@ export function assertInvariants(w: WorldState, s: Scenario): void {
       (i.status === "RESOLVED" && i.hazard !== 0)
     )
       fail("invalid incident");
-  for (const h of w.hospitals)
+  for (const h of w.hospitals) {
     if (h.currentPatients < 0 || h.baselinePatients < 0 || h.fuel < 0)
       fail("negative hospital resources");
+    if (h.edCapacity !== undefined) {
+      const census =
+        h.baselinePatients +
+        w.patients
+          .filter(
+            (p) =>
+              p.hospitalId === h.id &&
+              ["IN_TRANSIT", "QUEUED", "ADMITTED"].includes(p.state),
+          )
+          .reduce((n, p) => n + (p.count ?? 1), 0);
+      if (h.currentPatients !== census) fail("hospital census mismatch");
+      const ids = h.patientQueue ?? [];
+      if (
+        new Set(ids).size !== ids.length ||
+        ids.some(
+          (id) =>
+            !w.patients.some(
+              (p) =>
+                p.id === id && p.hospitalId === h.id && p.state === "QUEUED",
+            ),
+        )
+      )
+        fail("invalid hospital queue");
+      if (
+        w.patients.some(
+          (p) =>
+            p.hospitalId === h.id &&
+            p.state === "QUEUED" &&
+            !ids.includes(p.id),
+        )
+      )
+        fail("missing queued patient");
+      const admitted = w.patients.filter(
+        (p) => p.hospitalId === h.id && p.state === "ADMITTED",
+      );
+      if (
+        h.baselinePatients + admitted.reduce((n, p) => n + (p.count ?? 1), 0) >
+        h.capacity + h.emergencyCapacity
+      )
+        fail("inpatient bed capacity");
+      if (
+        h.criticalPatients +
+          admitted
+            .filter((p) => p.critical)
+            .reduce((n, p) => n + (p.count ?? 1), 0) >
+        (h.icuCapacity ?? h.capacity)
+      )
+        fail("ICU bed capacity");
+      if (
+        admitted
+          .filter((p) => p.triage === "DELAYED")
+          .reduce((n, p) => n + (p.count ?? 1), 0) >
+        (h.traumaCapacity ?? h.capacity)
+      )
+        fail("trauma bed capacity");
+    }
+  }
   for (const p of w.patients) {
+    if (
+      !Number.isFinite(p.health) ||
+      p.health < 0 ||
+      p.health > 100 ||
+      !Number.isInteger(p.count ?? 1) ||
+      (p.count ?? 1) < 1
+    )
+      fail("invalid patient health/count");
     if (!incidents.has(p.incidentId)) fail("unknown patient incident");
     if (p.state === "DEAD" && p.health !== 0) fail("dead patient health");
     if (p.hospitalId && !w.hospitals.some((h) => h.id === p.hospitalId))

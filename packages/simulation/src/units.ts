@@ -2,6 +2,27 @@ import type { WorldState, Scenario, Unit } from "../../domain/src/index";
 import { route, edge, cost, passable } from "./routing";
 import { emit } from "./events";
 import { unitReport } from "./intelligence";
+import {
+  beginHandover,
+  completeHandover,
+  splitPatient,
+  clinicalEnabled,
+} from "./hospital";
+function resumeMission(w: WorldState, u: Unit): void {
+  const incident = w.incidents.find((i) => i.id === u.assignment);
+  if (
+    incident &&
+    incident.status !== "RESOLVED" &&
+    w.patients.some(
+      (p) => p.incidentId === incident.id && p.state === "WAITING",
+    ) &&
+    travelTo(w, u, incident.nodeId)
+  )
+    return;
+  u.assignment = undefined;
+  travelTo(w, u, u.homeId);
+  u.state = "RETURNING";
+}
 function travelTo(w: WorldState, u: Unit, target: string): boolean {
   const path = route(w, u.nodeId, target, u.agency);
   if (!path) return false;
@@ -14,6 +35,14 @@ function travelTo(w: WorldState, u: Unit, target: string): boolean {
 export function responders(w: WorldState, s: Scenario): void {
   for (const u of w.units) {
     if (u.state === "DISABLED" || u.state === "AVAILABLE") continue;
+    if (u.state === "HANDOVER") {
+      if (w.tick >= (u.handoverUntil ?? Infinity)) {
+        completeHandover(w, u);
+        resumeMission(w, u);
+        unitReport(w, s, u.id);
+      }
+      continue;
+    }
     if (u.state === "DISPATCHED") {
       u.state = "EN_ROUTE";
       emit(w, "UNIT_DEPARTED", { unitId: u.id }, [u.missionCause]);
@@ -75,6 +104,11 @@ export function responders(w: WorldState, s: Scenario): void {
         u.missionCause,
       ]);
       if (u.destinationHospital) {
+        if (clinicalEnabled(w)) {
+          beginHandover(w, u);
+          unitReport(w, s, u.id);
+          continue;
+        }
         const h = w.hospitals.find((h) => h.id === u.destinationHospital)!;
         for (const patientId of u.patients) {
           const p = w.patients.find((p) => p.id === patientId)!;
@@ -128,7 +162,7 @@ export function responders(w: WorldState, s: Scenario): void {
       continue;
     }
     if (u.agency !== "EMS" || w.tick % 12 !== 0) continue;
-    const patients = w.patients
+    let patients = w.patients
       .filter((p) => p.incidentId === i.id && p.state === "WAITING")
       .sort(
         (a, b) =>
@@ -150,14 +184,27 @@ export function responders(w: WorldState, s: Scenario): void {
         (a, b) =>
           a.path.eta +
             (a.h.power || a.h.generator === "OPERATIONAL" ? 0 : 500) +
-            Math.max(0, a.h.currentPatients - a.h.capacity) * 20 -
+            Math.max(0, a.h.currentPatients - a.h.capacity) * 20 +
+            (a.h.status === "DIVERTING" ? 240 : 0) -
             (b.path.eta +
               (b.h.power || b.h.generator === "OPERATIONAL" ? 0 : 500) +
-              Math.max(0, b.h.currentPatients - b.h.capacity) * 20) ||
+              Math.max(0, b.h.currentPatients - b.h.capacity) * 20 +
+              (b.h.status === "DIVERTING" ? 240 : 0)) ||
           a.h.id.localeCompare(b.h.id, "en"),
       );
     const destination = hospitals[0];
     if (!destination) continue;
+    if (clinicalEnabled(w)) {
+      let capacity = 2;
+      const loaded: WorldState["patients"] = [];
+      for (let p of patients) {
+        if (!capacity) break;
+        if ((p.count ?? 1) > capacity) p = splitPatient(w, p, capacity);
+        loaded.push(p);
+        capacity -= p.count ?? 1;
+      }
+      patients = loaded;
+    }
     u.patients = patients.map((p) => p.id);
     u.destinationHospital = destination.h.id;
     u.route = destination.path.nodes;
@@ -167,6 +214,11 @@ export function responders(w: WorldState, s: Scenario): void {
     for (const p of patients) {
       p.state = "IN_TRANSIT";
       p.unitId = u.id;
+      if (clinicalEnabled(w)) {
+        p.destination = destination.h.id;
+        p.transportNeed = true;
+        p.treatmentState = "FIELD";
+      }
       p.cause = emit(
         w,
         "PATIENT_TRANSPORTED",

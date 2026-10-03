@@ -94,7 +94,7 @@ it("earthquake v2 cohorts link real casualties while v1 remains separate", () =>
   sim.step(600);
   assertInvariants(sim.state, earthquakeSystemic);
   expect(sim.state.patients.every((p) => !!p.civilianCohortId)).toBe(true);
-  expect(sim.state.scenarioVersion).toBe("2.0.0");
+  expect(sim.state.scenarioVersion).toBe(earthquakeSystemic.version);
 });
 it("split/event/queue runaway guards fail explicitly", () => {
   const sim = new Simulation(flood, "cohort-guards");

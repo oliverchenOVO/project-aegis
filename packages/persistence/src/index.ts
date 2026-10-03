@@ -113,13 +113,16 @@ export function load(bytes: Uint8Array): {
         ].includes(entry.name);
       },
     });
+    const decoded = new Map<string, string>();
     const text = (name: string) => {
       if (!files[name]) throw new Error(`缺少 ${name}`);
-      return strFromU8(files[name]);
+      if (!decoded.has(name)) decoded.set(name, strFromU8(files[name]));
+      return decoded.get(name)!;
     };
+    const manifestInput: unknown = JSON.parse(text("manifest.json"));
     const header = z
       .object({ saveFormatVersion: z.number().int() })
-      .parse(JSON.parse(text("manifest.json")));
+      .parse(manifestInput);
     if (header.saveFormatVersion > 2) throw new Error("未知的未來存檔版本");
     if (header.saveFormatVersion === 1) {
       const legacy = loadLegacy(bytes),
@@ -147,7 +150,7 @@ export function load(bytes: Uint8Array): {
       };
     }
     if (header.saveFormatVersion !== 2) throw new Error("不支援的存檔版本");
-    const manifest = ManifestSchema.parse(JSON.parse(text("manifest.json"))),
+    const manifest = ManifestSchema.parse(manifestInput),
       scenario = ScenarioSchema.parse(JSON.parse(text("scenario.json"))),
       state = WorldSchema.parse(JSON.parse(text("snapshot.json")));
     for (const name of [

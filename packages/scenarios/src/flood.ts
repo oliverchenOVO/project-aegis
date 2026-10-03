@@ -37,7 +37,7 @@ const groups = [
 export const flood: Scenario = ScenarioSchema.parse({
   ...structuredClone(earthquake),
   id: "flood-urban-v1",
-  version: "1.0.0",
+  version: "1.1.0",
   name: "臨江市・都市暴洪",
   hazardKind: "FLOOD",
   maxTicks: 2400,
@@ -88,6 +88,18 @@ export const flood: Scenario = ScenarioSchema.parse({
   hospitals: earthquake.hospitals.map((h) => ({
     ...h,
     fuel: h.id === "H-B" ? 180 : 900,
+    capacity: h.id === "H-A" ? 34 : h.capacity,
+    emergencyCapacity: h.id === "H-A" ? 4 : h.emergencyCapacity,
+    edCapacity: 10,
+    icuCapacity: h.id === "H-A" ? 12 : 16,
+    traumaCapacity: 8,
+    treatmentThroughput: 0.06,
+    staffEffectiveness: 0.85,
+    patientQueue: [],
+    status: "NORMAL",
+    throughputCredit: 0,
+    overloadTicks: 0,
+    powerEmergencyTicks: 0,
   })),
 });
 export const FLOOD_SHOWCASE_SEED = "AEGIS-FLOOD-2026-001";

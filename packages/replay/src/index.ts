@@ -44,6 +44,7 @@ export type ReplayRecord = z.infer<typeof ReplaySchema>;
 export class ReplayRecorder {
   record: ReplayRecord;
   constructor(sim: Simulation) {
+    const initialHash = sim.hash();
     this.record = {
       formatVersion: 2,
       simulationVersion: sim.state.version,
@@ -52,8 +53,8 @@ export class ReplayRecorder {
       seed: sim.state.seed,
       endTick: sim.state.tick,
       commands: [],
-      hashes: [{ tick: 0, hash: sim.hash() }],
-      checkpoints: [captureCheckpoint(sim, 0)],
+      hashes: [{ tick: 0, hash: initialHash }],
+      checkpoints: [captureCheckpoint(sim, 0, initialHash)],
     };
   }
   command(sim: Simulation, input: CommandInput): void {
@@ -69,10 +70,11 @@ export class ReplayRecorder {
       sim.state.tick % 300 === 0 &&
       !this.record.hashes.some((h) => h.tick === sim.state.tick)
     ) {
-      this.record.hashes.push({ tick: sim.state.tick, hash: sim.hash() });
+      const boundaryHash = sim.hash();
+      this.record.hashes.push({ tick: sim.state.tick, hash: boundaryHash });
       this.record.checkpoints ??= [];
       this.record.checkpoints.push(
-        captureCheckpoint(sim, this.record.commands.length),
+        captureCheckpoint(sim, this.record.commands.length, boundaryHash),
       );
     }
   }
@@ -190,13 +192,14 @@ function simulateValidated(
 function captureCheckpoint(
   sim: Simulation,
   commandCursor: number,
+  canonicalHash: string,
 ): ReplayCheckpoint {
   return {
     tick: sim.state.tick,
     snapshot: sim.snapshot(),
     eventCursor: sim.state.events.length,
     commandCursor,
-    canonicalHash: sim.hash(),
+    canonicalHash,
     simulationVersion: sim.state.version,
     scenarioVersion: sim.scenario.version,
   };
@@ -208,7 +211,8 @@ export class VerifiedTimeline {
   readonly #scenario: Scenario;
   constructor(scenario: Scenario, input: unknown) {
     this.#scenario = ScenarioSchema.parse(scenario);
-    this.#record = validateReplay(structuredClone(input), this.#scenario);
+    // Full Zod parsing creates owned copies of every record/snapshot field.
+    this.#record = validateReplay(input, this.#scenario);
     simulateValidated(this.#scenario, this.#record, this.#record.endTick);
   }
   seek(target: number): Simulation {

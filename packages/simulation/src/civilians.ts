@@ -338,7 +338,7 @@ export function synchronizeCivilians(w: WorldState): void {
       cohort.state = "SHELTERED";
       cohort.healthState = "NORMAL";
       cohort.evacuationState = "SHELTERED";
-    } else if (patient.state === "ADMITTED") {
+    } else if (patient.state === "ADMITTED" || patient.state === "QUEUED") {
       cohort.state = "TRANSPORTED";
       cohort.evacuationState = "TRANSPORTED";
     } else if (patient.state === "IN_TRANSIT") {
@@ -347,6 +347,8 @@ export function synchronizeCivilians(w: WorldState): void {
       cohort.healthState = patient.critical ? "CRITICAL" : "INJURED";
       cohort.state = cohort.healthState;
     }
+    if (patient.state !== "DEAD" && patient.state !== "RECOVERED")
+      cohort.healthState = patient.critical ? "CRITICAL" : "INJURED";
   }
 }
 export function assertPopulation(w: WorldState): void {
