@@ -1,5 +1,8 @@
 import { z } from "zod";
-export const SIM_VERSION = "0.1.0";
+export const SIM_VERSION = "0.2.0";
+export const SAVE_FORMAT_VERSION = 2;
+export const REPLAY_FORMAT_VERSION = 2;
+export const SimulationVersionSchema = z.enum(["0.1.0", "0.2.0"]);
 const id = z.string().min(1).max(100);
 const tick = z.number().int().nonnegative().max(100000);
 const positive = z.number().nonnegative().finite();
@@ -252,7 +255,7 @@ export const ScenarioSchema = z.object({
 });
 export type Scenario = z.infer<typeof ScenarioSchema>;
 export const WorldSchema = z.object({
-  version: z.literal(SIM_VERSION),
+  version: SimulationVersionSchema,
   scenarioId: id,
   scenarioVersion: id,
   seed: id,

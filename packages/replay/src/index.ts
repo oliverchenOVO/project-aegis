@@ -1,9 +1,9 @@
 import { z } from "zod";
 import {
-  SIM_VERSION,
   CommandInputSchema,
   ScenarioSchema,
   WorldSchema,
+  SimulationVersionSchema,
   type Scenario,
   type CommandInput,
 } from "../../domain/src/index";
@@ -15,13 +15,13 @@ export const CheckpointSchema = z.object({
   eventCursor: z.number().int().nonnegative(),
   commandCursor: z.number().int().nonnegative(),
   canonicalHash: z.string().regex(/^[0-9a-f]{16}$/),
-  simulationVersion: z.literal(SIM_VERSION),
+  simulationVersion: SimulationVersionSchema,
   scenarioVersion: z.string(),
 });
 export type ReplayCheckpoint = z.infer<typeof CheckpointSchema>;
 export const ReplaySchema = z.object({
-  formatVersion: z.literal(1),
-  simulationVersion: z.literal(SIM_VERSION),
+  formatVersion: z.union([z.literal(1), z.literal(2)]),
+  simulationVersion: SimulationVersionSchema,
   scenarioId: z.string(),
   scenarioVersion: z.string(),
   seed: z.string().min(1).max(100),
@@ -45,8 +45,8 @@ export class ReplayRecorder {
   record: ReplayRecord;
   constructor(sim: Simulation) {
     this.record = {
-      formatVersion: 1,
-      simulationVersion: SIM_VERSION,
+      formatVersion: 2,
+      simulationVersion: sim.state.version,
       scenarioId: sim.scenario.id,
       scenarioVersion: sim.scenario.version,
       seed: sim.state.seed,
@@ -115,6 +115,8 @@ export function validateReplay(
       checkpoint.tick > record.endTick ||
       checkpoint.snapshot.tick !== checkpoint.tick ||
       checkpoint.snapshot.seed !== record.seed ||
+      checkpoint.snapshot.version !== record.simulationVersion ||
+      checkpoint.simulationVersion !== record.simulationVersion ||
       checkpoint.snapshot.scenarioId !== scenario.id ||
       checkpoint.scenarioVersion !== scenario.version ||
       checkpoint.snapshot.scenarioVersion !== scenario.version ||
@@ -140,7 +142,12 @@ export function replay(
     target = targetTick ?? record.endTick;
   if (!Number.isInteger(target) || target < 0 || target > record.endTick)
     throw new Error("重播時間超出範圍");
-  const sim = new Simulation(scenario, record.seed);
+  const sim = new Simulation(
+    scenario,
+    record.seed,
+    undefined,
+    record.simulationVersion,
+  );
   let cursor = 0;
   const checks = new Map(record.hashes.map((h) => [h.tick, h.hash]));
   while (sim.state.tick <= target) {
@@ -179,7 +186,7 @@ function captureCheckpoint(
     eventCursor: sim.state.events.length,
     commandCursor,
     canonicalHash: sim.hash(),
-    simulationVersion: SIM_VERSION,
+    simulationVersion: sim.state.version,
     scenarioVersion: sim.scenario.version,
   };
 }
@@ -217,7 +224,12 @@ export class VerifiedTimeline {
       .find((c) => c.tick <= target);
     const sim = checkpoint
       ? new Simulation(this.#scenario, this.#record.seed, checkpoint.snapshot)
-      : new Simulation(this.#scenario, this.#record.seed);
+      : new Simulation(
+          this.#scenario,
+          this.#record.seed,
+          undefined,
+          this.#record.simulationVersion,
+        );
     const restoreMs = performance.now() - start,
       restoredTick = sim.state.tick;
     let cursor = checkpoint?.commandCursor ?? 0;

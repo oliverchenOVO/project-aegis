@@ -11,6 +11,7 @@ import {
   VerifiedTimeline,
 } from "../../replay/src/index";
 import { save, load } from "../../persistence/src/index";
+import type { MigrationMetadata } from "../../persistence/src/index";
 export interface SessionUpdate {
   view: CommandCenterView;
   mode: "LIVE" | "REPLAY";
@@ -26,6 +27,7 @@ export class Session {
   #cursor = 0;
   #verified = false;
   #timeline?: VerifiedTimeline;
+  #migrations: MigrationMetadata[] = [];
   constructor(seed: string) {
     this.#sim = new Simulation(earthquake, seed);
     this.#recorder = new ReplayRecorder(this.#sim);
@@ -77,11 +79,16 @@ export class Session {
     return this.update();
   }
   exportSave(): Uint8Array {
-    return save(this.#original ?? this.#sim, this.#recorder.record);
+    return save(
+      this.#original ?? this.#sim,
+      this.#recorder.record,
+      this.#migrations,
+    );
   }
   importSave(bytes: Uint8Array): SessionUpdate {
     const loaded = load(bytes);
     this.#sim = loaded.simulation;
+    this.#migrations = loaded.migrations;
     this.#recorder = new ReplayRecorder(this.#sim);
     this.#recorder.record = loaded.replay;
     this.#original = undefined;

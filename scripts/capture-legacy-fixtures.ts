@@ -5,7 +5,7 @@ import { Simulation } from "../packages/simulation/src/index";
 import { earthquake } from "../packages/scenarios/src/earthquake";
 import { ReplayRecorder } from "../packages/replay/src/index";
 import { save } from "../packages/persistence/src/index";
-if (SIM_VERSION !== "0.1.0")
+if (String(SIM_VERSION) !== "0.1.0")
   throw new Error("Legacy capture requires the original v0.1.0 engine");
 const root = "tests/fixtures/legacy";
 mkdirSync(root, { recursive: true });

@@ -14,13 +14,34 @@ import { responders } from "./units";
 import { observe, transmit, projectView, unitReport } from "./intelligence";
 import { issue, deliverCommands } from "./commands";
 import { emit } from "./events";
+import { Simulation as LegacySimulation } from "../../legacy-v1/vendor/packages/simulation/src/index";
+import {
+  WorldSchema as LegacyWorldSchema,
+  ScenarioSchema as LegacyScenarioSchema,
+  CommandInputSchema as LegacyCommandSchema,
+} from "../../legacy-v1/vendor/packages/domain/src/index";
 export class Simulation {
   readonly scenario: Scenario;
   state: WorldState;
-  constructor(scenario: Scenario, seed: string, snapshot?: WorldState) {
+  #legacy?: LegacySimulation;
+  constructor(
+    scenario: Scenario,
+    seed: string,
+    snapshot?: WorldState,
+    simulationVersion: WorldState["version"] = snapshot?.version ?? SIM_VERSION,
+  ) {
     this.scenario = ScenarioSchema.parse(scenario);
     if (!seed.trim() || seed.length > 100)
       throw new Error("Seed 必須為 1–100 字元");
+    if (simulationVersion === "0.1.0") {
+      this.#legacy = new LegacySimulation(
+        LegacyScenarioSchema.parse(scenario),
+        seed,
+        snapshot ? LegacyWorldSchema.parse(snapshot) : undefined,
+      );
+      this.state = this.#legacy.state;
+      return;
+    }
     if (snapshot) {
       this.state = WorldSchema.parse(snapshot);
       if (
@@ -57,9 +78,12 @@ export class Simulation {
       unitReport(this.state, scenario, u.id, true);
   }
   issue(input: CommandInput) {
+    if (this.#legacy)
+      return this.#legacy.issue(LegacyCommandSchema.parse(input));
     return issue(this.state, input);
   }
   view() {
+    if (this.#legacy) return this.#legacy.view();
     return projectView(this.state, this.scenario);
   }
   snapshot() {
@@ -69,6 +93,11 @@ export class Simulation {
     return hash(this.state);
   }
   step(count = 1): void {
+    if (this.#legacy) {
+      this.#legacy.step(count);
+      this.state = this.#legacy.state;
+      return;
+    }
     if (!Number.isInteger(count) || count < 0 || count > 20000)
       throw new Error("Invalid tick count");
     for (let n = 0; n < count && !this.state.completed; n++) {
@@ -106,6 +135,7 @@ export class Simulation {
     }
   }
   aar(): AAR {
+    if (this.#legacy) return this.#legacy.aar();
     const w = this.state;
     if (!w.completed) throw new Error("AAR 僅能於情境結束後開啟");
     const reports = w.reports,

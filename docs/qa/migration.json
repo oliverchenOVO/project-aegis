@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "fixture": "tests/fixtures/legacy/legacy-save-basic-v1.aegis",
+      "iterations": 10,
+      "p50Ms": 49.47260000000006,
+      "p95Ms": 118.6823,
+      "mismatches": 0
+    },
+    {
+      "fixture": "tests/fixtures/legacy/legacy-save-midincident-v1.aegis",
+      "iterations": 10,
+      "p50Ms": 404.5851,
+      "p95Ms": 481.21399999999994,
+      "mismatches": 0
+    }
+  ]
+}

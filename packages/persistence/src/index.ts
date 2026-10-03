@@ -2,6 +2,7 @@ import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 import { z } from "zod";
 import {
   SIM_VERSION,
+  SimulationVersionSchema,
   ScenarioSchema,
   WorldSchema,
   type Scenario,
@@ -14,49 +15,85 @@ import {
   type ReplayRecord,
 } from "../../replay/src/index";
 import { Simulation } from "../../simulation/src/index";
+import { load as loadLegacy } from "../../legacy-v1/vendor/packages/persistence/src/index";
+import {
+  migrations,
+  SavePayloadSchema,
+  MigrationMetadataSchema,
+  type MigrationMetadata,
+} from "./migrations";
+export { SaveMigrationRegistry } from "./migrations";
+export type { SaveMigration, MigrationMetadata } from "./migrations";
 const ManifestSchema = z.object({
-  saveFormatVersion: z.literal(1),
-  simulationVersion: z.literal(SIM_VERSION),
+  saveFormatVersion: z.literal(2),
+  simulationVersion: SimulationVersionSchema,
   scenarioVersion: z.string(),
+  simulationBuild: z.literal(SIM_VERSION),
   snapshotHash: z.string(),
   eventHash: z.string(),
   replay: ReplaySchema,
+  contentManifest: z.record(z.string(), z.string()),
+  migrations: z.array(MigrationMetadataSchema),
 });
 const ndjson = (items: unknown[]) =>
   items.map((item) => JSON.stringify(item)).join("\n");
-const parseLines = (value: string): unknown[] =>
-  value.trim()
-    ? value
+const parseLines = (text: string): unknown[] =>
+  text.trim()
+    ? text
         .trim()
         .split("\n")
         .map((line) => JSON.parse(line) as unknown)
     : [];
-export function save(sim: Simulation, record: ReplayRecord): Uint8Array {
+const checkpointIndex = (record: ReplayRecord) =>
+  (record.checkpoints ?? []).map((c) => ({
+    tick: c.tick,
+    canonicalHash: c.canonicalHash,
+    eventCursor: c.eventCursor,
+    commandCursor: c.commandCursor,
+  }));
+export function save(
+  sim: Simulation,
+  record: ReplayRecord,
+  history: MigrationMetadata[] = [],
+): Uint8Array {
   const state = sim.snapshot();
   validateReplay(record, sim.scenario);
-  const manifest = {
-    saveFormatVersion: 1,
-    simulationVersion: SIM_VERSION,
+  if (
+    record.endTick !== state.tick ||
+    record.simulationVersion !== state.version
+  )
+    throw new Error("Save/replay version or tick mismatch");
+  const files: Record<string, Uint8Array> = {
+    "scenario.json": strToU8(JSON.stringify(sim.scenario)),
+    "snapshot.json": strToU8(JSON.stringify(state)),
+    "commands.ndjson": strToU8(ndjson(state.commands)),
+    "events.ndjson": strToU8(ndjson(state.events)),
+    "checkpoints.json": strToU8(JSON.stringify(checkpointIndex(record))),
+  };
+  const manifest = ManifestSchema.parse({
+    saveFormatVersion: 2,
+    simulationVersion: state.version,
     scenarioVersion: sim.scenario.version,
+    simulationBuild: SIM_VERSION,
     snapshotHash: hash(state),
     eventHash: hash(state.events),
     replay: record,
-  };
-  return zipSync(
-    {
-      "manifest.json": strToU8(JSON.stringify(manifest)),
-      "scenario.json": strToU8(JSON.stringify(sim.scenario)),
-      "snapshot.json": strToU8(JSON.stringify(state)),
-      "commands.ndjson": strToU8(ndjson(state.commands)),
-      "events.ndjson": strToU8(ndjson(state.events)),
-    },
-    { level: 6 },
-  );
+    contentManifest: Object.fromEntries(
+      Object.entries(files).map(([name, bytes]) => [
+        name,
+        hash(strFromU8(bytes)),
+      ]),
+    ),
+    migrations: history,
+  });
+  files["manifest.json"] = strToU8(JSON.stringify(manifest));
+  return zipSync(files, { level: 6 });
 }
 export function load(bytes: Uint8Array): {
   simulation: Simulation;
   replay: ReplayRecord;
   scenario: Scenario;
+  migrations: MigrationMetadata[];
 } {
   try {
     if (bytes.length > 20_000_000 || bytes.length < 20)
@@ -73,6 +110,7 @@ export function load(bytes: Uint8Array): {
           "snapshot.json",
           "commands.ndjson",
           "events.ndjson",
+          "checkpoints.json",
         ].includes(entry.name);
       },
     });
@@ -80,10 +118,51 @@ export function load(bytes: Uint8Array): {
       if (!files[name]) throw new Error(`缺少 ${name}`);
       return strFromU8(files[name]);
     };
+    const header = z
+      .object({ saveFormatVersion: z.number().int() })
+      .parse(JSON.parse(text("manifest.json")));
+    if (header.saveFormatVersion > 2) throw new Error("未知的未來存檔版本");
+    if (header.saveFormatVersion === 1) {
+      const legacy = loadLegacy(bytes),
+        payload = SavePayloadSchema.parse(
+          migrations.migrate(
+            {
+              saveFormatVersion: 1,
+              scenario: legacy.scenario,
+              snapshot: legacy.simulation.snapshot(),
+              replay: legacy.replay,
+            },
+            1,
+            2,
+          ),
+        );
+      return {
+        simulation: new Simulation(
+          payload.scenario,
+          payload.snapshot.seed,
+          payload.snapshot,
+        ),
+        replay: payload.replay,
+        scenario: payload.scenario,
+        migrations: payload.migrations,
+      };
+    }
+    if (header.saveFormatVersion !== 2) throw new Error("不支援的存檔版本");
     const manifest = ManifestSchema.parse(JSON.parse(text("manifest.json"))),
       scenario = ScenarioSchema.parse(JSON.parse(text("scenario.json"))),
       state = WorldSchema.parse(JSON.parse(text("snapshot.json")));
+    for (const name of [
+      "scenario.json",
+      "snapshot.json",
+      "commands.ndjson",
+      "events.ndjson",
+      "checkpoints.json",
+    ]) {
+      if (manifest.contentManifest[name] !== hash(text(name)))
+        throw new Error(`存檔校驗失敗：${name}`);
+    }
     if (
+      manifest.simulationVersion !== state.version ||
       manifest.scenarioVersion !== scenario.version ||
       manifest.snapshotHash !== hash(state) ||
       manifest.eventHash !== hash(state.events) ||
@@ -93,7 +172,10 @@ export function load(bytes: Uint8Array): {
       throw new Error("存檔校驗失敗");
     const record = validateReplay(manifest.replay, scenario);
     if (
+      record.simulationVersion !== state.version ||
       record.endTick !== state.tick ||
+      hash(JSON.parse(text("checkpoints.json"))) !==
+        hash(checkpointIndex(record)) ||
       replay(scenario, record).hash() !== hash(state)
     )
       throw new Error("存檔與重播不一致");
@@ -101,6 +183,7 @@ export function load(bytes: Uint8Array): {
       simulation: new Simulation(scenario, state.seed, state),
       replay: record,
       scenario,
+      migrations: manifest.migrations,
     };
   } catch (error) {
     throw new Error(

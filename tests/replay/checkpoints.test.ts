@@ -99,7 +99,7 @@ it("verified timeline is isolated from caller mutation and repeated seeking", ()
   first.state.rng = {};
   expect(verified.seek(600).hash()).toBe(expected.get(600));
 });
-it("fixed v0.1 fixtures retain original hashes and load without checkpoints", () => {
+it("fixed v0.1 fixtures retain original hashes while migration adds checkpoints", () => {
   for (const fixture of legacyManifest.fixtures) {
     const bytes = readFileSync(fixture.name);
     expect(createHash("sha256").update(bytes).digest("hex")).toBe(
@@ -107,7 +107,8 @@ it("fixed v0.1 fixtures retain original hashes and load without checkpoints", ()
     );
     const loaded = load(bytes);
     expect(loaded.simulation.hash()).toBe(fixture.stateHash);
-    expect(loaded.replay.checkpoints).toBeUndefined();
+    expect(loaded.replay.checkpoints?.length).toBeGreaterThan(0);
+    expect(loaded.replay.simulationVersion).toBe("0.1.0");
     expect(replay(loaded.scenario, loaded.replay).hash()).toBe(
       fixture.stateHash,
     );
