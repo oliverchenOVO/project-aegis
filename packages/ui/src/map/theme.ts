@@ -76,10 +76,10 @@ export const MAP_LAYERS = {
 } as const;
 export type HeightClass = "LOW" | "MID" | "HIGH" | "LANDMARK";
 export const HEIGHTS: Record<HeightClass, number> = {
-  LOW: 8,
-  MID: 17,
-  HIGH: 29,
-  LANDMARK: 35,
+  LOW: 12,
+  MID: 24,
+  HIGH: 40,
+  LANDMARK: 52,
 };
 export type Detail = "FAR" | "MEDIUM" | "NEAR";
 export const detailForScale = (scale: number): Detail =>

@@ -1,5 +1,6 @@
 import type { CommandCenterView } from "../../../domain/src/index";
 import { districtProfiles, HEIGHTS, type HeightClass } from "./theme";
+import { PROJECTION, groundFramePoint, buildingDepth } from "./projection";
 export interface Identity {
   id: string;
   version: string;
@@ -40,6 +41,7 @@ export function cityKey(city: CommandCenterView["city"], identity: Identity) {
     identity.id,
     identity.version,
     "massing-v1",
+    PROJECTION.revision,
     city.nodes.map((n) => [n.id, n.x, n.y, n.district]),
     city.roads.map((r) => [r.id, r.from, r.to]),
     city.facilities.map((f) => [f.id, f.type, f.nodeId]),
@@ -109,12 +111,14 @@ export function cityLayout(
           });
         }
     }
-  masses.sort((a, b) => a.y + a.d - (b.y + b.d) || a.id.localeCompare(b.id));
+  masses.sort(
+    (a, b) => buildingDepth(a) - buildingDepth(b) || a.id.localeCompare(b.id),
+  );
   return { key, masses, parcels };
 }
 export function roofOffset(heightClass: HeightClass) {
   const h = HEIGHTS[heightClass];
-  return { x: -h * 0.38, y: -h * 0.68 };
+  return groundFramePoint(0, 0, h);
 }
 export function crossesRiver(
   a: { x: number; y: number },

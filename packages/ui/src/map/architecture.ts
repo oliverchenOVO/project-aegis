@@ -1,4 +1,5 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Graphics, Text, Matrix } from "pixi.js";
+import { PROJECTION, buildingDepth, groundFramePoint } from "./projection";
 import type { CommandCenterView } from "../../../domain/src/index";
 import {
   cityLayout,
@@ -15,6 +16,11 @@ export function layer(parent: Container, order: number) {
   result.zIndex = order;
   parent.addChild(result);
   return result;
+}
+export function screenFacing(object: Container, x: number, y: number) {
+  const { a, b, c, d } = PROJECTION,
+    det = a * d - b * c;
+  object.setFromMatrix(new Matrix(d / det, -b / det, -c / det, a / det, x, y));
 }
 export function mapLabel(
   parent: Container,
@@ -34,7 +40,7 @@ export function mapLabel(
       stroke: { color: t.labelPlate, width: 3 },
     },
   });
-  label.position.set(x, y);
+  screenFacing(label, x, y);
   label.eventMode = "none";
   parent.addChild(label);
   return label;
@@ -108,13 +114,16 @@ export function drawArchitecture(
   detail: Detail,
 ) {
   const root = new Container();
+  const groundRoot = new Container();
   root.sortableChildren = true;
+  groundRoot.sortableChildren = true;
   root.eventMode = "none";
+  groundRoot.eventMode = "none";
   const layout = cityLayout(city, identity),
     nodes = new Map(city.nodes.map((n) => [n.id, n]));
   const graphics = (order: number) => {
     const g = new Graphics();
-    layer(root, order).addChild(g);
+    layer(order <= z.bridges ? groundRoot : root, order).addChild(g);
     return g;
   };
   graphics(z.terrain).rect(0, 0, 800, 590).fill(t.terrain);
@@ -178,8 +187,14 @@ export function drawArchitecture(
         .lineTo(b.x + 4, b.y + 7)
         .stroke({ color: t.shadow, width: width + 9, alpha: 0.5 });
       bridges
-        .moveTo(a.x, a.y + 3)
-        .lineTo(b.x, b.y + 3)
+        .moveTo(
+          groundFramePoint(a.x, a.y, -5).x,
+          groundFramePoint(a.x, a.y, -5).y,
+        )
+        .lineTo(
+          groundFramePoint(b.x, b.y, -5).x,
+          groundFramePoint(b.x, b.y, -5).y,
+        )
         .stroke({ color: t.front, width: width + 6 });
       bridges
         .moveTo(a.x, a.y)
@@ -193,16 +208,29 @@ export function drawArchitecture(
         .moveTo(a.x, a.y)
         .lineTo(b.x, b.y)
         .stroke({ color: t.roadLine, width: 1 });
-      for (const n of [a, b]) bridges.circle(n.x, n.y + 7, 3).fill(t.front);
+      for (const ratio of [0.3, 0.7]) {
+        const x = a.x + (b.x - a.x) * ratio,
+          y = a.y + (b.y - a.y) * ratio,
+          foot = groundFramePoint(x, y, -12);
+        bridges
+          .moveTo(x, y)
+          .lineTo(foot.x, foot.y)
+          .stroke({ color: t.front, width: 4 });
+      }
     }
   }
   const shadows = graphics(z.shadows),
     buildings = graphics(z.buildings);
+  const jobs: { id: string; depth: number; draw: () => void }[] = [];
   for (const b of layout.masses) {
     shadow(shadows, b);
-    mass(buildings, b, detail);
+    jobs.push({
+      id: b.id,
+      depth: buildingDepth(b),
+      draw: () => mass(buildings, b, detail),
+    });
   }
-  const landmarks = graphics(z.landmarks),
+  const landmarks = buildings,
     labels = layer(root, z.labels);
   const landmark = (id: string, nodeId: string, kind: string, name: string) => {
     const n = nodes.get(nodeId);
@@ -225,89 +253,95 @@ export function drawArchitecture(
       district: n.district,
     };
     shadow(shadows, b);
-    mass(landmarks, b, detail);
-    const o = roofOffset(b.heightClass),
-      x = b.x + o.x,
-      y = b.y + o.y;
-    if (kind === "HOSPITAL" || kind === "EMS") {
-      if (kind === "HOSPITAL")
-        mass(
-          landmarks,
-          {
-            ...b,
-            x: b.x - 12,
-            y: b.y + 17,
-            w: 21,
-            d: 18,
-            heightClass: "LOW",
-            roof: t.hospitalWing,
-          },
-          detail,
-        );
-      landmarks
-        .rect(x + b.w / 2 - 2, y + 5, 4, 14)
-        .fill(t.hospital)
-        .rect(x + b.w / 2 - 7, y + 10, 14, 4)
-        .fill(t.hospital);
-      landmarks
-        .rect(n.x + 16, n.y + 48, 17, 5)
-        .fill(t.roadEdge)
-        .stroke({ color: t.hospital, width: 0.7 });
-    } else if (kind === "COMMS") {
-      landmarks
-        .poly([n.x + 38, n.y + 34, n.x + 45, n.y - 11, n.x + 52, n.y + 34])
-        .stroke({ color: t.edge, width: 1.5 });
-      landmarks
-        .moveTo(n.x + 38, n.y + 4)
-        .lineTo(n.x + 52, n.y + 4)
-        .moveTo(n.x + 36, n.y - 6)
-        .lineTo(n.x + 54, n.y - 6)
-        .stroke({ color: t.comms, width: 2 });
-    } else if (kind === "POWER") {
-      for (let k = 0; k < 3; k++)
-        mass(
-          landmarks,
-          {
-            ...b,
-            x: b.x + k * 10,
-            y: b.y + 20,
-            w: 6,
-            d: 10,
-            heightClass: "LOW",
-            roof: t.utility,
-          },
-          detail,
-        );
-      landmarks
-        .moveTo(x + 5, y + 3)
-        .lineTo(x + 11, y + 9)
-        .lineTo(x + 6, y + 15)
-        .stroke({ color: t.utility, width: 2 });
-    } else if (kind === "FIRE") {
-      for (let k = 0; k < 3; k++)
-        landmarks.rect(b.x + k * 8 + 3, b.y + b.d - 5, 5, 5).fill(t.fire);
-    } else if (kind === "POLICE") {
-      landmarks
-        .poly([
-          x + 13,
-          y + 5,
-          x + 20,
-          y + 8,
-          x + 17,
-          y + 17,
-          x + 13,
-          y + 20,
-          x + 9,
-          y + 17,
-          x + 6,
-          y + 8,
-        ])
-        .fill(t.police);
-    } else if (kind === "UTILITY") {
-      landmarks
-        .rect(b.x + 1, b.y + b.d + 3, 32, 9)
-        .stroke({ color: t.utility, width: 1 });
-    }
+    jobs.push({
+      id,
+      depth: buildingDepth({ ...b, d: b.d + 25 }),
+      draw: () => {
+        mass(landmarks, b, detail);
+        const o = roofOffset(b.heightClass),
+          x = b.x + o.x,
+          y = b.y + o.y;
+        if (kind === "HOSPITAL" || kind === "EMS") {
+          if (kind === "HOSPITAL")
+            mass(
+              landmarks,
+              {
+                ...b,
+                x: b.x - 12,
+                y: b.y + 17,
+                w: 21,
+                d: 18,
+                heightClass: "LOW",
+                roof: t.hospitalWing,
+              },
+              detail,
+            );
+          landmarks
+            .rect(x + b.w / 2 - 2, y + 5, 4, 14)
+            .fill(t.hospital)
+            .rect(x + b.w / 2 - 7, y + 10, 14, 4)
+            .fill(t.hospital);
+          landmarks
+            .rect(n.x + 16, n.y + 48, 17, 5)
+            .fill(t.roadEdge)
+            .stroke({ color: t.hospital, width: 0.7 });
+        } else if (kind === "COMMS") {
+          landmarks
+            .poly([n.x + 38, n.y + 34, n.x + 45, n.y - 11, n.x + 52, n.y + 34])
+            .stroke({ color: t.edge, width: 1.5 });
+          landmarks
+            .moveTo(n.x + 38, n.y + 4)
+            .lineTo(n.x + 52, n.y + 4)
+            .moveTo(n.x + 36, n.y - 6)
+            .lineTo(n.x + 54, n.y - 6)
+            .stroke({ color: t.comms, width: 2 });
+        } else if (kind === "POWER") {
+          for (let k = 0; k < 3; k++)
+            mass(
+              landmarks,
+              {
+                ...b,
+                x: b.x + k * 10,
+                y: b.y + 20,
+                w: 6,
+                d: 10,
+                heightClass: "LOW",
+                roof: t.utility,
+              },
+              detail,
+            );
+          landmarks
+            .moveTo(x + 5, y + 3)
+            .lineTo(x + 11, y + 9)
+            .lineTo(x + 6, y + 15)
+            .stroke({ color: t.utility, width: 2 });
+        } else if (kind === "FIRE") {
+          for (let k = 0; k < 3; k++)
+            landmarks.rect(b.x + k * 8 + 3, b.y + b.d - 5, 5, 5).fill(t.fire);
+        } else if (kind === "POLICE") {
+          landmarks
+            .poly([
+              x + 13,
+              y + 5,
+              x + 20,
+              y + 8,
+              x + 17,
+              y + 17,
+              x + 13,
+              y + 20,
+              x + 9,
+              y + 17,
+              x + 6,
+              y + 8,
+            ])
+            .fill(t.police);
+        } else if (kind === "UTILITY") {
+          landmarks
+            .rect(b.x + 1, b.y + b.d + 3, 32, 9)
+            .stroke({ color: t.utility, width: 1 });
+        }
+      },
+    });
     if (detail !== "FAR")
       mapLabel(
         labels,
@@ -328,13 +362,21 @@ export function drawArchitecture(
       continue;
     const n = nodes.get(net.nodeId);
     if (!n) continue;
-    landmarks
-      .moveTo(n.x + 31, n.y + 8)
-      .lineTo(n.x + 36, n.y - 13)
-      .lineTo(n.x + 41, n.y + 8)
-      .moveTo(n.x + 30, n.y - 7)
-      .lineTo(n.x + 42, n.y - 7)
-      .stroke({ color: t.comms, width: 1, alpha: 0.6 });
+    jobs.push({
+      id: net.id,
+      depth: buildingDepth({ x: n.x + 31, y: n.y + 8, w: 10, d: 0 }),
+      draw: () => {
+        const top = groundFramePoint(n.x + 36, n.y + 8, 28),
+          cross = groundFramePoint(n.x + 36, n.y + 8, 21);
+        landmarks
+          .moveTo(n.x + 31, n.y + 8)
+          .lineTo(top.x, top.y)
+          .lineTo(n.x + 41, n.y + 8)
+          .moveTo(cross.x - 6, cross.y)
+          .lineTo(cross.x + 6, cross.y)
+          .stroke({ color: t.comms, width: 1, alpha: 0.6 });
+      },
+    });
   }
   const civic: Mass = {
     id: "visual-city-hall",
@@ -347,22 +389,32 @@ export function drawArchitecture(
     district: "D",
   };
   shadow(shadows, civic);
-  mass(landmarks, civic, detail);
-  const offset = roofOffset("LANDMARK");
-  landmarks
-    .poly([
-      civic.x + offset.x - 3,
-      civic.y + offset.y + 8,
-      civic.x + offset.x + 21,
-      civic.y + offset.y - 2,
-      civic.x + offset.x + 46,
-      civic.y + offset.y + 8,
-    ])
-    .fill(t.edge);
-  for (let k = 0; k < 5; k++)
-    landmarks
-      .rect(civic.x + 4 + k * 8, civic.y + civic.d - 10, 3, 10)
-      .fill(t.edge);
+  jobs.push({
+    id: civic.id,
+    depth: buildingDepth(civic),
+    draw: () => {
+      mass(landmarks, civic, detail);
+      const offset = roofOffset("LANDMARK");
+      landmarks
+        .poly([
+          civic.x + offset.x - 3,
+          civic.y + offset.y + 8,
+          civic.x + offset.x + 21,
+          civic.y + offset.y - 2,
+          civic.x + offset.x + 46,
+          civic.y + offset.y + 8,
+        ])
+        .fill(t.edge);
+      for (let k = 0; k < 5; k++)
+        landmarks
+          .rect(civic.x + 4 + k * 8, civic.y + civic.d - 10, 3, 10)
+          .fill(t.edge);
+    },
+  });
+  for (const job of jobs.sort(
+    (a, b) => a.depth - b.depth || a.id.localeCompare(b.id),
+  ))
+    job.draw();
   mapLabel(labels, "市政中心", 648, 484, t.label, 10);
   for (const d of city.districts)
     mapLabel(labels, d.name, d.x, d.y + 30, t.label, 16);
@@ -373,5 +425,9 @@ export function drawArchitecture(
     resolution: detail === "NEAR" ? 2 : detail === "MEDIUM" ? 1.25 : 1,
     antialias: false,
   });
-  return { root, key: layout.key, detail };
+  groundRoot.cacheAsTexture({
+    resolution: detail === "NEAR" ? 2 : detail === "MEDIUM" ? 1.25 : 1,
+    antialias: false,
+  });
+  return { root, groundRoot, key: layout.key, detail };
 }

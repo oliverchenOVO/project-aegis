@@ -1,11 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { Application, Container, Graphics, Text } from "pixi.js";
+import {
+  Application,
+  Container,
+  Graphics,
+  Text,
+  Matrix,
+  Circle,
+} from "pixi.js";
 import "pixi.js/unsafe-eval";
 import { ZoomIn, ZoomOut, LocateFixed } from "lucide-react";
 import type { CommandCenterView } from "../../domain/src/index";
 import { useUI, type Layer } from "./store";
 import { color, incidentNames } from "./labels";
-import { drawArchitecture, layer, mapLabel } from "./map/architecture";
+import {
+  drawArchitecture,
+  layer,
+  mapLabel,
+  screenFacing,
+} from "./map/architecture";
+import {
+  PROJECTION,
+  cityFit,
+  cityCamera,
+  pointerGround,
+} from "./map/projection";
 import { cityKey, type Identity } from "./map/city";
 import { CityGeometryCache } from "./map/cache";
 import { detailForScale, MAP_LAYERS, mapTheme, type Detail } from "./map/theme";
@@ -16,12 +34,7 @@ import {
   operationalAppearance,
   roadAppearance,
 } from "./map/knowledge";
-import {
-  cameraPosition,
-  invalidator,
-  nearSegment,
-  screenToGround,
-} from "./map/camera";
+import { invalidator, nearSegment } from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
   UNITS: "單位",
@@ -46,6 +59,8 @@ export function SituationMap({ view, identity }: MapProps) {
       architecture?: ReturnType<typeof drawArchitecture>;
       geometryCache: CityGeometryCache<ReturnType<typeof drawArchitecture>>;
       staticHost: Container;
+      staticGroundHost: Container;
+      floodHost: Container;
       routes: {
         a: { x: number; y: number };
         b: { x: number; y: number };
@@ -70,19 +85,24 @@ export function SituationMap({ view, identity }: MapProps) {
   ) => {
     const key = cityKey(e.publicCity, e.identity);
     if (e.architecture?.key === key && e.architecture.detail === detail) return;
-    if (e.architecture) e.architecture.root.visible = false;
+    if (e.architecture) {
+      e.architecture.root.visible = false;
+      e.architecture.groundRoot.visible = false;
+    }
     e.architecture = e.geometryCache.get(key, detail, () => {
       const value = drawArchitecture(e.publicCity, e.identity, detail);
       e.staticHost.addChild(value.root);
+      e.staticGroundHost.addChild(value.groundRoot);
       return value;
     });
     e.architecture.root.visible = true;
+    e.architecture.groundRoot.visible = true;
   };
   const transform = () => {
     const e = engine.current;
     if (!e) return;
     e.scene.scale.set(e.base * e.zoom);
-    const position = cameraPosition(
+    const position = cityCamera(
       e.app.screen.width,
       e.app.screen.height,
       e.base * e.zoom,
@@ -122,7 +142,21 @@ export function SituationMap({ view, identity }: MapProps) {
       const scene = new Container(),
         content = new Container();
       const staticHost = new Container();
-      scene.addChild(staticHost, content);
+      const staticGroundHost = new Container(),
+        floodHost = new Container();
+      const world = new Container();
+      world.setFromMatrix(
+        new Matrix(
+          PROJECTION.a,
+          PROJECTION.b,
+          PROJECTION.c,
+          PROJECTION.d,
+          0,
+          0,
+        ),
+      );
+      world.addChild(staticGroundHost, floodHost, staticHost, content);
+      scene.addChild(world);
       content.sortableChildren = true;
       app.stage.addChild(scene);
       engine.current = {
@@ -130,9 +164,12 @@ export function SituationMap({ view, identity }: MapProps) {
         scene,
         content,
         staticHost,
-        geometryCache: new CityGeometryCache((value) =>
-          value.root.destroy({ children: true }),
-        ),
+        staticGroundHost,
+        floodHost,
+        geometryCache: new CityGeometryCache((value) => {
+          value.root.destroy({ children: true });
+          value.groundRoot.destroy({ children: true });
+        }),
         routes: [],
         publicCity: view.city,
         identity,
@@ -141,7 +178,7 @@ export function SituationMap({ view, identity }: MapProps) {
           cancelAnimationFrame,
           () => app.render(),
         ),
-        base: Math.min(element.clientWidth / 800, element.clientHeight / 590),
+        base: cityFit(element.clientWidth, element.clientHeight),
         zoom: 1,
         pan: { x: 0, y: 0 },
       };
@@ -157,10 +194,7 @@ export function SituationMap({ view, identity }: MapProps) {
     const resize = new ResizeObserver(() => {
       const e = engine.current;
       if (e) {
-        e.base = Math.min(
-          element.clientWidth / 800,
-          element.clientHeight / 590,
-        );
+        e.base = cityFit(element.clientWidth, element.clientHeight);
         e.app.renderer.resize(element.clientWidth, element.clientHeight);
         transform();
       }
@@ -179,7 +213,7 @@ export function SituationMap({ view, identity }: MapProps) {
       } else if (engine.current && element.contains(e.target as Node)) {
         const map = engine.current,
           box = element.getBoundingClientRect();
-        const point = screenToGround(
+        const point = pointerGround(
           { x: e.clientX - box.left, y: e.clientY - box.top },
           { x: map.scene.x, y: map.scene.y },
           map.base * map.zoom,
@@ -226,11 +260,14 @@ export function SituationMap({ view, identity }: MapProps) {
     e.content
       .removeChildren()
       .forEach((child) => child.destroy({ children: true }));
+    e.floodHost
+      .removeChildren()
+      .forEach((child) => child.destroy({ children: true }));
     e.publicCity = view.city;
     e.identity = identity;
     refreshArchitecture(e, detailForScale(e.base * e.zoom));
     e.routes = [];
-    const floodLayer = layer(e.content, MAP_LAYERS.flood);
+    const floodLayer = layer(e.floodHost, MAP_LAYERS.flood);
     const infrastructure = layer(e.content, MAP_LAYERS.infrastructure);
     const ground = layer(e.content, MAP_LAYERS.incidentGround);
     const routeLayer = layer(e.content, MAP_LAYERS.routes);
@@ -370,6 +407,7 @@ export function SituationMap({ view, identity }: MapProps) {
           color: operationalAppearance(b?.claim.value).color,
           width: 1.4,
         });
+        marker.hitArea = new Circle(x, y, 8);
         marker.eventMode = "static";
         marker.cursor = "pointer";
         marker.on("pointertap", () => select(b?.subjectId ?? net.id));
@@ -387,7 +425,7 @@ export function SituationMap({ view, identity }: MapProps) {
           (b) => b.kind === "HOSPITAL" && b.subjectId === h.id,
         );
         const marker = new Container();
-        marker.position.set(n.x, n.y);
+        screenFacing(marker, n.x, n.y);
         const icon = new Graphics()
           .roundRect(-14, -14, 28, 28, 3)
           .fill(mapTheme.hospitalPlate)
@@ -473,7 +511,7 @@ export function SituationMap({ view, identity }: MapProps) {
           b.claim.value === "已解除" ? mapTheme.resolved : mapTheme.incident;
         const marker = new Container();
         const callout = calloutPositions.get(b.subjectId)!;
-        marker.position.set(callout.x, callout.y);
+        screenFacing(marker, callout.x, callout.y);
         const anchor = new Graphics()
           .circle(n.x, n.y, 10)
           .stroke({ color: c, width: 2, alpha: 0.9 })

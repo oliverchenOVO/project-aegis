@@ -5,7 +5,11 @@ import { launch } from "./launch";
 import { viewport, capture } from "./capture";
 import type { CommandCenterView } from "../../packages/domain/src/index";
 import { incidentCallouts } from "../../packages/ui/src/map/knowledge";
-import { cameraPosition } from "../../packages/ui/src/map/camera";
+import {
+  cityFit,
+  cityCamera,
+  projectGround,
+} from "../../packages/ui/src/map/projection";
 declare global {
   interface Window {
     mapInteractionView?: CommandCenterView;
@@ -33,9 +37,13 @@ const point = async (x: number, y: number, zoom = 1) => {
     await new Promise(requestAnimationFrame);
   });
   const box = (await page.locator("canvas").boundingBox())!;
-  const scale = Math.min(box.width / 800, box.height / 590) * zoom,
-    p = cameraPosition(box.width, box.height, scale, { x: 0, y: 0 });
-  return { x: box.x + p.x + x * scale, y: box.y + p.y + y * scale };
+  const scale = cityFit(box.width, box.height) * zoom,
+    p = cityCamera(box.width, box.height, scale, { x: 0, y: 0 }),
+    ground = projectGround(x, y);
+  return {
+    x: box.x + p.x + ground.x * scale,
+    y: box.y + p.y + ground.y * scale,
+  };
 };
 const click = async (x: number, y: number, zoom = 1) => {
   const p = await point(x, y, zoom);
@@ -95,6 +103,48 @@ try {
     await expect(page.locator(".unit-row").first()).toContainText("未知");
     await expect(page.locator(".operation-banner")).toContainText("通訊：未知");
     await capture(app, page, resolve(output, `${scenario}-t0-fog.png`));
+    for (const [width, height] of [
+      [1920, 1080],
+      [1600, 900],
+      [1366, 768],
+    ]) {
+      await viewport(app, page, { width, height });
+      await page.getByRole("button", { name: "重設地圖", exact: true }).click();
+      const hospital = unknown.city.hospitals[0],
+        hospitalNode = unknown.city.nodes.find(
+          (n) => n.id === hospital.nodeId,
+        )!;
+      await click(hospitalNode.x, hospitalNode.y);
+      await expect(page.locator(".intel-panel")).toContainText(
+        `${hospital.id}：狀態未知`,
+      );
+      const comm = unknown.city.communicationNodes![0],
+        commNode = unknown.city.nodes.find((n) => n.id === comm.nodeId)!;
+      await click(commNode.x + 30, commNode.y - 10);
+      await expect(page.locator(".intel-panel")).toContainText(
+        `${comm.id}：狀態未知`,
+      );
+      const zone = unknown.city.floodZones?.[0];
+      if (zone) {
+        const zoneNode = unknown.city.nodes.find(
+          (n) => n.id === zone.nodeIds[0],
+        )!;
+        await click(zoneNode.x - 25, zoneNode.y + 25);
+        await expect(page.locator(".intel-panel")).toContainText(
+          `${zone.id}：狀態未知`,
+        );
+      }
+      checks.push({
+        scenario,
+        width,
+        height,
+        projectedHospital: true,
+        projectedComms: true,
+        projectedFlood: !!zone,
+      });
+    }
+    await viewport(app, page, { width: 1600, height: 900 });
+    await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     await step();
     const view = await page.evaluate(() => window.mapInteractionView!);
     const incident =
