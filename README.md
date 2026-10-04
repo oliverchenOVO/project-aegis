@@ -48,39 +48,9 @@ _固定展示 seed `AEGIS-FLOOD-2026-001` 中，替代派遣方案的模擬死�
 
 ## 系統架構
 
-```mermaid
-flowchart TB
-    subgraph Desktop[桌面與操作介面]
-        UI[React 指揮介面與 Pixi 城市地圖]
-        Port[CommandPort 應用介面]
-        Files[Electron 存讀檔橋接]
-    end
-    subgraph Worker[獨立 Web Worker]
-        Session[Session 工作階段與版本分派]
-        Engine[純 TypeScript 決定性模擬核心]
-        Queue[通訊路由與命令佇列]
-        Knowledge[觀測與回報 → 傳輸 → 已接收知識]
-        Timeline[重播驗證與 checkpoint]
-        Analysis[完成後的 AAR 與反事實分支]
-        Save[存檔校驗與舊版遷移]
-    end
-    UI -->|操作命令| Port
-    Port -->|訊息| Session
-    Session --> Queue
-    Queue -->|送達後執行| Engine
-    Engine -->|現場觀測| Knowledge
-    Knowledge -->|已接收 DTO| UI
-    Session --> Timeline
-    Timeline -->|重播或分支模擬| Engine
-    Engine -->|完成後的結果與事件| Analysis
-    Analysis -->|事後分析資料| UI
-    Session <--> Save
-    Save <-->|經校驗的存檔資料| Files
-    classDef core fill:#17364a,stroke:#5b9cba,color:#fff
-    classDef knowledge fill:#3f2b1e,stroke:#ee985b,color:#fff
-    class Engine,Timeline,Save core
-    class Knowledge knowledge
-```
+![Project AEGIS 系統架構：桌面介面、隔離的模擬 Worker、情報投影與重播存檔邊界](docs/diagrams/aegis-architecture.svg)
+
+_架構圖以向量格式保存在倉庫，可供個人網站或推甄簡報重用；箭頭呈現主要資料流，詳細模組契約見[架構文件](docs/ARCHITECTURE.md)。_
 
 模擬核心不依賴 DOM、Electron、檔案系統或網路。正常遊玩時，前端只取得公開城市資料與已接收 DTO，不匯入完整世界快照。這個邊界同時保護情報迷霧、測試可重現性與未來更換視覺層的彈性。
 
