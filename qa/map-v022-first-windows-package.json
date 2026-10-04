@@ -1,0 +1,18 @@
+{
+  "version": "0.2.2",
+  "sourceCommit": "6424bc38345f8585c0d5150212742c17407b3442",
+  "portable": {
+    "path": "F:\\CodeX開發小東東\\AI 災難指揮中心\\release\\AEGIS-0.2.2-Windows-x64.exe",
+    "bytes": 100377382,
+    "sha256": "21FB51E4CB792BAE648110AC7B953B552448DF7644B41148149355203B30CC6D"
+  },
+  "runtime": {
+    "bytes": 245726720,
+    "sha256": "98190DC764D211EE25E35DBB17604D4B1AB86E6B26234B04EF3446834B786C8D",
+    "fileVersion": "0.2.2",
+    "productVersion": "0.2.2.0",
+    "signature": "NotSigned"
+  },
+  "asarBytes": 23217578,
+  "stableV021Sha256": "7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81"
+}

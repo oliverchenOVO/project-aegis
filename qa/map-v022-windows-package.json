@@ -1,0 +1,18 @@
+{
+  "version": "0.2.2",
+  "sourceCommit": "3ba9cbdca8d23706334b22b6ca2573083eae7fbc",
+  "portable": {
+    "path": "F:\\CodeX\u958b\u767c\u5c0f\u6771\u6771\\AI \u707d\u96e3\u6307\u63ee\u4e2d\u5fc3\\release\\AEGIS-0.2.2-Windows-x64.exe",
+    "bytes": 100375646,
+    "sha256": "08C60A69A5349A04C0F52D5F912D39E0FCBE13567D0A594E1758DD004C0A8F37"
+  },
+  "runtime": {
+    "bytes": 245726720,
+    "sha256": "14E1B2EE7B5A1C65F6F601DAE3E40579567ECB98319A01102A81BA16D81AAE65",
+    "fileVersion": "0.2.2",
+    "productVersion": "0.2.2.0",
+    "signature": "NotSigned"
+  },
+  "asarBytes": 23868880,
+  "stableV021Sha256": "7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81"
+}

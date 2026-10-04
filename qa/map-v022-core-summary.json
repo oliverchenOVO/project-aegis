@@ -1,0 +1,8 @@
+{
+  "baseline": "825bf505ad40f420d61cd81082c5c57fdec0a4af",
+  "tests": 127,
+  "existingUnchanged": 117,
+  "addedProjection": 5,
+  "addedClustering": 5,
+  "workerBundle": "worker-CsSoRM7K.js"
+}

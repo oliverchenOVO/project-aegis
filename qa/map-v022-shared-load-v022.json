@@ -1,0 +1,178 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron",
+  "graphics": "SwiftShader",
+  "launchMs": 1088.4599,
+  "runtime": {
+    "version": "0.2.2",
+    "gpuFeatures": {
+      "2d_canvas": "disabled_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "disabled_off",
+      "webgpu": "disabled_off",
+      "webnn": "disabled_off"
+    }
+  },
+  "rows": [
+    {
+      "scenario": "earthquake",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 1463.8719999999998,
+      "idleDraws": [
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          73.67709999999988,
+          47.045900000000074,
+          54.25720000000001,
+          67.09520000000066,
+          81.13689999999951,
+          82.33290000000034,
+          51.558100000000195,
+          75.98990000000049
+        ],
+        "p50Ms": 73.67709999999988,
+        "p95Ms": 82.33290000000034
+      },
+      "layerToggle": {
+        "samples": [
+          85.30580000000009,
+          135.85879999999997,
+          102.29659999999967,
+          95.9364999999998,
+          64.70160000000033,
+          61.71509999999944,
+          64.88290000000052,
+          110.45450000000073
+        ],
+        "p50Ms": 95.9364999999998,
+        "p95Ms": 135.85879999999997
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 836.6208999999999,
+        "effectiveFramesPerSecond": 28.68682816793126
+      },
+      "stepAndRender": {
+        "samples": [
+          255.47949999999946,
+          263.0139999999992,
+          216.39879999999994,
+          322.22060000000056
+        ],
+        "p50Ms": 263.0139999999992,
+        "p95Ms": 322.22060000000056
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 1251.5796999999993,
+        "effectiveFramesPerSecond": 19.17576643341212
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          144.09999999403954,
+          51.099999994039536,
+          45.79999998211861,
+          51.89999997615814
+        ],
+        "p50Ms": 51.89999997615814,
+        "p95Ms": 144.09999999403954
+      }
+    },
+    {
+      "scenario": "flood",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 645.9387000000006,
+      "idleDraws": [
+        244,
+        244,
+        244,
+        244,
+        244,
+        244
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          98.26629999999932,
+          100.26140000000123,
+          73.20869999999923,
+          48.07060000000092,
+          104.87359999999899,
+          55.49409999999989,
+          71.44800000000032,
+          95.60759999999937
+        ],
+        "p50Ms": 95.60759999999937,
+        "p95Ms": 104.87359999999899
+      },
+      "layerToggle": {
+        "samples": [
+          68.68419999999969,
+          102.5577000000012,
+          122.89040000000023,
+          82.94180000000051,
+          116.35940000000119,
+          33.10100000000057,
+          104.49410000000171,
+          35.58350000000064
+        ],
+        "p50Ms": 102.5577000000012,
+        "p95Ms": 122.89040000000023
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 957.1295999999984,
+        "effectiveFramesPerSecond": 25.074974172776642
+      },
+      "stepAndRender": {
+        "samples": [
+          288.58929999999964,
+          504.1456999999991,
+          446.8603000000003,
+          558.0154000000002
+        ],
+        "p50Ms": 504.1456999999991,
+        "p95Ms": 558.0154000000002
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 1856.9156999999996,
+        "effectiveFramesPerSecond": 12.92465780756768
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          140.30000001192093,
+          235.2999999821186,
+          129.19999998807907,
+          139.69999998807907
+        ],
+        "p50Ms": 140.30000001192093,
+        "p95Ms": 235.2999999821186
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

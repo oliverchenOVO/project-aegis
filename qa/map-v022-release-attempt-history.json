@@ -1,0 +1,93 @@
+[
+  {
+    "name": "v022-release-packaged-gpu",
+    "started": "2026-10-04T14:53:18.5432656+08:00",
+    "ended": "2026-10-04T14:53:41.1276145+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-packaged-software",
+    "started": "2026-10-04T14:53:41.1481738+08:00",
+    "ended": "2026-10-04T14:54:11.8432802+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-portable-gpu",
+    "started": "2026-10-04T14:54:11.853348+08:00",
+    "ended": "2026-10-04T14:55:25.2258906+08:00",
+    "exitCode": 1,
+    "passed": false
+  },
+  {
+    "name": "v022-release-hits-packaged-gpu",
+    "started": "2026-10-04T15:02:15.9640608+08:00",
+    "ended": "2026-10-04T15:02:33.8368580+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-hits-packaged-software",
+    "started": "2026-10-04T15:02:33.8748066+08:00",
+    "ended": "2026-10-04T15:03:11.1218653+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-hits-portable-gpu",
+    "started": "2026-10-04T15:03:11.1332904+08:00",
+    "ended": "2026-10-04T15:04:01.5174447+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-hits-portable-software",
+    "started": "2026-10-04T15:04:01.5236136+08:00",
+    "ended": "2026-10-04T15:05:09.2477286+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-replay-packaged",
+    "started": "2026-10-04T15:05:09.2544104+08:00",
+    "ended": "2026-10-04T15:05:49.4408605+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-migrations-packaged",
+    "started": "2026-10-04T15:05:49.5520819+08:00",
+    "ended": "2026-10-04T15:06:06.2597122+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-overload-packaged",
+    "started": "2026-10-04T15:06:06.2845449+08:00",
+    "ended": "2026-10-04T15:06:26.6745425+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-replay-portable",
+    "started": "2026-10-04T15:06:26.6787026+08:00",
+    "ended": "2026-10-04T15:08:13.0550444+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-migrations-portable",
+    "started": "2026-10-04T15:08:13.0610801+08:00",
+    "ended": "2026-10-04T15:11:26.0575995+08:00",
+    "exitCode": 0,
+    "passed": true
+  },
+  {
+    "name": "v022-release-overload-portable",
+    "started": "2026-10-04T15:11:26.0629473+08:00",
+    "ended": "2026-10-04T15:12:35.6352051+08:00",
+    "exitCode": 0,
+    "passed": true
+  }
+]

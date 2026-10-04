@@ -1,0 +1,108 @@
+{
+  "baseline": "825bf505ad40f420d61cd81082c5c57fdec0a4af",
+  "frozenSourcePaths": [
+    "packages/domain",
+    "packages/simulation",
+    "packages/application",
+    "packages/scenarios",
+    "packages/replay",
+    "packages/persistence",
+    "packages/after-action",
+    "packages/shared",
+    "packages/intelligence",
+    "packages/communications",
+    "tests/replay",
+    "tests/simulation",
+    "tests/fixtures",
+    "tests/integration/map-25d.test.ts",
+    "tests/integration/boundaries.test.ts",
+    "tests/integration/consequences.test.ts",
+    "tests/integration/migrations.test.ts",
+    "tests/integration/persistence.test.ts",
+    "tests/integration/session.test.ts"
+  ],
+  "changes": [],
+  "existingTestFiles": [
+    {
+      "path": "tests/integration/boundaries.test.ts",
+      "baselineBlob": "44bfe251ebd53fc6e07c5d11eb97c050ad7b7e2d",
+      "candidateBlob": "44bfe251ebd53fc6e07c5d11eb97c050ad7b7e2d"
+    },
+    {
+      "path": "tests/integration/consequences.test.ts",
+      "baselineBlob": "1981e7281294dfb21a28105706023e46c89c6450",
+      "candidateBlob": "1981e7281294dfb21a28105706023e46c89c6450"
+    },
+    {
+      "path": "tests/integration/map-25d.test.ts",
+      "baselineBlob": "2af846e2a3d6af9fda95b680fdc5023b0dad8236",
+      "candidateBlob": "2af846e2a3d6af9fda95b680fdc5023b0dad8236"
+    },
+    {
+      "path": "tests/integration/migrations.test.ts",
+      "baselineBlob": "5ab9edb3458c51ab7d3fe0f28571923f60bd7d4d",
+      "candidateBlob": "5ab9edb3458c51ab7d3fe0f28571923f60bd7d4d"
+    },
+    {
+      "path": "tests/integration/persistence.test.ts",
+      "baselineBlob": "a915b66deff9ef0994d8916d34e3b3f38db20381",
+      "candidateBlob": "a915b66deff9ef0994d8916d34e3b3f38db20381"
+    },
+    {
+      "path": "tests/integration/session.test.ts",
+      "baselineBlob": "77dc5a0141507e8c5ea53462108b44e9af43a350",
+      "candidateBlob": "77dc5a0141507e8c5ea53462108b44e9af43a350"
+    },
+    {
+      "path": "tests/replay/branches.test.ts",
+      "baselineBlob": "d1cd1c395cabc06741434433835c886293d68720",
+      "candidateBlob": "d1cd1c395cabc06741434433835c886293d68720"
+    },
+    {
+      "path": "tests/replay/checkpoints.test.ts",
+      "baselineBlob": "1259fa9e8f1b5fd65e40e34491edb5c9f6e82a0d",
+      "candidateBlob": "1259fa9e8f1b5fd65e40e34491edb5c9f6e82a0d"
+    },
+    {
+      "path": "tests/replay/phase2-golden.test.ts",
+      "baselineBlob": "f16d99723d8bdc9e39e5292e2d3f0ce52839fbe4",
+      "candidateBlob": "f16d99723d8bdc9e39e5292e2d3f0ce52839fbe4"
+    },
+    {
+      "path": "tests/replay/replay.test.ts",
+      "baselineBlob": "6cfaa973e8081b605528fb442f31137875330ebd",
+      "candidateBlob": "6cfaa973e8081b605528fb442f31137875330ebd"
+    },
+    {
+      "path": "tests/simulation/after-action.test.ts",
+      "baselineBlob": "3e8539ed7fcbf49beadab1e5898699d6994d8c70",
+      "candidateBlob": "3e8539ed7fcbf49beadab1e5898699d6994d8c70"
+    },
+    {
+      "path": "tests/simulation/civilians.test.ts",
+      "baselineBlob": "a3f124d7f1bf3802430b5ee7425a23468a0ae5f6",
+      "candidateBlob": "a3f124d7f1bf3802430b5ee7425a23468a0ae5f6"
+    },
+    {
+      "path": "tests/simulation/core.test.ts",
+      "baselineBlob": "16c66afe1394d65b2a162f8864a2253fe202f387",
+      "candidateBlob": "16c66afe1394d65b2a162f8864a2253fe202f387"
+    },
+    {
+      "path": "tests/simulation/flood.test.ts",
+      "baselineBlob": "5bba1b754d50d8072b56ec640fa2e08cc78bd397",
+      "candidateBlob": "5bba1b754d50d8072b56ec640fa2e08cc78bd397"
+    },
+    {
+      "path": "tests/simulation/hospital.test.ts",
+      "baselineBlob": "d8333963af4f14aaf5f586e288b0e8dd5130c233",
+      "candidateBlob": "d8333963af4f14aaf5f586e288b0e8dd5130c233"
+    },
+    {
+      "path": "tests/simulation/network.test.ts",
+      "baselineBlob": "aa429562c5266c520dee4644a45ad80c9851c114",
+      "candidateBlob": "aa429562c5266c520dee4644a45ad80c9851c114"
+    }
+  ],
+  "passed": true
+}

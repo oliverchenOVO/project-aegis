@@ -1,0 +1,178 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron",
+  "graphics": "ordinary desktop flags",
+  "launchMs": 6957.7945,
+  "runtime": {
+    "version": "0.2.2",
+    "gpuFeatures": {
+      "2d_canvas": "disabled_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "disabled_off",
+      "webgpu": "disabled_off",
+      "webnn": "disabled_off"
+    }
+  },
+  "rows": [
+    {
+      "scenario": "earthquake",
+      "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Ti Laptop GPU (0x000024A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "firstMapRenderMs": 593.6013999999996,
+      "idleDraws": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          71.5622999999996,
+          61.46889999999985,
+          59.43950000000041,
+          60.64220000000023,
+          53.95589999999902,
+          56.52260000000024,
+          61.71359999999913,
+          57.99359999999979
+        ],
+        "p50Ms": 60.64220000000023,
+        "p95Ms": 71.5622999999996
+      },
+      "layerToggle": {
+        "samples": [
+          79.53740000000107,
+          59.247699999999895,
+          66.92660000000069,
+          73.01949999999852,
+          75.66649999999936,
+          71.35920000000078,
+          77.08979999999974,
+          60.27629999999954
+        ],
+        "p50Ms": 73.01949999999852,
+        "p95Ms": 79.53740000000107
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 588.0087999999996,
+        "effectiveFramesPerSecond": 40.81571568316667
+      },
+      "stepAndRender": {
+        "samples": [
+          467.3205999999991,
+          629.9206000000013,
+          680.9627,
+          235.80220000000008
+        ],
+        "p50Ms": 629.9206000000013,
+        "p95Ms": 680.9627
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 363.3119000000006,
+        "effectiveFramesPerSecond": 66.05894274313601
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          228,
+          279.10000002384186,
+          230.59999999403954,
+          52
+        ],
+        "p50Ms": 230.59999999403954,
+        "p95Ms": 279.10000002384186
+      }
+    },
+    {
+      "scenario": "flood",
+      "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Ti Laptop GPU (0x000024A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "firstMapRenderMs": 128.72710000000006,
+      "idleDraws": [
+        317,
+        317,
+        317,
+        317,
+        317,
+        317
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          65.49309999999969,
+          37.680200000000696,
+          47.52210000000014,
+          62.79939999999988,
+          41.852100000000064,
+          41.13060000000041,
+          41.8663000000015,
+          43.897399999999834
+        ],
+        "p50Ms": 43.897399999999834,
+        "p95Ms": 65.49309999999969
+      },
+      "layerToggle": {
+        "samples": [
+          53.13639999999941,
+          48.0023999999994,
+          42.54660000000149,
+          42.43080000000009,
+          35.9437999999991,
+          49.14190000000053,
+          42.09569999999985,
+          43.061799999999494
+        ],
+        "p50Ms": 43.061799999999494,
+        "p95Ms": 53.13639999999941
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 357.8155000000006,
+        "effectiveFramesPerSecond": 67.0736734434365
+      },
+      "stepAndRender": {
+        "samples": [
+          191.43509999999878,
+          475.3634999999995,
+          487.9031000000032,
+          1012.0118999999977
+        ],
+        "p50Ms": 487.9031000000032,
+        "p95Ms": 1012.0118999999977
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 630.5776000000005,
+        "effectiveFramesPerSecond": 38.060343405791734
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          64.7000000178814,
+          178.59999999403954,
+          104.2000000178814,
+          382.19999998807907
+        ],
+        "p50Ms": 178.59999999403954,
+        "p95Ms": 382.19999998807907
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

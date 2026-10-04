@@ -1,0 +1,204 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "portable": false,
+  "graphics": "ordinary desktop flags",
+  "checks": [
+    {
+      "scenario": "earthquake",
+      "width": 1920,
+      "height": 1080,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1600,
+      "height": 900,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1366,
+      "height": 768,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1920,
+      "height": 1080,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1600,
+      "height": 900,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1366,
+      "height": 768,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1920,
+      "height": 1080,
+      "tick": 700,
+      "received": 8,
+      "plates": 7,
+      "clusterMembers": 2,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "earthquake",
+      "clusterDispatchTarget": "INC-2",
+      "unit": "ENG-01"
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1600,
+      "height": 900,
+      "tick": 700,
+      "received": 8,
+      "plates": 5,
+      "clusterMembers": 3,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1366,
+      "height": 768,
+      "tick": 700,
+      "received": 8,
+      "plates": 3,
+      "clusterMembers": 4,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "earthquake",
+      "unitClick": "ENG-01",
+      "commandTarget": "INC-2",
+      "routeHover": true,
+      "pan": true,
+      "layers": 9
+    },
+    {
+      "scenario": "flood",
+      "width": 1920,
+      "height": 1080,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1600,
+      "height": 900,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1366,
+      "height": 768,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1920,
+      "height": 1080,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1600,
+      "height": 900,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1366,
+      "height": 768,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1920,
+      "height": 1080,
+      "tick": 680,
+      "received": 75,
+      "plates": 32,
+      "clusterMembers": 4,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "flood",
+      "clusterDispatchTarget": "INC-15",
+      "unit": "UTL-01"
+    },
+    {
+      "scenario": "flood",
+      "width": 1600,
+      "height": 900,
+      "tick": 680,
+      "received": 75,
+      "plates": 15,
+      "clusterMembers": 13,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1366,
+      "height": 768,
+      "tick": 680,
+      "received": 75,
+      "plates": 6,
+      "clusterMembers": 28,
+      "clusterSelection": true,
+      "memberInspector": true,
+      "vehicles": true
+    },
+    {
+      "scenario": "flood",
+      "unitClick": "ENG-01",
+      "commandTarget": "INC-1",
+      "routeHover": true,
+      "pan": true,
+      "layers": 9
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

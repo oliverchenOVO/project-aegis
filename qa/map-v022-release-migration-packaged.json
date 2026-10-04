@@ -1,0 +1,39 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "portable": false,
+  "realProcessRestarts": 2,
+  "rows": [
+    {
+      "fixture": "tests/fixtures/legacy/legacy-save-basic-v1.aegis",
+      "originalHash": "1ff69df065556950",
+      "continuedHash": "274b9673981fea23",
+      "restartHash": "274b9673981fea23",
+      "completedHash": "c3bc65045a879d42",
+      "migrations": [
+        {
+          "fromVersion": 1,
+          "toVersion": 2,
+          "originalSnapshotHash": "1ff69df065556950"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "fixture": "tests/fixtures/legacy/legacy-save-midincident-v1.aegis",
+      "originalHash": "df7be778dec70fd4",
+      "continuedHash": "0473de9276368be2",
+      "restartHash": "0473de9276368be2",
+      "completedHash": "36c486a38daa37c1",
+      "migrations": [
+        {
+          "fromVersion": 1,
+          "toVersion": 2,
+          "originalSnapshotHash": "df7be778dec70fd4"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "passed": true
+}

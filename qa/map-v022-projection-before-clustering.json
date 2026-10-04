@@ -1,0 +1,128 @@
+{
+  "executable": "--dev",
+  "portable": false,
+  "graphics": "ordinary desktop flags",
+  "checks": [
+    {
+      "scenario": "earthquake",
+      "width": 1920,
+      "height": 1080,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1600,
+      "height": 900,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1366,
+      "height": 768,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": false
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1920,
+      "height": 1080,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1600,
+      "height": 900,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "width": 1366,
+      "height": 768,
+      "incident": "INC-2",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "earthquake",
+      "unitClick": "ENG-01",
+      "commandTarget": "INC-2",
+      "routeHover": true,
+      "pan": true,
+      "layers": 9
+    },
+    {
+      "scenario": "flood",
+      "width": 1920,
+      "height": 1080,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1600,
+      "height": 900,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1366,
+      "height": 768,
+      "projectedHospital": true,
+      "projectedComms": true,
+      "projectedFlood": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1920,
+      "height": 1080,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1600,
+      "height": 900,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "width": 1366,
+      "height": 768,
+      "incident": "INC-1",
+      "click": true,
+      "hover": true
+    },
+    {
+      "scenario": "flood",
+      "heavyUnitClick": "ENG-03",
+      "tick": 680,
+      "incidentCount": 75
+    },
+    {
+      "scenario": "flood",
+      "unitClick": "ENG-01",
+      "commandTarget": "INC-1",
+      "routeHover": true,
+      "pan": true,
+      "layers": 9
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": true
+}

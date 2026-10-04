@@ -1,0 +1,12 @@
+{
+  "buildSourceCommit": "3ba9cbdca8d23706334b22b6ca2573083eae7fbc",
+  "checkedCommit": "928614cc0ae3b452191704033c9abe816eaaab25",
+  "compiledPaths": [
+    "packages/ui",
+    "apps/desktop",
+    "package.json"
+  ],
+  "changes": [],
+  "workerBundle": "worker-CsSoRM7K.js",
+  "passed": true
+}
