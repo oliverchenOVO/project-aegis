@@ -12,6 +12,8 @@ declare global {
       draws: number;
       view?: CommandCenterView;
       receivedAt?: number;
+      panCosts?: number[];
+      pointerStarted?: number;
     };
   }
 }
@@ -111,6 +113,25 @@ try {
     });
     await expect(page.locator(".unit-row").first()).toContainText("未知");
     await expect(page.locator(".operation-banner")).toContainText("電力：未知");
+    await page.evaluate(() => {
+      if (!window.aegisMapQa.panCosts) {
+        window.addEventListener(
+          "pointermove",
+          (e) => {
+            if (e.buttons === 1)
+              window.aegisMapQa.pointerStarted = performance.now();
+          },
+          true,
+        );
+        window.addEventListener("pointermove", (e) => {
+          if (e.buttons === 1 && window.aegisMapQa.pointerStarted !== undefined)
+            window.aegisMapQa.panCosts!.push(
+              performance.now() - window.aegisMapQa.pointerStarted,
+            );
+        });
+      }
+      window.aegisMapQa.panCosts = [];
+    });
     await capture(app, page, resolve(output, `${scenario}-early.png`));
     const webglRenderer = await page.evaluate(() => {
       const canvas = document.querySelector("canvas")!;
@@ -197,6 +218,13 @@ try {
         await capture(app, page, resolve(output, `${scenario}-mid.png`));
     }
     await capture(app, page, resolve(output, `${scenario}-late.png`));
+    const denseFocusBefore = await page.evaluate(() => {
+      window.aegisMapQa.panCosts = [];
+      return {
+        focused: document.hasFocus(),
+        visibility: document.visibilityState,
+      };
+    });
     const densePanStarted = performance.now();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
@@ -209,6 +237,11 @@ try {
     }
     await page.mouse.up();
     const densePanMs = performance.now() - densePanStarted;
+    const denseDiagnostics = await page.evaluate(() => ({
+      focused: document.hasFocus(),
+      visibility: document.visibilityState,
+      costs: window.aegisMapQa.panCosts!,
+    }));
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     const denseIdle = await page.evaluate(async () => {
       const counts: number[] = [];
@@ -240,6 +273,12 @@ try {
         ms: densePanMs,
         effectiveFramesPerSecond: (frames / densePanMs) * 1000,
       },
+      denseFocusBefore,
+      denseFocusAfter: {
+        focused: denseDiagnostics.focused,
+        visibility: denseDiagnostics.visibility,
+      },
+      densePanHandler: stats(denseDiagnostics.costs),
       receivedUpdateToFrame: stats(receivedUpdateToFrameMs),
     });
     console.log(JSON.stringify(rows.at(-1)));
