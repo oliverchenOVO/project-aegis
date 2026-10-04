@@ -197,6 +197,19 @@ try {
         await capture(app, page, resolve(output, `${scenario}-mid.png`));
     }
     await capture(app, page, resolve(output, `${scenario}-late.png`));
+    const densePanStarted = performance.now();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    for (let n = 1; n <= frames; n++) {
+      await page.mouse.move(
+        box.x + box.width / 2 + n * 2,
+        box.y + box.height / 2 + n,
+      );
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+    }
+    await page.mouse.up();
+    const densePanMs = performance.now() - densePanStarted;
+    await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     rows.push({
       scenario,
       webglRenderer,
@@ -211,6 +224,12 @@ try {
         effectiveFramesPerSecond: (frames / panMs) * 1000,
       },
       stepAndRender: stats(running),
+      densePan: {
+        tick: 1200,
+        frames,
+        ms: densePanMs,
+        effectiveFramesPerSecond: (frames / densePanMs) * 1000,
+      },
       receivedUpdateToFrame: stats(receivedUpdateToFrameMs),
     });
     console.log(JSON.stringify(rows.at(-1)));
