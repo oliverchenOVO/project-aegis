@@ -140,14 +140,24 @@ export function drawArchitecture(
   const water = graphics(z.water);
   water
     .poly(RIVER)
-    .fill(t.water)
+    .fill(t.waterDeep)
     .stroke({ color: t.bank, width: 5, alpha: 0.75 });
+  const recessed = [
+    352, 0, 376, 0, 412, 170, 391, 320, 452, 590, 430, 590, 376, 320, 393, 170,
+  ];
   water
-    .poly([
-      352, 0, 376, 0, 412, 170, 391, 320, 452, 590, 430, 590, 376, 320, 393,
-      170,
-    ])
-    .fill({ color: t.waterDeep, alpha: 0.7 });
+    .poly(
+      recessed.flatMap((_, i) =>
+        i % 2
+          ? []
+          : (() => {
+              const p = groundFramePoint(recessed[i], recessed[i + 1], -8);
+              return [p.x, p.y];
+            })(),
+      ),
+    )
+    .fill({ color: t.water, alpha: 0.85 })
+    .stroke({ color: t.waterDeep, width: 2 });
   for (let y = 35; y < 590; y += 45) {
     const x =
       y < 170
@@ -286,14 +296,17 @@ export function drawArchitecture(
             .fill(t.roadEdge)
             .stroke({ color: t.hospital, width: 0.7 });
         } else if (kind === "COMMS") {
+          const top = groundFramePoint(n.x + 45, n.y + 34, 40),
+            upper = groundFramePoint(n.x + 45, n.y + 34, 34),
+            lower = groundFramePoint(n.x + 45, n.y + 34, 25);
           landmarks
-            .poly([n.x + 38, n.y + 34, n.x + 45, n.y - 11, n.x + 52, n.y + 34])
+            .poly([n.x + 38, n.y + 34, top.x, top.y, n.x + 52, n.y + 34])
             .stroke({ color: t.edge, width: 1.5 });
           landmarks
-            .moveTo(n.x + 38, n.y + 4)
-            .lineTo(n.x + 52, n.y + 4)
-            .moveTo(n.x + 36, n.y - 6)
-            .lineTo(n.x + 54, n.y - 6)
+            .moveTo(lower.x - 7, lower.y)
+            .lineTo(lower.x + 7, lower.y)
+            .moveTo(upper.x - 9, upper.y)
+            .lineTo(upper.x + 9, upper.y)
             .stroke({ color: t.comms, width: 2 });
         } else if (kind === "POWER") {
           for (let k = 0; k < 3; k++)
