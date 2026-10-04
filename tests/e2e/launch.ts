@@ -90,8 +90,30 @@ export async function launch(
   });
   let browserPid: number | undefined;
   let socket: WebSocket | undefined;
+  let inspectorVerified = false;
   let browser: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   const close = async () => {
+    if (inspectorVerified && socket?.readyState === WebSocket.OPEN) {
+      // Graceful Electron quit lets the portable wrapper finish removing its own
+      // extraction. Force-killing the wrapper after 5s can leave ~900MB behind.
+      socket.send(
+        JSON.stringify({
+          id: 0,
+          method: "Runtime.evaluate",
+          params: { expression: "require('electron').app.quit()" },
+        }),
+      );
+      if (processHandle.exitCode === null)
+        await new Promise<void>((done) => {
+          const timer = setTimeout(finish, 20000);
+          function finish() {
+            clearTimeout(timer);
+            processHandle.removeListener("exit", finish);
+            done();
+          }
+          processHandle.once("exit", finish);
+        });
+    }
     socket?.close();
     await browser?.close().catch(() => {});
     // Kill only the browser PID obtained from this wrapper's reserved CDP port.
@@ -192,6 +214,7 @@ export async function launch(
     };
     if ((await evaluateExpression("process.pid")) !== browserPid)
       throw new Error("Inspector and renderer belong to different processes");
+    inspectorVerified = true;
     // Mirrors Playwright's Electron main-process evaluation, including require access.
     const evaluate = ((fn: unknown, arg: unknown) =>
       evaluateExpression(

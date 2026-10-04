@@ -139,7 +139,10 @@ export function Intelligence({
           </dl>
         </div>
       )}
-      <div className="incident-inspector">
+      <div
+        className="incident-inspector"
+        key={selected ?? cluster?.join("|") ?? "unselected"}
+      >
         {cluster ? (
           <div className="inspector-body" data-testid="cluster-inspector">
             <div className="panel-title">

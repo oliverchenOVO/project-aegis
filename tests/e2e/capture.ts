@@ -17,6 +17,12 @@ export async function viewport(
   await page.bringToFront();
 }
 export async function capture(app: App, page: Page, path: string) {
+  // DOM assertions can complete before the compositor presents the selection frame.
+  // Wait across a paint boundary before asking Electron for native pixels.
+  await page.evaluate(async () => {
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+  });
   const size = await page.evaluate(() => ({
     width: innerWidth,
     height: innerHeight,
