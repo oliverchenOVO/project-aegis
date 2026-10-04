@@ -358,6 +358,11 @@ try {
         await page.mouse.click(box.x + cluster.x + 20, box.y + cluster.y + 12);
         await expect(page.getByTestId("cluster-inspector")).toBeVisible();
         await expect(
+          page
+            .getByTestId("cluster-inspector")
+            .getByRole("heading", { name: "事件聚合", exact: true }),
+        ).toBeInViewport();
+        await expect(
           page.locator('[data-testid^="cluster-member-"]'),
         ).toHaveCount(cluster.members.length);
         await capture(
