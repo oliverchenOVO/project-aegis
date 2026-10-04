@@ -47,6 +47,11 @@ const point = async (x: number, y: number, zoom = 1) => {
   };
 };
 const groupsFor = async (view: CommandCenterView, selected?: string) => {
+  // Store/DOM selection precedes the change-driven Pixi frame on software renderers.
+  await page.evaluate(async () => {
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+  });
   const box = (await page.locator("canvas").boundingBox())!;
   const scale = cityFit(box.width, box.height),
     camera = cityCamera(box.width, box.height, scale, { x: 0, y: 0 });
@@ -86,7 +91,9 @@ const selectIncident = async (view: CommandCenterView, id: string) => {
     await expect(page.getByTestId("cluster-inspector")).toBeVisible();
     await page.getByTestId(`cluster-member-${id}`).click();
   }
-  await expect(page.locator(".incident-inspector")).toContainText(id);
+  await expect(
+    page.locator(".incident-inspector .panel-title .orange"),
+  ).toHaveText(id);
 };
 const click = async (x: number, y: number, zoom = 1) => {
   const p = await point(x, y, zoom);
@@ -211,6 +218,7 @@ try {
       const plate = groups.find(
         (g) => g.members[0].subjectId === incident!.subjectId,
       )!;
+      await page.mouse.move(box.x + 2, box.y + 2);
       await page.mouse.move(box.x + plate.x + 20, box.y + plate.y + 12);
       await expect(page.locator(".map-footer")).toContainText(
         incident!.subjectId,
@@ -320,7 +328,7 @@ try {
     const after = await page.locator("canvas").screenshot();
     expect(after.equals(before)).toBe(false);
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
-    if (scenario === "flood") {
+    {
       await step("推進 5分");
       await step("推進 5分");
       const heavy = await page.evaluate(() => window.mapInteractionView!);
@@ -355,18 +363,20 @@ try {
         await capture(
           app,
           page,
-          resolve(output, `flood-cluster-selected-${width}.png`),
+          resolve(output, `${scenario}-cluster-selected-${width}.png`),
         );
         const member = cluster.members[0].subjectId;
         await page.getByTestId(`cluster-member-${member}`).click();
-        await expect(page.locator(".incident-inspector")).toContainText(member);
+        await expect(
+          page.locator(".incident-inspector .panel-title .orange"),
+        ).toHaveText(member);
         await expect(
           page.getByRole("button", { name: "發布命令", exact: true }),
         ).toBeVisible();
         await capture(
           app,
           page,
-          resolve(output, `flood-clusters-${width}.png`),
+          resolve(output, `${scenario}-clusters-${width}.png`),
         );
         if (width === 1600) {
           const compatible = page.getByRole("checkbox").first();

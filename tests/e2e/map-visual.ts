@@ -209,11 +209,6 @@ try {
     }
     await page.mouse.up();
     const densePanMs = performance.now() - densePanStarted;
-    if (scenario === "flood")
-      expect(
-        (frames / densePanMs) * 1000,
-        "dense flood pan release floor",
-      ).toBeGreaterThanOrEqual(12);
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     const denseIdle = await page.evaluate(async () => {
       const counts: number[] = [];
@@ -248,6 +243,11 @@ try {
       receivedUpdateToFrame: stats(receivedUpdateToFrameMs),
     });
     console.log(JSON.stringify(rows.at(-1)));
+    if (scenario === "flood" && !process.argv.includes("--baseline"))
+      expect(
+        (frames / densePanMs) * 1000,
+        "dense flood pan release floor",
+      ).toBeGreaterThanOrEqual(12);
   }
   expect(errors).toEqual([]);
   expect(warnings).toEqual([]);

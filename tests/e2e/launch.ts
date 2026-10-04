@@ -17,7 +17,9 @@ async function port() {
   return address.port;
 }
 async function endpoint(port: number, path: string) {
-  for (let n = 0; n < 60; n++) {
+  // Portable extraction and software-driver startup can exceed 30s on busy Windows.
+  // This readiness deadline is outside all recorded map/interaction intervals.
+  for (let n = 0; n < 120; n++) {
     try {
       const response = await fetch(`http://127.0.0.1:${port}${path}`, {
         signal: AbortSignal.timeout(1000),
