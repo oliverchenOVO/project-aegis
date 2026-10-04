@@ -530,7 +530,7 @@
       marker-end="url(#arrow)"
     />
     <path
-      d="M930 514 V612 H212 V256"
+      d="M930 514 V612 H376 V214 H364"
       fill="none"
       stroke="#77b9d7"
       stroke-width="3"
