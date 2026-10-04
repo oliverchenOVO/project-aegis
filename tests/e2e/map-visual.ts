@@ -209,13 +209,28 @@ try {
     }
     await page.mouse.up();
     const densePanMs = performance.now() - densePanStarted;
+    if (scenario === "flood")
+      expect(
+        (frames / densePanMs) * 1000,
+        "dense flood pan release floor",
+      ).toBeGreaterThanOrEqual(12);
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
+    const denseIdle = await page.evaluate(async () => {
+      const counts: number[] = [];
+      for (let i = 0; i < 8; i++) {
+        await new Promise(requestAnimationFrame);
+        counts.push(window.aegisMapQa.draws);
+      }
+      return counts.slice(2);
+    });
+    expect(new Set(denseIdle).size).toBe(1);
     rows.push({
       scenario,
       webglRenderer,
       firstMapRenderMs,
       idleDraws: idle,
       idleAdditionalDraws: idle.at(-1)! - idle[0],
+      denseIdleAdditionalDraws: denseIdle.at(-1)! - denseIdle[0],
       zoom: stats(zoom),
       layerToggle: stats(toggles),
       pan: {

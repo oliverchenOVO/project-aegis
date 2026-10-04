@@ -356,7 +356,7 @@ export function App() {
           </div>
           <div className="menu-footer">
             Information Fog · Command · Consequence · Replay
-            <span>LOCAL SIMULATION / v0.2.1</span>
+            <span>LOCAL SIMULATION / v0.2.2</span>
           </div>
         </main>
       ) : (
