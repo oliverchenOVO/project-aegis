@@ -11,6 +11,8 @@ export type Layer =
   | "INTELLIGENCE";
 interface UIState {
   selected?: string;
+  cluster?: string[];
+  selectCluster: (ids: string[]) => void;
   speed: number;
   paused: boolean;
   layers: Layer[];
@@ -34,7 +36,8 @@ export const useUI = create<UIState>((set) => ({
     "CIVILIANS",
     "INTELLIGENCE",
   ],
-  select: (selected) => set({ selected }),
+  select: (selected) => set({ selected, cluster: undefined }),
+  selectCluster: (cluster) => set({ cluster, selected: undefined }),
   setSpeed: (speed) => set({ speed }),
   setPaused: (paused) => set({ paused }),
   toggleLayer: (layer) =>

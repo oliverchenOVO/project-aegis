@@ -8,6 +8,7 @@ import type {
 import { clock } from "../../shared/src/index";
 import { useUI } from "./store";
 import { incidentNames, statusNames, duration } from "./labels";
+import { incidentPriority } from "./map/clusters";
 export function Intelligence({
   view,
   command,
@@ -19,6 +20,12 @@ export function Intelligence({
 }) {
   const selected = useUI((s) => s.selected),
     select = useUI((s) => s.select);
+  const cluster = useUI((s) => s.cluster);
+  const members = cluster
+    ? view.beliefs
+        .filter((b) => b.kind === "INCIDENT" && cluster.includes(b.subjectId))
+        .sort(incidentPriority())
+    : [];
   const [filter, setFilter] = useState("ALL"),
     [reportId, setReportId] = useState<string>(),
     [selectedUnits, setSelectedUnits] = useState<string[]>([]),
@@ -133,7 +140,37 @@ export function Intelligence({
         </div>
       )}
       <div className="incident-inspector">
-        {belief ? (
+        {cluster ? (
+          <div className="inspector-body" data-testid="cluster-inspector">
+            <div className="panel-title">
+              <h2>事件聚合</h2>
+              <b className="orange">{members.length} 件已接收</b>
+            </div>
+            <p className="muted">選取成員以檢視情報與派遣單位。</p>
+            {members.map((b) => (
+              <button
+                className="report-row full"
+                key={b.subjectId}
+                data-testid={`cluster-member-${b.subjectId}`}
+                onClick={() => select(b.subjectId)}
+              >
+                <div>
+                  <b>
+                    {b.subjectId} ·{" "}
+                    {incidentNames[b.claim.incidentType!] ?? b.claim.value}
+                  </b>
+                  <time>
+                    {duration(Math.max(0, view.tick - b.receivedTick))}前接收
+                  </time>
+                </div>
+                <small>
+                  回報嚴重度 {b.claim.severity ?? "未知"} · {b.claim.value}
+                </small>
+              </button>
+            ))}
+            {!members.length && <p>這組情報已不在目前接收視圖中。</p>}
+          </div>
+        ) : belief ? (
           <>
             <div className="panel-title">
               <h2>{incident ? "事件詳情" : "情報詳情"}</h2>

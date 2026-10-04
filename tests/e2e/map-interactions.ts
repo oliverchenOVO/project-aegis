@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { launch } from "./launch";
 import { viewport, capture } from "./capture";
 import type { CommandCenterView } from "../../packages/domain/src/index";
-import { incidentCallouts } from "../../packages/ui/src/map/knowledge";
+import { positionedUnits } from "../../packages/ui/src/map/knowledge";
+import { clusterIncidents } from "../../packages/ui/src/map/clusters";
 import {
   cityFit,
   cityCamera,
@@ -44,6 +45,48 @@ const point = async (x: number, y: number, zoom = 1) => {
     x: box.x + p.x + ground.x * scale,
     y: box.y + p.y + ground.y * scale,
   };
+};
+const groupsFor = async (view: CommandCenterView, selected?: string) => {
+  const box = (await page.locator("canvas").boundingBox())!;
+  const scale = cityFit(box.width, box.height),
+    camera = cityCamera(box.width, box.height, scale, { x: 0, y: 0 });
+  const reserved = [...positionedUnits(view)].flatMap(([id, units]) => {
+    const n = view.city.nodes.find((n) => n.id === id)!;
+    return units.map((_, i) => {
+      const p = projectGround(
+        n.x - 16 + (i % 4) * 11,
+        n.y + 28 + Math.floor(i / 4) * 11,
+      );
+      return { x: camera.x + p.x * scale, y: camera.y + p.y * scale };
+    });
+  });
+  return {
+    box,
+    groups: clusterIncidents(
+      view,
+      camera,
+      scale,
+      box.width,
+      box.height,
+      selected,
+      reserved,
+    ),
+  };
+};
+const selectIncident = async (view: CommandCenterView, id: string) => {
+  // Public hospital clears any previous incident selection before computing layout.
+  const n = view.city.nodes.find(
+    (n) => n.id === view.city.hospitals[0].nodeId,
+  )!;
+  await click(n.x, n.y);
+  const { box, groups } = await groupsFor(view);
+  const g = groups.find((g) => g.members.some((b) => b.subjectId === id))!;
+  await page.mouse.click(box.x + g.x + 20, box.y + g.y + 12);
+  if (g.members.length > 1) {
+    await expect(page.getByTestId("cluster-inspector")).toBeVisible();
+    await page.getByTestId(`cluster-member-${id}`).click();
+  }
+  await expect(page.locator(".incident-inspector")).toContainText(id);
 };
 const click = async (x: number, y: number, zoom = 1) => {
   const p = await point(x, y, zoom);
@@ -153,7 +196,6 @@ try {
           b.kind === "INCIDENT" && b.claim.incidentType === "BUILDING_COLLAPSE",
       ) ?? view.beliefs.find((b) => b.kind === "INCIDENT");
     expect(incident).toBeDefined();
-    const callout = incidentCallouts(view).get(incident!.subjectId)!;
     for (const [width, height] of [
       [1920, 1080],
       [1600, 900],
@@ -161,12 +203,15 @@ try {
     ]) {
       await viewport(app, page, { width, height });
       await page.getByRole("button", { name: "重設地圖", exact: true }).click();
-      await click(callout.x + 25, callout.y);
+      await selectIncident(view, incident!.subjectId);
       await expect(page.locator(".incident-inspector")).toContainText(
         incident!.subjectId,
       );
-      const p = await point(callout.x + 25, callout.y);
-      await page.mouse.move(p.x, p.y);
+      const { box, groups } = await groupsFor(view, incident!.subjectId);
+      const plate = groups.find(
+        (g) => g.members[0].subjectId === incident!.subjectId,
+      )!;
+      await page.mouse.move(box.x + plate.x + 20, box.y + plate.y + 12);
       await expect(page.locator(".map-footer")).toContainText(
         incident!.subjectId,
       );
@@ -182,7 +227,7 @@ try {
     }
     await viewport(app, page, { width: 1600, height: 900 });
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
-    await click(callout.x + 25, callout.y);
+    await selectIncident(view, incident!.subjectId);
     const checkbox = page.getByRole("checkbox").first();
     const unitId = (await checkbox.getAttribute("aria-label"))!.replace(
       "派遣 ",
@@ -279,44 +324,95 @@ try {
       await step("推進 5分");
       await step("推進 5分");
       const heavy = await page.evaluate(() => window.mapInteractionView!);
-      const places = [...incidentCallouts(heavy).values()];
-      let covered: { id: string; x: number; y: number } | undefined;
-      for (const u of heavy.units) {
-        const n = heavy.city.nodes.find((n) => n.id === u.belief?.claim.nodeId);
-        if (!n) continue;
-        const group = heavy.units.filter(
-            (v) => v.belief?.claim.nodeId === n.id,
-          ),
-          i = group.findIndex((v) => v.id === u.id);
-        const x = n.x - 16 + (i % 4) * 11,
-          y = n.y + 28 + Math.floor(i / 4) * 11;
-        if (
-          places.some(
-            (p) =>
-              x >= p.x - 13 && x <= p.x + 80 && y >= p.y - 13 && y <= p.y + 17,
-          )
-        ) {
-          covered = { id: u.id, x, y };
-          break;
+      const ids = heavy.beliefs
+        .filter((b) => b.kind === "INCIDENT")
+        .map((b) => b.subjectId)
+        .sort();
+      for (const [width, height] of [
+        [1920, 1080],
+        [1600, 900],
+        [1366, 768],
+      ]) {
+        await viewport(app, page, { width, height });
+        await page
+          .getByRole("button", { name: "重設地圖", exact: true })
+          .click();
+        const n = heavy.city.nodes.find(
+          (n) => n.id === heavy.city.hospitals[0].nodeId,
+        )!;
+        await click(n.x, n.y);
+        const { box, groups } = await groupsFor(heavy);
+        expect(
+          groups.flatMap((g) => g.members.map((b) => b.subjectId)).sort(),
+        ).toEqual(ids);
+        expect(groups.length).toBeLessThan(ids.length);
+        const cluster = groups.find((g) => g.members.length > 1)!;
+        await page.mouse.click(box.x + cluster.x + 20, box.y + cluster.y + 12);
+        await expect(page.getByTestId("cluster-inspector")).toBeVisible();
+        await expect(
+          page.locator('[data-testid^="cluster-member-"]'),
+        ).toHaveCount(cluster.members.length);
+        await capture(
+          app,
+          page,
+          resolve(output, `flood-cluster-selected-${width}.png`),
+        );
+        const member = cluster.members[0].subjectId;
+        await page.getByTestId(`cluster-member-${member}`).click();
+        await expect(page.locator(".incident-inspector")).toContainText(member);
+        await expect(
+          page.getByRole("button", { name: "發布命令", exact: true }),
+        ).toBeVisible();
+        await capture(
+          app,
+          page,
+          resolve(output, `flood-clusters-${width}.png`),
+        );
+        if (width === 1600) {
+          const compatible = page.getByRole("checkbox").first();
+          const dispatchedId = (await compatible.getAttribute(
+            "aria-label",
+          ))!.replace("派遣 ", "");
+          await compatible.check();
+          await page
+            .getByRole("button", { name: "發布命令", exact: true })
+            .click();
+          await expect(page.locator(".queue")).toContainText(member);
+          await expect(page.locator(".queue")).toContainText(dispatchedId);
+          checks.push({
+            scenario,
+            clusterDispatchTarget: member,
+            unit: dispatchedId,
+          });
         }
+        for (const u of heavy.units
+          .filter((u) => u.belief?.claim.nodeId)
+          .slice(0, 3)) {
+          const n = heavy.city.nodes.find(
+            (n) => n.id === u.belief!.claim.nodeId,
+          )!;
+          const i = heavy.units
+            .filter((v) => v.belief?.claim.nodeId === n.id)
+            .findIndex((v) => v.id === u.id);
+          await click(
+            n.x - 16 + (i % 4) * 11,
+            n.y + 28 + Math.floor(i / 4) * 11,
+          );
+          await expect(page.locator(".unit-row.selected")).toContainText(u.id);
+        }
+        checks.push({
+          scenario,
+          width,
+          height,
+          tick: heavy.tick,
+          received: ids.length,
+          plates: groups.length,
+          clusterMembers: cluster.members.length,
+          clusterSelection: true,
+          memberInspector: true,
+          vehicles: true,
+        });
       }
-      expect(
-        covered,
-        "a received vehicle inside a dense incident plate must stay selectable",
-      ).toBeDefined();
-      const other = heavy.units.find((u) => u.id !== covered!.id)!;
-      await page.locator(".unit-row").filter({ hasText: other.id }).click();
-      await click(covered!.x, covered!.y);
-      await expect(page.locator(".unit-row.selected")).toContainText(
-        covered!.id,
-      );
-      await capture(app, page, resolve(output, "flood-heavy-vehicle.png"));
-      checks.push({
-        scenario,
-        heavyUnitClick: covered!.id,
-        tick: heavy.tick,
-        incidentCount: places.length,
-      });
     }
     checks.push({
       scenario,
@@ -340,9 +436,10 @@ try {
       {
         executable: process.argv[2],
         portable: process.argv.includes("--portable"),
-        graphics: process.env.AEGIS_SOFTWARE_RENDERING
-          ? "SwiftShader"
-          : "ordinary desktop flags",
+        graphics:
+          process.env.AEGIS_SOFTWARE_RENDERING || process.env.CI
+            ? "SwiftShader"
+            : "ordinary desktop flags",
         checks,
         errors,
         warnings,

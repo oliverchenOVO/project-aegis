@@ -23,6 +23,7 @@ import {
   cityFit,
   cityCamera,
   pointerGround,
+  projectGround,
 } from "./map/projection";
 import { cityKey, type Identity } from "./map/city";
 import { CityGeometryCache } from "./map/cache";
@@ -30,10 +31,10 @@ import { detailForScale, MAP_LAYERS, mapTheme, type Detail } from "./map/theme";
 import {
   positionedUnits,
   floodAppearance,
-  incidentCallouts,
   operationalAppearance,
   roadAppearance,
 } from "./map/knowledge";
+import { clusterIncidents, PLATE } from "./map/clusters";
 import { invalidator, nearSegment } from "./map/camera";
 const layerNames: Record<Layer, string> = {
   INCIDENTS: "事件",
@@ -56,6 +57,8 @@ export function SituationMap({ view, identity }: MapProps) {
       app: Application;
       scene: Container;
       content: Container;
+      screenHost: Container;
+      refreshCallouts?: () => void;
       architecture?: ReturnType<typeof drawArchitecture>;
       geometryCache: CityGeometryCache<ReturnType<typeof drawArchitecture>>;
       staticHost: Container;
@@ -77,6 +80,8 @@ export function SituationMap({ view, identity }: MapProps) {
     [hover, setHover] = useState("拖曳平移 · 滾輪縮放 · 點選事件或單位");
   const selected = useUI((s) => s.selected),
     select = useUI((s) => s.select),
+    selectCluster = useUI((s) => s.selectCluster),
+    selectedCluster = useUI((s) => s.cluster),
     layers = useUI((s) => s.layers),
     toggle = useUI((s) => s.toggleLayer);
   const refreshArchitecture = (
@@ -110,6 +115,7 @@ export function SituationMap({ view, identity }: MapProps) {
     );
     e.scene.position.set(position.x, position.y);
     refreshArchitecture(e, detailForScale(e.base * e.zoom));
+    e.refreshCallouts?.();
     e.invalidation.flush();
   };
   const zoom = (factor: number) => {
@@ -158,11 +164,13 @@ export function SituationMap({ view, identity }: MapProps) {
       world.addChild(staticGroundHost, floodHost, staticHost, content);
       scene.addChild(world);
       content.sortableChildren = true;
-      app.stage.addChild(scene);
+      const screenHost = new Container();
+      app.stage.addChild(scene, screenHost);
       engine.current = {
         app,
         scene,
         content,
+        screenHost,
         staticHost,
         staticGroundHost,
         floodHost,
@@ -272,7 +280,7 @@ export function SituationMap({ view, identity }: MapProps) {
     const ground = layer(e.content, MAP_LAYERS.incidentGround);
     const routeLayer = layer(e.content, MAP_LAYERS.routes);
     const unitsLayer = layer(e.content, MAP_LAYERS.units);
-    const callouts = layer(e.content, MAP_LAYERS.callouts);
+
     const labels = layer(e.content, MAP_LAYERS.labels);
     const selectionLayer = layer(e.content, MAP_LAYERS.selection);
     const g = new Graphics();
@@ -502,22 +510,15 @@ export function SituationMap({ view, identity }: MapProps) {
         infrastructure.addChild(hit);
       }
     }
-    const calloutPositions = incidentCallouts(view);
     if (layers.includes("INCIDENTS"))
       for (const b of view.beliefs.filter((b) => b.kind === "INCIDENT")) {
-        const n = nodes.get(b.claim.nodeId!)!;
+        const n = nodes.get(b.claim.nodeId ?? "");
         if (!n) continue;
         const c =
           b.claim.value === "已解除" ? mapTheme.resolved : mapTheme.incident;
-        const marker = new Container();
-        const callout = calloutPositions.get(b.subjectId)!;
-        screenFacing(marker, callout.x, callout.y);
         const anchor = new Graphics()
           .circle(n.x, n.y, 10)
-          .stroke({ color: c, width: 2, alpha: 0.9 })
-          .moveTo(n.x, n.y - 10)
-          .lineTo(callout.x, callout.y + 17)
-          .stroke({ color: c, width: 1.3 });
+          .stroke({ color: c, width: 2, alpha: 0.9 });
         ground.addChild(anchor);
         if (b.claim.value !== "已解除" && b.claim.incidentType === "FIRE") {
           anchor
@@ -542,40 +543,108 @@ export function SituationMap({ view, identity }: MapProps) {
               ])
               .fill({ color: mapTheme.roof, alpha: 0.85 });
         }
-        marker.addChild(
-          new Graphics()
-            .roundRect(-13, -13, 93, 30, 3)
-            .fill({ color: mapTheme.incidentPlate, alpha: 0.95 })
-            .stroke({
-              color: selected === b.subjectId ? mapTheme.selectedIncident : c,
-              width: selected === b.subjectId ? 2 : 1,
-            })
-            .poly([-5, 7, 3, -7, 11, 7])
-            .fill(c),
-        );
-        const text = new Text({
-          text: `${b.subjectId}\n${incidentNames[b.claim.incidentType!] ?? b.claim.value}`,
-          style: {
-            fontFamily: "Segoe UI, Microsoft JhengHei",
-            fontSize: 10,
-            fill: c,
-            lineHeight: 13,
-          },
-        });
-        text.position.set(18, -10);
-        marker.addChild(text);
-        marker.eventMode = "static";
-        marker.cursor = "pointer";
-        marker.on("pointertap", () => select(b.subjectId));
-        marker.on("pointerover", () =>
-          setHover(
-            `${b.subjectId} · ${b.claim.value} · 觀察距今 ${b.age}秒 · 信心 ${Math.round(b.confidence * 100)}%`,
-          ),
-        );
-        callouts.addChild(marker);
-        if (layers.includes("INTELLIGENCE") && b.stale)
-          label("過時", n.x + 43, n.y - 40, mapTheme.staleLabel, 10);
       }
+    // Reuse screen-facing plates during camera changes; static polygons stay cached.
+    e.screenHost
+      .removeChildren()
+      .forEach((child) => child.destroy({ children: true }));
+    const plateCache = new Map<string, Container>();
+    const stems = new Graphics();
+    stems.eventMode = "none";
+    e.screenHost.addChild(stems);
+    e.refreshCallouts = () => {
+      stems.clear();
+      if (!layers.includes("INCIDENTS")) return;
+      const scale = e.base * e.zoom;
+      const camera = { x: e.scene.x, y: e.scene.y };
+      const reserved = layers.includes("UNITS")
+        ? [...positionedUnits(view)].flatMap(([id, units]) => {
+            const n = nodes.get(id)!;
+            return units.map((_, i) => {
+              const p = projectGround(
+                n.x - 16 + (i % 4) * 11,
+                n.y + 28 + Math.floor(i / 4) * 11,
+              );
+              return { x: camera.x + p.x * scale, y: camera.y + p.y * scale };
+            });
+          })
+        : [];
+      const groups = clusterIncidents(
+        view,
+        camera,
+        scale,
+        e.app.screen.width,
+        e.app.screen.height,
+        selected,
+        reserved,
+      );
+      const active = new Set(groups.map((g) => g.key));
+      for (const [key, plate] of plateCache)
+        if (!active.has(key)) {
+          plate.destroy({ children: true });
+          plateCache.delete(key);
+        }
+      for (const g of groups) {
+        const primary = g.members[0];
+        const c =
+          primary.claim.value === "已解除"
+            ? mapTheme.resolved
+            : mapTheme.incident;
+        let plate = plateCache.get(g.key);
+        if (!plate) {
+          plate = new Container();
+          const isSelected =
+            selected === primary.subjectId ||
+            selectedCluster?.slice().sort().join("|") === g.key;
+          plate.addChild(
+            new Graphics()
+              .roundRect(0, 0, PLATE.width, PLATE.height, 4)
+              .fill({ color: mapTheme.incidentPlate, alpha: 0.97 })
+              .stroke({
+                color: isSelected ? mapTheme.selectedIncident : c,
+                width: isSelected ? 2 : 1,
+              }),
+          );
+          const text = new Text({
+            text:
+              g.members.length > 1
+                ? `${g.members.length} 件事件 · ${g.severity ?? "?"}\n${g.receivedAge}秒前接收 · ${g.categories.length}類`
+                : `${primary.subjectId}\n${incidentNames[primary.claim.incidentType!] ?? primary.claim.value}`,
+            resolution: window.devicePixelRatio,
+            style: {
+              fontFamily: "Segoe UI, Microsoft JhengHei",
+              fontSize: 11,
+              fill: c,
+              lineHeight: 15,
+            },
+          });
+          text.position.set(8, 4);
+          plate.addChild(text);
+          plate.eventMode = "static";
+          plate.cursor = "pointer";
+          plate.on("pointertap", () =>
+            g.members.length > 1
+              ? selectCluster(g.members.map((b) => b.subjectId))
+              : select(primary.subjectId),
+          );
+          plate.on("pointerover", () =>
+            setHover(
+              g.members.length > 1
+                ? `${g.members.length} 件已接收事件 · 最高回報嚴重度 ${g.severity ?? "未知"} · 最新接收距今 ${g.receivedAge}秒`
+                : `${primary.subjectId} · ${primary.claim.value} · 觀察距今 ${primary.age}秒 · 信心 ${Math.round(primary.confidence * 100)}%`,
+            ),
+          );
+          plateCache.set(g.key, plate);
+          e.screenHost.addChild(plate);
+        }
+        plate.position.set(g.x, g.y);
+        stems
+          .moveTo(g.anchor.x, g.anchor.y)
+          .lineTo(g.x + PLATE.width / 2, g.y + PLATE.height)
+          .stroke({ color: c, width: 1, alpha: 0.5 });
+      }
+    };
+    e.refreshCallouts();
     if (layers.includes("UNITS")) {
       const groups = positionedUnits(view);
       for (const [nodeId, units] of groups) {
@@ -658,7 +727,17 @@ export function SituationMap({ view, identity }: MapProps) {
       }
     }
     e.invalidation.request();
-  }, [view, identity.id, identity.version, selected, layers, select, ready]);
+  }, [
+    view,
+    identity.id,
+    identity.version,
+    selected,
+    selectedCluster,
+    layers,
+    select,
+    selectCluster,
+    ready,
+  ]);
   return (
     <section className="map-panel">
       <div className="panel-title">
