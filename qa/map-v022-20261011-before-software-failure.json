@@ -1,0 +1,254 @@
+{
+  "executable": "release/windows-runtime/Project AEGIS.exe",
+  "browser": "Browser plugin not available; Playwright Electron",
+  "graphics": "SwiftShader",
+  "launchMs": 14888.209200000001,
+  "runtime": {
+    "version": "0.2.2",
+    "gpuFeatures": {
+      "2d_canvas": "disabled_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "disabled_off",
+      "webgpu": "disabled_off",
+      "webnn": "disabled_off"
+    }
+  },
+  "rows": [
+    {
+      "scenario": "earthquake",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 1620.449999999997,
+      "idleDraws": [
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          58.19140000000334,
+          72.2719999999972,
+          95.875,
+          98.03560000000289,
+          88.6336999999985,
+          85.67050000000017,
+          85.66859999999724,
+          157.70829999999842
+        ],
+        "p50Ms": 88.6336999999985,
+        "p95Ms": 157.70829999999842
+      },
+      "layerToggle": {
+        "samples": [
+          211.3159999999989,
+          103.07549999999901,
+          153.8434000000052,
+          107.19199999999546,
+          107.75249999999505,
+          104.53299999999581,
+          147.89129999999568,
+          91.37049999999726
+        ],
+        "p50Ms": 107.75249999999505,
+        "p95Ms": 211.3159999999989
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 985.8574000000008,
+        "effectiveFramesPerSecond": 24.34429157807202
+      },
+      "stepAndRender": {
+        "samples": [
+          657.8125,
+          725.6080999999976,
+          602.6003999999957,
+          962.8263999999981
+        ],
+        "p50Ms": 725.6080999999976,
+        "p95Ms": 962.8263999999981
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 1651.3096000000005,
+        "effectiveFramesPerSecond": 14.533919017972156
+      },
+      "denseFocusBefore": {
+        "focused": true,
+        "visibility": "visible"
+      },
+      "denseFocusAfter": {
+        "focused": true,
+        "visibility": "visible"
+      },
+      "densePanHandler": {
+        "samples": [
+          1.8999999985098839,
+          1.8999999985098839,
+          1.5,
+          1.3000000044703484,
+          1.8999999985098839,
+          1.7000000029802322,
+          1,
+          1.8999999985098839,
+          0.9000000059604645,
+          1.7999999970197678,
+          2,
+          1.7999999970197678,
+          2.899999998509884,
+          1.6000000014901161,
+          1.6999999955296516,
+          4.399999998509884,
+          1.6000000014901161,
+          1.5,
+          1.5,
+          1.7999999970197678,
+          1.1000000014901161,
+          1.7000000029802322,
+          1.5,
+          1.1999999955296516
+        ],
+        "p50Ms": 1.7000000029802322,
+        "p95Ms": 2.899999998509884
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          248.20000000298023,
+          325.6000000014901,
+          312,
+          218.10000000149012
+        ],
+        "p50Ms": 312,
+        "p95Ms": 325.6000000014901
+      }
+    },
+    {
+      "scenario": "flood",
+      "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "firstMapRenderMs": 553.6854999999996,
+      "idleDraws": [
+        244,
+        244,
+        244,
+        244,
+        244,
+        244
+      ],
+      "idleAdditionalDraws": 0,
+      "denseIdleAdditionalDraws": 0,
+      "zoom": {
+        "samples": [
+          44.77919999999722,
+          183.45630000000529,
+          157.71010000000388,
+          111.95709999999963,
+          113.28110000000015,
+          137.2595999999976,
+          245.66519999999582,
+          142.63319999999658
+        ],
+        "p50Ms": 142.63319999999658,
+        "p95Ms": 245.66519999999582
+      },
+      "layerToggle": {
+        "samples": [
+          128.77939999999944,
+          300.35629999999946,
+          299.7936999999947,
+          182.59249999999884,
+          133.12949999999546,
+          135.46409999999742,
+          116.48629999999685,
+          174.78429999999935
+        ],
+        "p50Ms": 174.78429999999935,
+        "p95Ms": 300.35629999999946
+      },
+      "pan": {
+        "frames": 24,
+        "ms": 1427.537000000004,
+        "effectiveFramesPerSecond": 16.812173694972483
+      },
+      "stepAndRender": {
+        "samples": [
+          551.4515000000029,
+          667.8220999999976,
+          1054.345199999996,
+          979.5911999999953
+        ],
+        "p50Ms": 979.5911999999953,
+        "p95Ms": 1054.345199999996
+      },
+      "densePan": {
+        "tick": 1200,
+        "frames": 24,
+        "ms": 3732.552300000003,
+        "effectiveFramesPerSecond": 6.429916601570454
+      },
+      "denseFocusBefore": {
+        "focused": true,
+        "visibility": "visible"
+      },
+      "denseFocusAfter": {
+        "focused": true,
+        "visibility": "visible"
+      },
+      "densePanHandler": {
+        "samples": [
+          0.6000000014901161,
+          0.6000000014901161,
+          0.5,
+          0.5,
+          0.5,
+          1.6000000014901161,
+          0.5,
+          0.6000000014901161,
+          0.5,
+          0.5,
+          0.5,
+          0.3999999985098839,
+          0.8000000044703484,
+          0.8999999985098839,
+          1,
+          0.5,
+          0.3999999985098839,
+          0.5,
+          0.5,
+          0.5,
+          0.3999999985098839,
+          0.3999999985098839,
+          0.4000000059604645,
+          0.5
+        ],
+        "p50Ms": 0.5,
+        "p95Ms": 1
+      },
+      "receivedUpdateToFrame": {
+        "samples": [
+          232.29999999701977,
+          166.5,
+          331.29999999701977,
+          328.20000000298023
+        ],
+        "p50Ms": 328.20000000298023,
+        "p95Ms": 331.29999999701977
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "passed": false
+}

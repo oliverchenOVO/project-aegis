@@ -2,6 +2,8 @@
 
 Stable baseline: v0.2.1, commit 825bf505ad40f420d61cd81082c5c57fdec0a4af. This task changes presentation only. All 117 existing tests remain unchanged. Simulation/scenario/RNG/save/replay/migration behavior and golden expectations are frozen; any authoritative hash mismatch stops implementation.
 
+Latest candidate evidence is in the [2026-10-11 follow-up](#2026-10-11-renderer-and-measurement-follow-up): 127/127 core tests, all 14 local Windows gates and product-source CI passed. Earlier failed candidates below are historical records. Formal releases require a clean working tree and successful CI at the exact tagged head, including the new portable performance check.
+
 ## v0.2.1 diagnosis before implementation
 
 Camera: one Pixi camera container applies centered uniform scale and translation to an 800×590 XY plane. `map/camera.ts` supplies inverse camera coordinates, route segment hit tolerance and a change-driven invalidator. Received updates coalesce into one RAF; camera changes flush immediately. Pixi's permanent ticker remains disabled.
@@ -130,17 +132,40 @@ Repeated forced QA shutdowns also retained five closed v0.2.2 portable extractio
 
 **OBLIQUE CITY VIEW GATE: FAIL — performance/CI qualification is unresolved. No v0.2.2 tag or formal release has been created.** The portable release candidate is 100,375,646 bytes, SHA-256 `08C60A69A5349A04C0F52D5F912D39E0FCBE13567D0A594E1758DD004C0A8F37`. Its compiled product source is commit `3ba9cbdca8d23706334b22b6ca2573083eae7fbc`; later commits only change the QA harness. `qa/map-v022-build-equivalence.json` proves unchanged compiled paths through `928614cc0ae3b452191704033c9abe816eaaab25`. The stable v0.2.1 portable SHA remains `7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81`.
 
-| Final candidate validation | Result | Evidence |
-| --- | --- | --- |
-| Packaged GPU / SwiftShader native interactions | PASS, both scenarios × all three widths | `qa/map-v022-release-hits-packaged-*.json` |
-| Portable GPU / SwiftShader native interactions | PASS, both scenarios × all three widths | `qa/map-v022-release-hits-portable-*.json` |
-| Replay, AAR, original/alternative branch, save/load | PASS, packaged and portable | `qa/map-v022-release-replay-*.json` |
-| Legacy migration and two real restarts | PASS, packaged and portable | `qa/map-v022-release-migration-*.json` |
-| Hospital overload and power emergency | PASS, packaged and portable | `qa/map-v022-release-overload-*.json` |
-| Final package performance matrix | INCOMPLETE / FAIL | `qa/map-v022-release-*-first-sample.json` |
-| Windows CI at 928614c | FAIL, dense flood SwiftShader 8.835 FPS < 12 | `qa/map-v022-ci-928614c-failure.json` |
+| Final candidate validation                          | Result                                       | Evidence                                   |
+| --------------------------------------------------- | -------------------------------------------- | ------------------------------------------ |
+| Packaged GPU / SwiftShader native interactions      | PASS, both scenarios × all three widths      | `qa/map-v022-release-hits-packaged-*.json` |
+| Portable GPU / SwiftShader native interactions      | PASS, both scenarios × all three widths      | `qa/map-v022-release-hits-portable-*.json` |
+| Replay, AAR, original/alternative branch, save/load | PASS, packaged and portable                  | `qa/map-v022-release-replay-*.json`        |
+| Legacy migration and two real restarts              | PASS, packaged and portable                  | `qa/map-v022-release-migration-*.json`     |
+| Hospital overload and power emergency               | PASS, packaged and portable                  | `qa/map-v022-release-overload-*.json`      |
+| Final package performance matrix                    | INCOMPLETE / FAIL                            | `qa/map-v022-release-*-first-sample.json`  |
+| Windows CI at 928614c                               | FAIL, dense flood SwiftShader 8.835 FPS < 12 | `qa/map-v022-ci-928614c-failure.json`      |
 
-Final candidate first local samples measured dense flood 38.06 FPS packaged GPU, 14.197 FPS packaged SwiftShader, and 10.583 FPS portable GPU. The last sample failed the unchanged pan floor; portable SwiftShader has not yet been qualified. Packaged SwiftShader earthquake was also slow (7.34 FPS). Local concurrent work is confirmed by the user, but it is **not established as the sole cause**. The separate Windows CI failure retained focused/visible state before and after pan; its JavaScript pointer-handler costs were p50 0.3 ms / p95 0.8 ms, versus 113.18 ms per end-to-end pan sample. This rules out lost focus and identifies that most elapsed time is outside the synchronous pointer handler; it does not distinguish raster/compositor, RAF scheduling and CDP overhead by itself. No assertion has been lowered or failed sample discarded.
+Final candidate first local samples measured dense flood 38.06 FPS packaged GPU, 14.197 FPS packaged SwiftShader, and 10.583 FPS portable GPU. The last sample failed the unchanged pan floor; portable SwiftShader has not yet been qualified. Packaged SwiftShader earthquake was also slow (7.34 FPS). Local concurrent work is confirmed by the user, but it is **not established as the sole cause**. The separate Windows CI failure retained focused/visible state before and after pan. Its original pointer-handler report (p50 0.3 ms / p95 0.8 ms) is invalid: the observer retained from the earthquake scenario ran before the remounted flood Map listener. The end-to-end 8.835 FPS failure remains valid, but those handler timings cannot attribute the delay or rule out synchronous rendering cost. No assertion has been lowered or failed sample discarded.
+
+## 2026-10-11 renderer and measurement follow-up
+
+The pan probe now reattaches after each scenario's Map listener and asserts that all 24 measured drag frames issue real draw calls. It also records input and RAF intervals without adding browser round trips inside the timed loop. A corrected, unmodified packaged SwiftShader run measured flood T1200 at 10.113 FPS, handler p50/p95 2.6/4.0 ms and 10 draw calls per drag frame. Windows display scaling was 150%, versus 125% during the earlier local baseline; cross-date differences are not controlled performance comparisons.
+
+The renderer disables multisampling on the main backbuffer and caches received flood geometry as a texture between received-view/layer updates. Pan retains the original public XY hit objects and only moves the camera; the flood texture stays below building volumes. Texture refresh remains tied to received information, not undisclosed simulation state. Simulation, replay, saves and the 117 original tests remain unchanged. Browser-injected diagnostic experiments are not release qualification; the rebuilt packaged and portable executables still require the complete gates.
+
+The rebuilt third candidate is 100,375,628 bytes, SHA-256 `B80243C13027F21CFB2E25FDFC574F9A018FED32847B62798DB2523D1FE3A219`, product source `dd6271a27b080c52c3ee8494b969862ecd9a0d20`. Its actual executable measurements below passed the unchanged dense flood floor. All eight scenario/mode measurements retained visible focus, 24 real redraw samples and zero extra idle draws. CPU workload varied between the before and after runs, so FPS differences are not attributed solely to the renderer change. The corrected software draw count fell from 10 to 5 per dense flood drag frame.
+
+| Runtime              | Scenario   | First map ms | Early pan FPS | T1200 dense pan FPS | Zoom ms p50/p95 | Toggle ms p50/p95 | +300 ticks/frame ms p50/p95 | Receipt/frame ms p50/p95 |
+| -------------------- | ---------- | -----------: | ------------: | ------------------: | --------------: | ----------------: | --------------------------: | -----------------------: |
+| Packaged GPU         | earthquake |       2906.3 |          70.6 |                63.6 |       41.5/50.1 |         43.8/57.5 |                 248.7/451.0 |               88.6/262.1 |
+| Packaged GPU         | flood      |        142.9 |          79.8 |                62.3 |       31.3/31.7 |         37.5/43.9 |                 443.7/466.1 |              111.2/220.2 |
+| Packaged SwiftShader | earthquake |        718.3 |          33.7 |                34.5 |       94.9/99.0 |       104.6/138.2 |                 259.4/302.4 |              102.0/144.6 |
+| Packaged SwiftShader | flood      |        393.6 |          31.1 |                27.3 |       48.2/55.0 |        86.5/128.4 |                 477.4/508.1 |              219.5/261.5 |
+| Portable GPU         | earthquake |        255.9 |          80.8 |                78.2 |       25.1/30.6 |         37.2/38.2 |                 165.5/167.2 |                69.3/83.4 |
+| Portable GPU         | flood      |         74.7 |          79.4 |                76.2 |       25.1/25.4 |         31.5/36.8 |                 411.4/425.3 |              233.3/261.9 |
+| Portable SwiftShader | earthquake |        640.7 |          40.3 |                35.8 |       47.7/54.1 |        70.4/149.3 |                 229.3/235.0 |               78.5/113.1 |
+| Portable SwiftShader | flood      |        353.5 |          35.3 |                31.1 |       57.2/74.2 |       106.2/134.9 |                 452.4/485.2 |              209.8/263.3 |
+
+All 14 local Windows gates passed: four performance modes, four native interaction matrices and replay/migration/overload for both packaged and portable executables. Interaction checks reported no page errors or warnings, both scenarios and all three viewport widths. Root `qa/map-v022-20261011-*.json` files preserve the new reports and the two earlier unmodified executable failures. Required native screenshots and width comparisons now come from the rebuilt package. Core regressions passed 127/127 again. The qualification manifest verifies that the bundled client, Worker and desktop entry files match their built sources and that the v0.2.1 portable is unchanged.
+
+Product-source [CI run 38087936163](https://github.com/oliverchenOVO/project-aegis/actions/runs/38087936163) passed both core and Windows jobs. Its actual packaged SwiftShader dense flood measured **20.47 FPS**, with five real draw calls per drag sample and zero extra idle draws; `qa/map-v022-20261011-ci-dd6271a-performance.json` retains the raw report. CI now also runs the same performance assertion against the portable wrapper. The final tagged commit must pass that expanded workflow before publication; [Releases](https://github.com/oliverchenOVO/project-aegis/releases) records the publication status.
 
 Replay original/alternative hashes remain `4eb523d46aa39a2a` / `2a2b76b4e6376144`; simulation version remains 0.2.0. Legacy basic migration continues/restarts at `274b9673981fea23`, completes at `c3bc65045a879d42`; mid-incident continues/restarts at `0473de9276368be2`, completes at `36c486a38daa37c1`. Overload peak queue/census/ICU remain 8/36/8, with overload/power-emergency/handover ticks 759/1352/328. Native screenshots for full/near/cluster and all interaction widths are from the rebuilt final package. The six early/mid/late performance screenshots still describe the first candidate pending replacement by a qualified final run.
 

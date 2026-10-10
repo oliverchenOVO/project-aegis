@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-11",
+  "productSource": "dd6271a27b080c52c3ee8494b969862ecd9a0d20",
+  "checkedHead": "dd6271a27b080c52c3ee8494b969862ecd9a0d20",
+  "baseline": "825bf505ad40f420d61cd81082c5c57fdec0a4af",
+  "frozenSourceChanges": [],
+  "coreTests": 127,
+  "existingTestsUnchanged": 117,
+  "workerBundle": "worker-CsSoRM7K.js",
+  "simulationVersion": "0.2.0",
+  "windowsMatrix": [
+    {
+      "name": "v022-20261011-candidate3-packaged-gpu",
+      "started": "2026-10-11T05:26:20.2124675+08:00",
+      "ended": "2026-10-11T05:27:26.6467548+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-packaged-software",
+      "started": "2026-10-11T05:27:27.6082165+08:00",
+      "ended": "2026-10-11T05:28:21.1339157+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-portable-gpu",
+      "started": "2026-10-11T05:28:25.1562129+08:00",
+      "ended": "2026-10-11T05:29:23.4328317+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-portable-software",
+      "started": "2026-10-11T05:29:28.4826685+08:00",
+      "ended": "2026-10-11T05:30:47.7658217+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-hits-packaged-gpu",
+      "started": "2026-10-11T05:30:48.1126701+08:00",
+      "ended": "2026-10-11T05:32:06.0307307+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-hits-packaged-software",
+      "started": "2026-10-11T05:32:18.8446205+08:00",
+      "ended": "2026-10-11T05:33:05.8638317+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-hits-portable-gpu",
+      "started": "2026-10-11T05:33:05.8798422+08:00",
+      "ended": "2026-10-11T05:33:56.1619778+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-hits-portable-software",
+      "started": "2026-10-11T05:33:56.1667344+08:00",
+      "ended": "2026-10-11T05:35:03.5665750+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-replay-packaged",
+      "started": "2026-10-11T05:35:03.5885286+08:00",
+      "ended": "2026-10-11T05:35:49.4708273+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-migrations-packaged",
+      "started": "2026-10-11T05:35:49.4760822+08:00",
+      "ended": "2026-10-11T05:36:09.7833213+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-overload-packaged",
+      "started": "2026-10-11T05:36:09.8144621+08:00",
+      "ended": "2026-10-11T05:36:27.3258966+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-replay-portable",
+      "started": "2026-10-11T05:36:27.4304388+08:00",
+      "ended": "2026-10-11T05:37:55.3401487+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-migrations-portable",
+      "started": "2026-10-11T05:37:55.4188231+08:00",
+      "ended": "2026-10-11T05:40:06.1021238+08:00",
+      "exitCode": 0,
+      "passed": true
+    },
+    {
+      "name": "v022-20261011-candidate3-overload-portable",
+      "started": "2026-10-11T05:40:06.2282919+08:00",
+      "ended": "2026-10-11T05:40:46.2652286+08:00",
+      "exitCode": 0,
+      "passed": true
+    }
+  ],
+  "packagedFiles": [
+    {
+      "path": "dist/assets/index-BVmpHyUY.js",
+      "sourceHash": "1A1A61BE3F684F33584025D91B331166FC604F5B8F77F447F1B884C47430A845",
+      "packagedHash": "1A1A61BE3F684F33584025D91B331166FC604F5B8F77F447F1B884C47430A845"
+    },
+    {
+      "path": "dist/assets/worker-CsSoRM7K.js",
+      "sourceHash": "D629F0966CF8EC5A62E92218DC395376C66871F183E2BBCEDEBB0DEDE06E52B5",
+      "packagedHash": "D629F0966CF8EC5A62E92218DC395376C66871F183E2BBCEDEBB0DEDE06E52B5"
+    },
+    {
+      "path": "apps/desktop/dist/main.cjs",
+      "sourceHash": "2126995F40ED2770DFACD1AFE24CF235D501E7FCDCC50E2FEB95F366FF40E192",
+      "packagedHash": "2126995F40ED2770DFACD1AFE24CF235D501E7FCDCC50E2FEB95F366FF40E192"
+    },
+    {
+      "path": "apps/desktop/dist/preload.cjs",
+      "sourceHash": "C84BF54C55447FD2E017E3F875CCE7ED3B8625177546EBCE519A5230FF9D391D",
+      "packagedHash": "C84BF54C55447FD2E017E3F875CCE7ED3B8625177546EBCE519A5230FF9D391D"
+    }
+  ],
+  "portable": {
+    "path": "release/AEGIS-0.2.2-Windows-x64.exe",
+    "bytes": 100375628,
+    "sha256": "B80243C13027F21CFB2E25FDFC574F9A018FED32847B62798DB2523D1FE3A219"
+  },
+  "stablePortable": {
+    "path": "release/AEGIS-0.2.1-Windows-x64.exe",
+    "bytes": 100366977,
+    "sha256": "7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81"
+  },
+  "displayScale": 1.5,
+  "densePanFrames": 24,
+  "denseFloodFloorFps": 12,
+  "originalFailuresRetained": true,
+  "note": "Local qualification. Release also requires successful CI at the final tagged head and clean Git."
+}

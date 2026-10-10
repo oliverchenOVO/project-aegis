@@ -4,11 +4,13 @@
 
 Project AEGIS 是以 TypeScript 開發的災害指揮模擬與決策分析專案。使用者在都市地震或暴洪情境中調度消防、救護、警察與公用事業單位；災害、道路、醫療、電力與通訊則在背景持續演化。每次決策都能透過事件紀錄、驗證重播與反事實分支重新檢視。
 
-[下載 Windows 穩定版](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.1) · [開發歷程](https://github.com/oliverchenOVO/project-aegis/commits/main/) · [自動驗證紀錄](https://github.com/oliverchenOVO/project-aegis/actions) · [技術文件](#技術文件與程式導覽)
+[下載 Windows 發布版](https://github.com/oliverchenOVO/project-aegis/releases/latest) · [開發歷程](https://github.com/oliverchenOVO/project-aegis/commits/main/) · [自動驗證紀錄](https://github.com/oliverchenOVO/project-aegis/actions) · [技術文件](#技術文件與程式導覽)
+
+![AEGIS 自動品質驗證](https://github.com/oliverchenOVO/project-aegis/actions/workflows/ci.yml/badge.svg)
 
 ![固定斜視城市指揮畫面：洪災回報、道路狀態、事件聚合與成員清單](qa/map-v022-clusters.png)
 
-_實際 Windows 程式截圖。中央呈現城市與已接收情報，右側列出聚合中的原始事件，保留逐件檢視與派遣入口。此圖為開發中的 v0.2.2，與下載頁的 v0.2.1 畫面有所不同。_
+_v0.2.2 Windows 封裝的實際截圖。中央呈現城市與已接收情報，右側列出聚合中的原始事件，保留逐件檢視與派遣入口。各版下載與驗證狀態以 Releases 和 Actions 為準。_
 
 ## 專案動機
 
@@ -24,7 +26,7 @@ _實際 Windows 程式截圖。中央呈現城市與已接收情報，右側列�
 
 ![情境初始畫面：城市地理已知，單位及設施狀態仍未知](qa/map-v022-oblique-full.png)
 
-_開發版情境初始畫面：「尚未收到消息」不等於「現場安全」。_
+_斜視城市版情境初始畫面：「尚未收到消息」不等於「現場安全」。_
 
 ### 災害連鎖效應與資源限制
 
@@ -67,35 +69,39 @@ _架構圖以向量格式保存在倉庫，可供個人網站或推甄簡報重�
 
 ## 開發演進與驗證證據
 
-| 階段                  | 內容                                                   | 狀態與紀錄                                                                                                       |
-| --------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Phase 1／v0.1.0       | 地震模擬、情報迷霧、命令流程、存檔與驗證重播           | [已發布](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.1.0) · [驗收報告](docs/PHASE1_REPORT.md) |
-| Phase 2／v0.2.0       | 系統性地震與洪災、居民與醫療模型、通訊網路、反事實分支 | [已發布](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.0) · [驗證報告](docs/PHASE2_REPORT.md) |
-| v0.2.1                | 2.5D 城市、建築輪廓、河道與橋梁、知識型圖層            | **目前穩定版** · [地圖驗收](docs/MAP_25D_UPGRADE.md)                                                             |
-| `main`／v0.2.2 開發中 | 固定斜視投影、統一建築深度、事件聚合與成員清單         | 互動驗證通過，效能發布門檻尚未通過 · [完整紀錄](docs/MAP_OBLIQUE_UPGRADE.md)                                     |
+| 階段            | 內容                                                         | 狀態與紀錄                                                                                                                             |
+| --------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 1／v0.1.0 | 地震模擬、情報迷霧、命令流程、存檔與驗證重播                 | [已發布](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.1.0) · [驗收報告](docs/PHASE1_REPORT.md)                       |
+| Phase 2／v0.2.0 | 系統性地震與洪災、居民與醫療模型、通訊網路、反事實分支       | [已發布](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.0) · [驗證報告](docs/PHASE2_REPORT.md)                       |
+| v0.2.1          | 2.5D 城市、建築輪廓、河道與橋梁、知識型圖層                  | [歷史發布版](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.1) · [地圖驗收](docs/MAP_25D_UPGRADE.md)                 |
+| `main`／v0.2.2  | 固定斜視投影、統一建築深度、事件聚合與成員清單；洪水圖層快取 | 本機效能與互動驗證通過 · [完整紀錄](docs/MAP_OBLIQUE_UPGRADE.md) · [發布狀態](https://github.com/oliverchenOVO/project-aegis/releases) |
 
 這個倉庫保留原始 commit history、各版 Releases 與 GitHub Actions 成功／失敗紀錄，讓設計調整、回歸修復與量測限制都能追溯。
 
 以下數字來自既有驗證紀錄，不是即時效能承諾：
 
-| 驗證項目             | 已記錄結果                                                                    | 原始證據                                                                                                                      |
-| -------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 開發版回歸測試       | 127 項通過；原有 117 項保持不變，新增投影與聚合測試各 5 項                    | [測試摘要](qa/map-v022-core-summary.json) · [凍結契約](qa/map-v022-frozen-contracts.json)                                     |
-| Phase 2 多 seed 驗證 | 地震 100 + 洪災 100；崩潰、不變量、重播、分支、存檔與原始時間線修改錯誤均為 0 | [200 個 seed 紀錄](docs/qa/phase2-benchmark.json)                                                                             |
-| 決定性與相容性       | 原始／替代分支雜湊、舊存檔遷移與真實程序重啟驗證                              | [回放紀錄](qa/map-v022-release-replay-portable.json) · [遷移紀錄](qa/map-v022-release-migration-portable.json)                |
-| 開發版原生互動       | Packaged／Portable × GPU／SwiftShader，涵蓋兩場景與 1920／1600／1366 寬度     | [一般 GPU](qa/map-v022-release-hits-packaged-gpu.json) · [Portable 軟體渲染](qa/map-v022-release-hits-portable-software.json) |
+| 驗證項目             | 已記錄結果                                                                    | 原始證據                                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 開發版回歸測試       | 127 項通過；原有 117 項保持不變，新增投影與聚合測試各 5 項                    | [測試摘要](qa/map-v022-20261011-qualification.json) · [凍結契約](qa/map-v022-frozen-contracts.json)                             |
+| Phase 2 多 seed 驗證 | 地震 100 + 洪災 100；崩潰、不變量、重播、分支、存檔與原始時間線修改錯誤均為 0 | [200 個 seed 紀錄](docs/qa/phase2-benchmark.json)                                                                               |
+| 決定性與相容性       | 原始／替代分支雜湊、舊存檔遷移與真實程序重啟驗證                              | [回放紀錄](qa/map-v022-20261011-replay-portable.json) · [遷移紀錄](qa/map-v022-20261011-migration-portable.json)                |
+| 開發版原生互動       | Packaged／Portable × GPU／SwiftShader，涵蓋兩場景與 1920／1600／1366 寬度     | [一般 GPU](qa/map-v022-20261011-hits-packaged-gpu.json) · [Portable 軟體渲染](qa/map-v022-20261011-hits-portable-software.json) |
 
-目前開發版仍有明確限制：遠端 Windows CI 的 SwiftShader 洪災 T1200 平移測得 **8.84 FPS，低於 12 FPS 發布門檻**，因此 v0.2.2 尚未發布。大量洪災資料的首次驗證、載入與定位也有延遲。[失敗樣本](qa/map-v022-ci-928614c-failure.json)與[效能前後比較](docs/MAP_OBLIQUE_UPGRADE.md)完整保留；模擬 ticks/sec 與地圖 FPS 是不同指標。
+2026-10-11 的實際封裝測試中，SwiftShader 洪災 T1200 平移測得 **Packaged 27.3 FPS／Portable 31.1 FPS**，均通過原定 12 FPS 門檻；一般 GPU 為 62.3／76.2 FPS。閒置額外重繪皆為 0。[本次 Packaged 紀錄](qa/map-v022-20261011-packaged-software.json)、[Portable 紀錄](qa/map-v022-20261011-portable-software.json)與[完整效能比較](docs/MAP_OBLIQUE_UPGRADE.md)可供核對。
+
+仍需留意首次城市快取、洪災存檔驗證與定位的延遲，以及桌面工作負載對量測的影響。先前遠端 Windows CI 的 **8.84 FPS 失敗樣本**也[完整保留](qa/map-v022-ci-928614c-failure.json)；舊版洪災 pointer-handler 探針低估成本的問題已修正。前後測試的顯示縮放與系統負載不同，因此不能把 FPS 差異全部歸因於程式優化，也不能承諾任意工作負載下都達到此數字。模擬 ticks/sec 與地圖 FPS 是不同指標。
 
 ## 下載與操作
 
-1. 前往 [v0.2.1 Release](https://github.com/oliverchenOVO/project-aegis/releases/tag/v0.2.1)，下載 `AEGIS-0.2.1-Windows-x64.exe`，在 Windows x64 執行。此版本未簽章。
+本次程式碼的[遠端品質驗證](https://github.com/oliverchenOVO/project-aegis/actions/runs/38087936163)亦已通過：Windows SwiftShader 密集洪災為 **20.47 FPS**。本機 [14 項 Windows 驗證](qa/map-v022-20261011-windows-matrix.json)涵蓋效能、互動、重播、程序重啟遷移與醫院超載。正式發布仍要求該標籤對應提交的完整 CI 通過。
+
+1. 前往[最新 Release](https://github.com/oliverchenOVO/project-aegis/releases/latest)，下載該版的 `AEGIS-版本-Windows-x64.exe`，在 Windows x64 執行。Windows 封裝未簽章；歷史版本可從 Releases 切換。
 2. 選擇地震或洪災；展示洪災 seed 可使用 `AEGIS-FLOOD-2026-001`。
 3. 開始情境，觀察回報來源與時間；可暫停，或推進 10 秒、1 分鐘、5 分鐘。
 4. 選取事件與相容單位後派遣，等待命令確認與現場回報；也可發布區域疏散。
 5. 儲存為 `.aegis`；情境結束後檢視 AAR、驗證重播，再建立替代命令分支。
 
-穩定版 SHA-256：`7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81`。不需安裝 Unity 或 Blender。開發版事件聚合可從 `main` 原始碼啟動體驗。
+本次 v0.2.2 封裝 SHA-256：`B80243C13027F21CFB2E25FDFC574F9A018FED32847B62798DB2523D1FE3A219`（100,375,628 bytes）。歷史 v0.2.1 SHA-256：`7FB5155E0DB785BC0B299FB1CFE429F087D4B17E7BB292BDABF95C5D4E491A81`。不需安裝 Unity 或 Blender，也可從 `main` 原始碼啟動體驗。
 
 ## 本機開發
 

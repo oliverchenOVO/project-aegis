@@ -1,0 +1,198 @@
+{
+  "portable": false,
+  "scenarioId": "qa-flood-overload",
+  "scenarioVersion": "1.4.0-overload-qa",
+  "worldHash": "f9853d774e984b33",
+  "hospital": {
+    "id": "H-A",
+    "status": "POWER_EMERGENCY",
+    "currentPatients": 20,
+    "queue": 0,
+    "peakQueue": 8,
+    "peakCensus": 36,
+    "peakICU": 8,
+    "overloadTicks": 759,
+    "powerEmergencyTicks": 1352,
+    "handoverTicks": 328
+  },
+  "events": [
+    {
+      "id": "evt-65",
+      "tick": 1,
+      "type": "HOSPITAL_STATUS_CHANGED",
+      "payload": {
+        "hospitalId": "H-A",
+        "status": "STRAINED",
+        "queue": 0,
+        "load": 28
+      },
+      "causedByEventIds": []
+    },
+    {
+      "id": "evt-2672",
+      "tick": 329,
+      "type": "HOSPITAL_STATUS_CHANGED",
+      "payload": {
+        "hospitalId": "H-B",
+        "status": "POWER_EMERGENCY",
+        "queue": 0,
+        "load": 34
+      },
+      "causedByEventIds": [
+        "evt-2671"
+      ]
+    },
+    {
+      "id": "evt-4895",
+      "tick": 480,
+      "type": "AMBULANCE_HANDOVER_STARTED",
+      "payload": {
+        "unitId": "AMB-05",
+        "hospitalId": "H-A",
+        "until": 520
+      },
+      "causedByEventIds": [
+        "evt-3661",
+        "evt-1378",
+        "evt-3719"
+      ]
+    },
+    {
+      "id": "evt-4899",
+      "tick": 480,
+      "type": "AMBULANCE_HANDOVER_STARTED",
+      "payload": {
+        "unitId": "AMB-06",
+        "hospitalId": "H-A",
+        "until": 520
+      },
+      "causedByEventIds": [
+        "evt-3691",
+        "evt-1378",
+        "evt-3722"
+      ]
+    },
+    {
+      "id": "evt-5274",
+      "tick": 481,
+      "type": "HOSPITAL_STATUS_CHANGED",
+      "payload": {
+        "hospitalId": "H-A",
+        "status": "DIVERTING",
+        "queue": 4,
+        "load": 32
+      },
+      "causedByEventIds": [
+        "evt-1378",
+        "evt-65"
+      ]
+    },
+    {
+      "id": "evt-5919",
+      "tick": 520,
+      "type": "AMBULANCE_HANDOVER_COMPLETED",
+      "payload": {
+        "unitId": "AMB-05",
+        "hospitalId": "H-A"
+      },
+      "causedByEventIds": [
+        "evt-4895",
+        "evt-1378"
+      ]
+    },
+    {
+      "id": "evt-5923",
+      "tick": 520,
+      "type": "AMBULANCE_HANDOVER_COMPLETED",
+      "payload": {
+        "unitId": "AMB-06",
+        "hospitalId": "H-A"
+      },
+      "causedByEventIds": [
+        "evt-4899",
+        "evt-1378"
+      ]
+    },
+    {
+      "id": "evt-9960",
+      "tick": 768,
+      "type": "AMBULANCE_HANDOVER_STARTED",
+      "payload": {
+        "unitId": "AMB-05",
+        "hospitalId": "H-A",
+        "until": 892
+      },
+      "causedByEventIds": [
+        "evt-3661",
+        "evt-1378",
+        "evt-5274",
+        "evt-7506"
+      ]
+    },
+    {
+      "id": "evt-9964",
+      "tick": 768,
+      "type": "AMBULANCE_HANDOVER_STARTED",
+      "payload": {
+        "unitId": "AMB-06",
+        "hospitalId": "H-A",
+        "until": 892
+      },
+      "causedByEventIds": [
+        "evt-3691",
+        "evt-1378",
+        "evt-5274",
+        "evt-7509"
+      ]
+    },
+    {
+      "id": "evt-12058",
+      "tick": 892,
+      "type": "AMBULANCE_HANDOVER_COMPLETED",
+      "payload": {
+        "unitId": "AMB-05",
+        "hospitalId": "H-A"
+      },
+      "causedByEventIds": [
+        "evt-9960",
+        "evt-11892",
+        "evt-1378"
+      ]
+    },
+    {
+      "id": "evt-12062",
+      "tick": 892,
+      "type": "AMBULANCE_HANDOVER_COMPLETED",
+      "payload": {
+        "unitId": "AMB-06",
+        "hospitalId": "H-A"
+      },
+      "causedByEventIds": [
+        "evt-9964",
+        "evt-11893",
+        "evt-1378"
+      ]
+    },
+    {
+      "id": "evt-14266",
+      "tick": 1049,
+      "type": "HOSPITAL_STATUS_CHANGED",
+      "payload": {
+        "hospitalId": "H-A",
+        "status": "POWER_EMERGENCY",
+        "queue": 8,
+        "load": 36
+      },
+      "causedByEventIds": [
+        "evt-14265",
+        "evt-5274",
+        "evt-9175",
+        "evt-9176",
+        "evt-12059",
+        "evt-12063"
+      ]
+    }
+  ],
+  "errors": [],
+  "passed": true
+}
