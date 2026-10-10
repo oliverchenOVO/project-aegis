@@ -14,6 +14,12 @@ declare global {
       receivedAt?: number;
       panCosts?: number[];
       pointerStarted?: number;
+      pointerDraws?: number;
+      panDraws?: number[];
+      panProbe?: {
+        start: (event: PointerEvent) => void;
+        end: (event: PointerEvent) => void;
+      };
     };
   }
 }
@@ -114,23 +120,34 @@ try {
     await expect(page.locator(".unit-row").first()).toContainText("未知");
     await expect(page.locator(".operation-banner")).toContainText("電力：未知");
     await page.evaluate(() => {
-      if (!window.aegisMapQa.panCosts) {
-        window.addEventListener(
-          "pointermove",
-          (e) => {
-            if (e.buttons === 1)
-              window.aegisMapQa.pointerStarted = performance.now();
-          },
-          true,
-        );
-        window.addEventListener("pointermove", (e) => {
-          if (e.buttons === 1 && window.aegisMapQa.pointerStarted !== undefined)
-            window.aegisMapQa.panCosts!.push(
-              performance.now() - window.aegisMapQa.pointerStarted,
-            );
-        });
+      // A scenario remount installs a new Map listener. Reattach the end probe
+      // after it; retaining the first probe would measure before the second map.
+      const previous = window.aegisMapQa.panProbe;
+      if (previous) {
+        window.removeEventListener("pointermove", previous.start, true);
+        window.removeEventListener("pointermove", previous.end);
       }
+      const probe = {
+        start(event: PointerEvent) {
+          if (event.buttons !== 1) return;
+          window.aegisMapQa.pointerStarted = performance.now();
+          window.aegisMapQa.pointerDraws = window.aegisMapQa.draws;
+        },
+        end(event: PointerEvent) {
+          if (event.buttons !== 1) return;
+          window.aegisMapQa.panCosts!.push(
+            performance.now() - window.aegisMapQa.pointerStarted!,
+          );
+          window.aegisMapQa.panDraws!.push(
+            window.aegisMapQa.draws - window.aegisMapQa.pointerDraws!,
+          );
+        },
+      };
+      window.aegisMapQa.panProbe = probe;
       window.aegisMapQa.panCosts = [];
+      window.aegisMapQa.panDraws = [];
+      window.addEventListener("pointermove", probe.start, true);
+      window.addEventListener("pointermove", probe.end);
     });
     await capture(app, page, resolve(output, `${scenario}-early.png`));
     const webglRenderer = await page.evaluate(() => {
@@ -220,6 +237,7 @@ try {
     await capture(app, page, resolve(output, `${scenario}-late.png`));
     const denseFocusBefore = await page.evaluate(() => {
       window.aegisMapQa.panCosts = [];
+      window.aegisMapQa.panDraws = [];
       return {
         focused: document.hasFocus(),
         visibility: document.visibilityState,
@@ -228,12 +246,20 @@ try {
     const densePanStarted = performance.now();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
+    const denseFrameSamples: { inputMs: number; rafMs: number }[] = [];
     for (let n = 1; n <= frames; n++) {
+      const inputStarted = performance.now();
       await page.mouse.move(
         box.x + box.width / 2 + n * 2,
         box.y + box.height / 2 + n,
       );
+      const inputMs = performance.now() - inputStarted;
+      const rafStarted = performance.now();
       await page.evaluate(() => new Promise(requestAnimationFrame));
+      denseFrameSamples.push({
+        inputMs,
+        rafMs: performance.now() - rafStarted,
+      });
     }
     await page.mouse.up();
     const densePanMs = performance.now() - densePanStarted;
@@ -241,6 +267,7 @@ try {
       focused: document.hasFocus(),
       visibility: document.visibilityState,
       costs: window.aegisMapQa.panCosts!,
+      drawCalls: window.aegisMapQa.panDraws!,
     }));
     await page.getByRole("button", { name: "重設地圖", exact: true }).click();
     const denseIdle = await page.evaluate(async () => {
@@ -279,9 +306,17 @@ try {
         visibility: denseDiagnostics.visibility,
       },
       densePanHandler: stats(denseDiagnostics.costs),
+      densePanDrawCalls: denseDiagnostics.drawCalls,
+      denseInput: stats(denseFrameSamples.map((frame) => frame.inputMs)),
+      denseRaf: stats(denseFrameSamples.map((frame) => frame.rafMs)),
       receivedUpdateToFrame: stats(receivedUpdateToFrameMs),
     });
     console.log(JSON.stringify(rows.at(-1)));
+    expect(denseDiagnostics.drawCalls).toHaveLength(frames);
+    expect(
+      denseDiagnostics.drawCalls.every((count) => count > 0),
+      "each measured drag frame must redraw the actual map",
+    ).toBe(true);
     if (scenario === "flood" && !process.argv.includes("--baseline"))
       expect(
         (frames / densePanMs) * 1000,

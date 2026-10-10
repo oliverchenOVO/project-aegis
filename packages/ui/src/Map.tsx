@@ -136,7 +136,9 @@ export function SituationMap({ view, identity }: MapProps) {
         autoStart: false,
         background: "#121a22",
         resizeTo: element,
-        antialias: true,
+        // Architecture and text already use cached textures. Avoid a multisampled
+        // backbuffer on software GL; retain the display resolution for detail.
+        antialias: false,
         resolution: window.devicePixelRatio,
         autoDensity: true,
       });
@@ -725,6 +727,17 @@ export function SituationMap({ view, identity }: MapProps) {
           }
         }
       }
+    }
+    // Received flood geometry is unchanged during camera motion. Flatten it once
+    // per received view/layer update while retaining the original XY hit objects.
+    e.floodHost.visible = floodLayer.children.length > 0;
+    if (e.floodHost.visible) {
+      if (!e.floodHost.isCachedAsTexture)
+        e.floodHost.cacheAsTexture({
+          resolution: Math.min(window.devicePixelRatio, 2),
+          antialias: false,
+        });
+      else e.floodHost.updateCacheTexture();
     }
     e.invalidation.request();
   }, [

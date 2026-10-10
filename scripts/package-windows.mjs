@@ -1,4 +1,4 @@
-import { build, Platform, Arch } from "electron-builder";
+import { createRequire } from "node:module";
 import {
   mkdtempSync,
   mkdirSync,
@@ -11,6 +11,11 @@ import {
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve, relative } from "node:path";
+// electron-builder is CommonJS. Loading it directly avoids traversing its large
+// re-export graph for synthetic ESM named exports on Windows Node.js 24.
+const { build, Platform, Arch } = createRequire(import.meta.url)(
+  "electron-builder",
+);
 // Stage on local storage: some redirected Windows workspace drives reject directory renames.
 const temporaryRoot = realpathSync(tmpdir());
 const staging = mkdtempSync(join(temporaryRoot, "aegis-windows-"));
